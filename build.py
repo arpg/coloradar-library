@@ -80,6 +80,7 @@ class ImageBuild:
             print(f"Using CUDA version: {cuda_version}")
 
         ros_distro = self.version_selector.validate_ros_version(ros_distro)
+        lib_versions =  self.version_selector.version_config.get(ros_distro, {})
         if ros_distro:
             print(f"Using ROS version: {ros_distro}")
 
@@ -94,8 +95,10 @@ class ImageBuild:
         print(f'Building image: {image_name}')
         build_command = [
             "docker", "buildx", "build",
-            "--build-arg", f"BASE_IMAGE={base_image}",
-            "--build-arg", f"ROS_DISTRO={ros_distro}",
+            "--build-arg", f"DOCKER_GCC_VERSION={lib_versions.get('gcc', '')}",
+            "--build-arg", f"DOCKER_BOOST_VERSION={lib_versions.get('boost', '')}",
+            "--build-arg", f"DOCKER_PCL_VERSION={lib_versions.get('pcl', '')}",
+            "--build-arg", f"DOCKER_PYBIND_VERSION={lib_versions.get('pybind', '')}",
             f"--cache-from=type=local,src={CACHE_FROM_DIR}",
             f"--cache-to=type=local,dest={CACHE_TO_DIR},mode=max",
             "-t", image_name,

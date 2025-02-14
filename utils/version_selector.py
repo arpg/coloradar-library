@@ -5,9 +5,6 @@ import yaml
 from typing import Optional, Dict
 
 
-BASE_IMAGE_DOCKERHUB = "annazabnus/ros-cuda"
-
-
 class ImageNotFoundError(Exception):
     pass
 
@@ -55,11 +52,12 @@ class VersionSelector:
         """
         cuda_version = self.validate_cuda_version(cuda_version)
         ros_version = self.validate_ros_version(ros_version)
+        image_name = "annazabnus/ros-cuda" if cuda_version else "ros"
         if cuda_version is None:
             tag = ros_version
         else:
             tag = f'{cuda_version}-{ros_version}'
-        return f'{BASE_IMAGE_DOCKERHUB}:{tag}'
+        return f'{image_name}:{tag}'
 
 
 def main():
