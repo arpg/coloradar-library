@@ -20,7 +20,7 @@ class ImageBuild:
             "python3": "Please install Python 3.",
             "docker": "Please install Docker.",
         }
-        self.image_name_prefix = "annazabnus/ros-cuda"
+        self.image_name_prefix = "ghcr.io/arpg/coloradar-lib"
         self.version_selector = VersionSelector(version_config_file=version_config_file)
 
     def _check_dependencies(self) -> None:
@@ -86,7 +86,7 @@ class ImageBuild:
 
         image_name = self.get_image_name(ros_distro=ros_distro, cuda_version=cuda_version)
         try:  # Not raising error when base image not found
-            base_image = self.version_selector.determine_base_image(cuda_version, ros_distro)
+            base_image = self.version_selector.get_base_image(cuda_version, ros_distro)
         except ImageNotFoundError as e:
             print(e)
             return image_name
@@ -95,6 +95,7 @@ class ImageBuild:
         print(f'Building image: {image_name}')
         build_command = [
             "docker", "buildx", "build",
+            "--build-arg", f"BASE_IMAGE={base_image}",
             "--build-arg", f"DOCKER_GCC_VERSION={lib_versions.get('gcc', '')}",
             "--build-arg", f"DOCKER_BOOST_VERSION={lib_versions.get('boost', '')}",
             "--build-arg", f"DOCKER_PCL_VERSION={lib_versions.get('pcl', '')}",
@@ -113,7 +114,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Setup ROS + CUDA Docker image building.")
     parser.add_argument("--ros", required=False, help="ROS distribution (e.g., 'noetic', 'humble', etc.)")
     parser.add_argument("--cuda", required=False, help="CUDA version in X.Y format (e.g., '12.6')")
-    parser.add_argument("--config", default="ros-versions.yaml", help="Path to the ROS version configuration file")
+    parser.add_argument("--config", default="version-config.yaml", help="Path to the ROS version configuration file")
     args = parser.parse_args()
 
     build = ImageBuild(version_config_file=args.config)
