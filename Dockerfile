@@ -67,31 +67,19 @@ RUN if [ -n "$DOCKER_PYBIND_VERSION" ]; then \
 RUN rm -rf tmp/*
 
 
-# Build Tools Library
-WORKDIR /src/coloradar_tools
-COPY coloradar_tools/src src
-COPY coloradar_tools/CMakeLists.txt .
+# Build Library
+WORKDIR /src/coloradar_lib
+COPY src src
+COPY tests tests
+COPY CMakeLists.txt .
 
 RUN mkdir build
 RUN cmake -B build
 RUN make -C build -j2
 RUN ./build/coloradar_tests
+RUN python3 tests/test_bindings.py
 
-
-# Install Python dependencies
-COPY requirements.txt /tmp
-RUN apt update && apt install -y python3-pip
-RUN pip3 install --upgrade --ignore-installed -r /tmp/requirements.txt
-
-COPY coloradar_tools/scripts scripts
-COPY coloradar_tools/tests tests
-COPY coloradar_tools/__init__.py coloradar_tools/demo.ipynb ./
-
-
-# Run python tests
-ENV PYTHONPATH="${PYTHONPATH}:/src"
-WORKDIR /src
-RUN python3 coloradar_tools/tests/test_bindings.py
+COPY scripts scripts
 
 
 CMD ["bash"]
