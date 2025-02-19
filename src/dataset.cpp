@@ -115,30 +115,6 @@ std::vector<float> flattenHeatmap(const std::vector<float>& heatmap, const int& 
     return reorganizedHeatmap;
 }
 
-std::vector<float> flattenRadarCloud(const pcl::PointCloud<coloradar::RadarPoint>& cloud, bool collapseElevation) {
-    size_t numPoints = cloud.size();
-    size_t numDims = collapseElevation ? 3 : 4;
-    std::vector<float> data;
-    if (numPoints > 0) {
-        data.resize(numPoints * numDims);
-        if (collapseElevation) {
-            for (size_t i = 0; i < numPoints; ++i) {
-                data[i * numDims + 0] = cloud[i].x;
-                data[i * numDims + 1] = cloud[i].y;
-                data[i * numDims + 2] = cloud[i].intensity;
-            }
-        } else {
-            for (size_t i = 0; i < numPoints; ++i) {
-                data[i * numDims + 0] = cloud[i].x;
-                data[i * numDims + 1] = cloud[i].y;
-                data[i * numDims + 2] = cloud[i].z;
-                data[i * numDims + 3] = cloud[i].intensity;
-            }
-        }
-    }
-    return data;
-}
-
 std::vector<float> flattenLidarCloud(const pcl::PointCloud<pcl::PointXYZI>& cloud, bool collapseElevation, bool includeIntensity) {
     size_t numPoints = cloud.size();
     size_t numDims = collapseElevation ? 3 : 4;
@@ -195,7 +171,34 @@ void saveCloudToHDF5(const std::string& name, H5::H5File& file, const std::vecto
 }
 
 
-void saveCloudsToHDF5(const std::string& name, const H5::H5File& file, const std::vector<float>& flatClouds, const size_t& numFrames, const int& numDims, const std::vector<hsize_t>& cloudSizes) {
+namespace coloradar {
+
+std::vector<float> flattenRadarCloud(const pcl::PointCloud<coloradar::RadarPoint>& cloud, const RadarConfig* config) {
+    size_t numPoints = cloud.size();
+    std::vector<float> data;
+    if (numPoints == 0) return data;
+
+    bool hasZ = config->numElevationBins > 0;
+    size_t numDims = hasZ ? 5 : 4;
+    if (!config->hasDoppler) numDims -= 1;
+
+    data.resize(numPoints * numDims);
+    for (size_t i = 0; i < numPoints; ++i) {
+        data[i * numDims + 0] = cloud[i].x;
+        data[i * numDims + 1] = cloud[i].y;
+        if (hasZ) {
+            data[i * numDims + 2] = cloud[i].z;
+            data[i * numDims + 3] = cloud[i].intensity;
+            if (config->hasDoppler) data[i * numDims + 4] = cloud[i].doppler;
+        } else {
+            data[i * numDims + 2] = cloud[i].intensity;
+            if (config->hasDoppler) data[i * numDims + 3] = cloud[i].doppler;
+        }
+    }
+    return data;
+}
+
+void saveCloudsToHDF5(const std::string& name, const H5::H5File& file, const std::vector<float>& flatClouds, const hsize_t& numFrames, const std::vector<hsize_t>& cloudSizes, const hsize_t& numDims) {
     if (cloudSizes.size() != numFrames) {
         throw std::invalid_argument("cloudSizes size must match the number of frames.");
     }
@@ -211,9 +214,6 @@ void saveCloudsToHDF5(const std::string& name, const H5::H5File& file, const std
     H5::DataSet cloudDataset = file.createDataSet(name, H5::PredType::NATIVE_FLOAT, cloudDataspace);
     cloudDataset.write(flatClouds.data(), H5::PredType::NATIVE_FLOAT);
 }
-
-
-namespace coloradar {
 
 void saveHeatmapsToHDF5(const std::string& name, const H5::H5File& file, const std::vector<float>& flatHeatmaps, const hsize_t& numFrames, const RadarConfig* config) {
     std::vector<hsize_t> dims = {numFrames, static_cast<hsize_t>(config->numAzimuthBins), static_cast<hsize_t>(config->nRangeBins())};
@@ -264,13 +264,6 @@ void ColoradarPlusDataset::exportCascade(const std::vector<ColoradarPlusRun*> &r
         verticalFov = cascadeConfig_->elevationIdxToFovDegrees(elevationMaxBin);
     }
 
-    // Data Dimensions
-    CascadeConfig* heatmapConfig = new CascadeConfig(*dynamic_cast<CascadeConfig*>(cascadeConfig_));
-    hsize_t cloudNumDims = cascade_->exportConfig()->collapseElevation() ? 5 : 4;  // x, y, (z), intensity, doppler
-    if (cascade_->exportConfig()->removeDopplerDim()) {
-        cloudNumDims -= 1;
-    }
-
     for (auto* run : runs) {
         std::vector<double> timestamps = run->cascadeTimestamps();
         hsize_t numFrames = timestamps.size();
@@ -292,6 +285,7 @@ void ColoradarPlusDataset::exportCascade(const std::vector<ColoradarPlusRun*> &r
         
         // heatmaps
         if (cascade_->exportConfig()->exportHeatmaps()) {
+            CascadeConfig* heatmapConfig = new CascadeConfig(*dynamic_cast<CascadeConfig*>(cascadeConfig_));
             std::vector<float> heatmapsFlat;
             for (size_t i = 0; i < numFrames; ++i) {
                 auto heatmap = run->getCascadeHeatmap(i);
@@ -310,6 +304,9 @@ void ColoradarPlusDataset::exportCascade(const std::vector<ColoradarPlusRun*> &r
 
         // clouds
         if (cascade_->exportConfig()->exportClouds()) {
+            hsize_t numDims = cascadeConfig_->numElevationBins > 0 ? 5 : 4;  // x, y, (z), intensity, doppler
+            if (!cascadeConfig_->hasDoppler) numDims -= 1;
+
             bool buildClouds = false;
             try {
                 auto cloud = run->getCascadePointcloud(0);
@@ -333,11 +330,11 @@ void ColoradarPlusDataset::exportCascade(const std::vector<ColoradarPlusRun*> &r
                 if (cascade_->exportConfig()->collapseElevation()) {
                     collapseElevation(cloud, cascade_->exportConfig()->collapseElevationMinZ(), cascade_->exportConfig()->collapseElevationMaxZ());
                 }
-                std::vector<float> cloudFlat = flattenRadarCloud(cloud, cascade_->exportConfig()->collapseElevation());
+                cloudSizes[i] = cloud.size();
+                std::vector<float> cloudFlat = flattenRadarCloud(cloud, cascadeConfig_);
                 cloudsFlat.insert(cloudsFlat.end(), cloudFlat.begin(), cloudFlat.end());
-                cloudSizes.push_back(cloud.size() / cloudNumDims);
             }
-            saveCloudsToHDF5(cloudContentName + "_" + run->name, datasetFile, cloudsFlat, numFrames, cloudNumDims, cloudSizes);
+            saveCloudsToHDF5(cloudContentName + "_" + run->name, datasetFile, cloudsFlat, numFrames, cloudSizes, numDims);
         }
     }
 }
@@ -504,10 +501,10 @@ std::filesystem::path coloradar::ColoradarPlusDataset::exportToFile(
                     coloradar::collapseElevation(cascadeCloud, collapseCascadeElevationMinZ, collapseCascadeElevationMaxZ);
                 }
                 cloudSizes[i] = cascadeCloud.size();
-                auto cloudFlat = flattenRadarCloud(cascadeCloud, collapseCascadeElevation);
-                framesFlat.insert(framesFlat.end(), cloudFlat.begin(), cloudFlat.end());
+                // auto cloudFlat = flattenRadarCloud(cascadeCloud, collapseCascadeElevation);
+                // framesFlat.insert(framesFlat.end(), cloudFlat.begin(), cloudFlat.end());
             }
-            saveCloudsToHDF5(cascadeCloudContentName + "_" + run->name, datasetFile, framesFlat, numCascadeFrames, cascadeCloudNumDims, cloudSizes);
+            // saveCloudsToHDF5(cascadeCloudContentName + "_" + run->name, datasetFile, framesFlat, numCascadeFrames, cascadeCloudNumDims, cloudSizes);
             // if (savedHeatmaps) saveHeatmapsToHDF5(cascadeHeatmapContentName + "_" + run->name, datasetFile, heatmapsFlat, numCascadeFrames, heatmapDims);
         }
         if (includeCascadeHeatmaps && !savedHeatmaps) {
@@ -538,7 +535,7 @@ std::filesystem::path coloradar::ColoradarPlusDataset::exportToFile(
                 auto cloudFlat = flattenLidarCloud(lidarFrame, collapseLidarFrameElevation, !removeLidarIntensity);
                 framesFlat.insert(framesFlat.end(), cloudFlat.begin(), cloudFlat.end());
             }
-            saveCloudsToHDF5(lidarFrameContentName + "_" + run->name, datasetFile, framesFlat, numLidarFrames, lidarFrameNumDims, cloudSizes);
+            // saveCloudsToHDF5(lidarFrameContentName + "_" + run->name, datasetFile, framesFlat, numLidarFrames, lidarFrameNumDims, cloudSizes);
         }
         if (includeLidarMap) {
             pcl::PointCloud<pcl::PointXYZI> mapRaw = run->readLidarOctomap();
@@ -566,7 +563,7 @@ std::filesystem::path coloradar::ColoradarPlusDataset::exportToFile(
                 auto cloudFlat = flattenLidarCloud(lidarMapSample, collapseMapSampleElevation, true);
                 framesFlat.insert(framesFlat.end(), cloudFlat.begin(), cloudFlat.end());
             }
-            saveCloudsToHDF5(mapFrameContentName + "_" + run->name, datasetFile, framesFlat, numCascadeFrames, mapFrameNumDims, cloudSizes);
+            // saveCloudsToHDF5(mapFrameContentName + "_" + run->name, datasetFile, framesFlat, numCascadeFrames, mapFrameNumDims, cloudSizes);
         }
         if (includeTruePoses) {
             savePosesToHDF5(truePosesContentName + "_" + run->name, datasetFile, poses);

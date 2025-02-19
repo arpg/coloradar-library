@@ -92,7 +92,6 @@ class ImageBuild:
         print(f'Using base image: {base_image}')
 
         print(f'Building image: {image_name}')
-        print('BOOST', self.version_selector.get_lib_version('boost'))
         build_command = [
             "docker", "buildx", "build",
             "--build-arg", f"CUDA_ENV={'true' if cuda_version else 'false'}",

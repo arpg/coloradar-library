@@ -1,11 +1,16 @@
 import argparse
 import os
 import re
+import subprocess
 import yaml
 from typing import Optional, Dict
 
 
 class ImageNotFoundError(Exception):
+    pass
+
+
+class CustomImageNotFoundError(ImageNotFoundError):
     pass
 
 
@@ -57,13 +62,28 @@ class VersionSelector:
         """
         cuda_version = self.validate_cuda_version(cuda_version)
         ros_version = self.validate_ros_version(ros_version)
+
         image_name = "annazabnus/ros-cuda" if cuda_version else "ros"
-        if cuda_version is None:
-            tag = ros_version
-        else:
-            tag = f'{cuda_version}-{ros_version}'
-        return f'{image_name}:{tag}'
-    
+        tag = f'{cuda_version}-{ros_version}' if cuda_version else ros_version
+        base_image = f'{image_name}:{tag}'
+
+        if not self._image_exists(base_image):
+            if base_image.startswith("annazabnus"):
+                raise CustomImageNotFoundError(f"Custom image '{base_image}' not found.")
+            raise ImageNotFoundError(f"Base image '{base_image}' not found.")
+        return base_image
+
+    def _image_exists(self, image: str) -> bool:
+        """
+        Check if a Docker image exists locally or in the registry.
+        """
+        result = subprocess.run(
+            ["docker", "manifest", "inspect", image],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+        return result.returncode == 0
+
     def get_lib_version(self, lib_name: str, ros_distro: Optional[str] = None) -> Optional[str]:
         lib_versions = self.lib_versions or self.version_config.get(ros_distro, {})
         if not lib_versions:
