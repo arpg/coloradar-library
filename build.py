@@ -4,7 +4,7 @@ import re
 import subprocess
 import shutil
 from typing import Optional
-from utils.version_selector import VersionSelector, ImageNotFoundError
+from utils.version_selector import VersionSelector, CustomImageNotFoundError
 
 
 PUSH_IMAGES = os.getenv("DOCKER_PUSH_IMAGES", "").lower() == 'true'
@@ -82,11 +82,13 @@ class ImageBuild:
             print(f"Using ROS version: {ros_distro}")
 
         image_name = self.get_image_name(ros_distro=ros_distro, cuda_version=cuda_version)
-        try:  # Not raising error when base image not found
+        try:
             base_image = self.version_selector.get_base_image(cuda_version, ros_distro)
-        except Exception as e:
+        # Not raising error when custom base image not found
+        except CustomImageNotFoundError as e:
             print(e)
-            return image_name
+            print(f'Aborting build of {image_name}')
+            return
         print(f'Using base image: {base_image}')
 
         print(f'Building image: {image_name}')
