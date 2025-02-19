@@ -84,7 +84,7 @@ class ImageBuild:
         image_name = self.get_image_name(ros_distro=ros_distro, cuda_version=cuda_version)
         try:  # Not raising error when base image not found
             base_image = self.version_selector.get_base_image(cuda_version, ros_distro)
-        except ImageNotFoundError as e:
+        except Exception as e:
             print(e)
             return image_name
         print(f'Using base image: {base_image}')
