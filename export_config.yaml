@@ -1,0 +1,125 @@
+global:
+  runs: all
+  destination_file: dataset.h5
+  export_transforms: False
+
+
+devices:
+  cascade_radar:
+    # == GLOBAL SETTINGS (applies to everything except datacubes)
+
+    # - meta data
+    export_poses: True
+    export_timestamps: True
+
+    # - FOV (specify either idx or degree constraints; defaults to all available FOV)
+    fov_azimuth_idx: -1
+    fov_elevation_idx: -1
+    # horizontal_fov_degrees_total: 360
+    # vertical_fov_degrees_total: 180
+    range_meters: -1
+
+    # - collapse elevation, aggregate data into 2D
+    collapse_elevation: False
+    collapse_elevation_min_z_meters: 0
+    collapse_elevation_max_z_meters: 0
+
+    # - other
+    remove_doppler_dim: True
+
+    # == DATA SETTINGS
+
+    # - datacubes
+    export_datacubes: False
+
+    # - heatmaps
+    export_heatmaps: True
+
+    # - point clouds
+    export_clouds: False
+    # relative intensity per frame
+    intensity_threshold_percent: 0
+    # False for ego-centric clouds
+    clouds_in_global_frame: True
+
+
+  lidar:
+    # == GLOBAL SETTINGS
+
+    # - meta data
+    export_poses: True
+    export_timestamps: True
+
+    # - collapse elevation, aggregate data into 2D
+    collapse_elevation: False
+    collapse_elevation_min_z_meters: 0
+    collapse_elevation_max_z_meters: 0
+
+    # == DATA SETTINGS
+
+    # - point clouds
+    export_clouds: False
+    remove_intensity_dim: True
+    cloud_fov:
+      horizontal_fov_degrees_total: 360
+      vertical_fov_degrees_total: 180
+      range_meters: 10
+
+    # - global  map
+    export_map: True
+    # filter by occupancy probability
+    map_occupancy_threshold_percent: 0
+    transform_map:
+      apply: False
+      displacement_xyz_meters: 0 0 0
+      rotation_xyzw_quat: 0 0 0 1
+
+    # - ego-centric map samples
+    export_map_samples: True
+    # filter by occupancy probability
+    map_sample_occupancy_threshold_percent: 0
+    # False to fail if samples don't exist on disk
+    allow_resample: True
+    # True to always rewrite existing samples, False to fetch samples from disk if they exist
+    force_resample: False
+    # sampling perspective options: base, lidar, cascade
+    center_sensor: cascade_radar
+    map_sample_fov:
+      horizontal_fov_degrees_total: 360
+      vertical_fov_degrees_total: 180
+      range_meters: 10
+
+
+  base_frame:
+    export_poses: False
+    export_timestamps: False
+
+
+  imu:
+    export_data: False
+    export_poses: False
+    export_timestamps: False
+
+
+  # WARNING: only present in dataset v1
+  single_chip_radar:
+    export_poses: False
+    export_timestamps: False
+
+    fov_azimuth_idx: -1
+    fov_range_meters: -1
+    fov_elevation_idx: -1
+
+    collapse_elevation: False
+    collapse_elevation_min_z_meters: 0
+    collapse_elevation_max_z_meters: 0
+
+    remove_doppler_dim: True
+
+    export_datacubes: False
+
+    export_heatmaps: True
+
+    export_clouds: False
+    intensity_threshold_percent: 0
+    clouds_in_global_frame: True
