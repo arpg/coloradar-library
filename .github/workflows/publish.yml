@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        ros: ["noetic", "humble", "jazzy"]
+        ros: ["noetic", "jazzy"]
         cuda: ["", "12.4", "12.6", "12.8"]
 
     steps:
@@ -56,8 +56,6 @@ jobs:
         run: |
           DOCKER_BUILDKIT=1 \
           DOCKER_PUSH_IMAGES=true \
-          DOCKER_CACHE_FROM="/tmp/.buildx-cache" \
-          DOCKER_CACHE_TO="/tmp/.buildx-cache-new" \
           python3 build.py --ros "${{ matrix.ros }}" --cuda "${{ matrix.cuda }}"
 
       - name: Clean Up Unused Docker Cache

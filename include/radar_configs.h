@@ -16,6 +16,8 @@ protected:
     void initPhaseFrequencyParams(const std::filesystem::path& phaseFrequencyCfgFile);
     void initInternalParams();
 
+    void setNumRangeBins(const int& num);
+
 public:
     static constexpr double c = 299792458; // speed of light in m/s
 
@@ -67,14 +69,25 @@ public:
     std::vector<float> elevationAngles;
     double dopplerBinWidth;
 
-    RadarConfig(const int& nAzimuthBeams = 1, const int& nElevationBeams = 1);
+    RadarConfig(const int& nAzimuthBeams = 1, const int& nElevationBeams = 1) {};
+    RadarConfig(const RadarConfig& other) = default;
     Json::Value toJson() const;
 
     const int& nRangeBins() const;
     const float& maxRange() const;
     int clipAzimuthMaxBin(const int& azMaxBin);
     int clipElevationMaxBin(const int& elMaxBin);
+    int clipRangeMaxBin(const int& rangeMaxBin);
     float clipRange(const float& range);
+    float azimuthIdxToFovDegrees(const int& azMaxBin);
+    float elevationIdxToFovDegrees(const int& elMaxBin);
+    float rangeIdxToRange(const int& rangeMaxBin);
+    int horizontalFovToAzimuthIdx(const float& horizontalFov);
+    int verticalFovToElevationIdx(const float& verticalFov);
+    int rangeToRangeIdx(const float& range);
+
+    std::vector<float> clipHeatmap(const std::vector<float>& heatmap, int azimuthMaxBin, int elevationMaxBin, int rangeMaxBin, bool updateConfig = true);
+    std::vector<float> clipHeatmap(const std::vector<float>& heatmap, float horizontalFov, float verticalFov, float range, bool updateConfig = true);
 };
 
 class SingleChipConfig : public RadarConfig {

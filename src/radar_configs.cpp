@@ -381,10 +381,6 @@ void coloradar::RadarConfig::initInternalParams() {
     }
 }
 
-
-coloradar::RadarConfig::RadarConfig(const int& nAzimuthBeams, const int& nElevationBeams): numAzimuthBeams(nAzimuthBeams), numElevationBeams(nElevationBeams) {}
-
-
 coloradar::SingleChipConfig::SingleChipConfig(const std::filesystem::path& calibDir, const int& nAzimuthBeams, const int& nElevationBeams) : coloradar::RadarConfig(nAzimuthBeams, nElevationBeams) {
     coloradar::internal::checkPathExists(calibDir);
     init(calibDir);
@@ -512,14 +508,108 @@ Json::Value coloradar::RadarConfig::toJson() const {
     for (const auto& angle : elevationAngles) jsonConfig["internal"]["elevationAngles"].append(angle);
     jsonConfig["internal"]["dopplerBinWidth"] = dopplerBinWidth;
 
-    // Json::StreamWriterBuilder writer;
-    // std::string jsonString = Json::writeString(writer, jsonConfig);
     return jsonConfig;
 }
 
+void coloradar::RadarConfig::setNumRangeBins(const int& num) { numPosRangeBins = num; }
 const int& coloradar::RadarConfig::nRangeBins() const { return numPosRangeBins; }
 const float& coloradar::RadarConfig::maxRange() const { return std::ceil(nRangeBins() * rangeBinWidth * 100.0f) / 100.0f; }
 
-int coloradar::RadarConfig::clipAzimuthMaxBin(const int& azMaxBin) { return 1; }
-int coloradar::RadarConfig::clipElevationMaxBin(const int& elMaxBin) { return 1; }
-float coloradar::RadarConfig::clipRange(const float& range) { return range > 0 && range <= maxRange() ? range : maxRange(); }
+int coloradar::RadarConfig::clipAzimuthMaxBin(const int& azMaxBin) { 
+    return azMaxBin >= 0 && (azMaxBin + 1) * 2 < numAzimuthBins ? azMaxBin : numAzimuthBins / 2; 
+}
+int coloradar::RadarConfig::clipElevationMaxBin(const int& elMaxBin) { 
+    return elMaxBin >= 0 && (elMaxBin + 1) * 2 < numElevationBins ? elMaxBin : numElevationBins / 2; 
+}
+int coloradar::RadarConfig::clipRangeMaxBin(const int& rangeMaxBin) {
+    return rangeMaxBin >= 0 && rangeMaxBin < nRangeBins() ? rangeMaxBin : nRangeBins() - 1;
+}
+float coloradar::RadarConfig::clipRange(const float& range) { 
+    return range > 0 && range <= maxRange() ? range : maxRange(); 
+}
+float coloradar::RadarConfig::azimuthIdxToFovDegrees(const int& azMaxBin) {
+    if (azMaxBin < 0 || (azMaxBin + 1) * 2 >= numAzimuthBins) {
+        throw std::runtime_error("Invalid azimuth max bin: expected value in [0; " + std::to_string(numAzimuthBins / 2) + "), got " + std::to_string(azMaxBin));
+    }
+    return azimuthBins[numAzimuthBins / 2 + azMaxBin] * 2 * 180.0f / M_PI;
+}
+float coloradar::RadarConfig::elevationIdxToFovDegrees(const int& elMaxBin) {
+    if (elMaxBin < 0 || (elMaxBin + 1) * 2 >= numElevationBins) {
+        throw std::runtime_error("Invalid elevation max bin: expected value in [0; " + std::to_string(numElevationBins / 2) + "), got " + std::to_string(elMaxBin));
+    }
+    return elevationBins[numElevationBins / 2 + elMaxBin] * 2 * 180.0f / M_PI;
+}
+float coloradar::RadarConfig::rangeIdxToRange(const int& rangeMaxBin) {
+    if (rangeMaxBin < 0 || rangeMaxBin >= nRangeBins()) {
+        throw std::runtime_error("Invalid range max bin: expected value in [0; " + std::to_string(nRangeBins()) + "), got " + std::to_string(rangeMaxBin));
+    }
+    return (rangeMaxBin + 1) * rangeBinWidth;
+}
+int coloradar::RadarConfig::horizontalFovToAzimuthIdx(const float& horizontalFov) {
+    if (horizontalFov <= 0 || horizontalFov > 360) {
+        throw std::runtime_error("Invalid horizontal FOV value: expected 0 < FOV <= 360, got " + std::to_string(horizontalFov));
+    }
+    float horizontalHalfFovRad = horizontalFov / 2 * M_PI / 180.0f;
+    auto it = std::lower_bound(azimuthBins.begin(), azimuthBins.end(), -horizontalHalfFovRad);
+    int binIdx = std::distance(azimuthBins.begin(), --it);
+    return numAzimuthBins - binIdx - 1;
+}
+int coloradar::RadarConfig::verticalFovToElevationIdx(const float& verticalFov) {
+    if (verticalFov <= 0 || verticalFov > 180) {
+        throw std::runtime_error("Invalid vertical FOV value: expected 0 < FOV <= 180, got " + std::to_string(verticalFov));
+    }
+    float verticalHalfFovRad = verticalFov / 2 * M_PI / 180.0f;
+    auto it = std::lower_bound(elevationBins.begin(), elevationBins.end(), -verticalHalfFovRad);
+    int binIdx = std::distance(elevationBins.begin(), --it);
+    return numElevationBins - binIdx - 1;
+}
+int coloradar::RadarConfig::rangeToRangeIdx(const float& range) {
+    if (range <= 0) {
+        throw std::runtime_error("Invalid max range value: expected R > 0, got " + std::to_string(range));
+    }
+    return static_cast<int>(std::ceil(range / rangeBinWidth));
+}
+
+
+std::vector<float> coloradar::RadarConfig::clipHeatmap(const std::vector<float>& heatmap, int azimuthMaxBin, int elevationMaxBin, int rangeMaxBin, bool updateConfig) {
+    azimuthMaxBin = clipAzimuthMaxBin(azimuthMaxBin);
+    elevationMaxBin = clipElevationMaxBin(elevationMaxBin);
+    rangeMaxBin = clipRangeMaxBin(rangeMaxBin);
+    if (azimuthMaxBin == numAzimuthBins / 2 && elevationMaxBin == numElevationBins / 2 && rangeMaxBin == nRangeBins() - 1) {
+        return heatmap;
+    }
+
+    int azimuthBinLimit = numAzimuthBins / 2 - 1;
+    int azimuthLeftBin = azimuthBinLimit - azimuthMaxBin;
+    int azimuthRightBin = azimuthBinLimit + azimuthMaxBin + 1;
+    
+    int elevationBinLimit = numElevationBins / 2 - 1;
+    int elevationLeftBin = elevationBinLimit - elevationMaxBin;
+    int elevationRightBin = elevationBinLimit + elevationMaxBin + 1;
+    
+    std::vector<float> clipped;
+    for (int e = elevationLeftBin; e <= elevationRightBin; ++e) {
+        for (int a = azimuthLeftBin; a <= azimuthRightBin; ++a) {
+            for (int r = 0; r <= rangeMaxBin; ++r) {
+                for (int n = 0; n < 2; ++n) {
+                    int index = (((e * numAzimuthBins + a) * nRangeBins() + r) * 2) + n;
+                    clipped.push_back(heatmap[index]);
+                }
+            }
+        }
+    }
+    if (updateConfig) {
+        numAzimuthBins = azimuthRightBin - azimuthLeftBin;
+        numElevationBins = elevationRightBin - elevationLeftBin;
+        setNumRangeBins(rangeMaxBin + 1);
+        azimuthBins = std::vector<float>(azimuthBins.begin() + azimuthLeftBin, azimuthBins.begin() + azimuthRightBin);
+        elevationBins = std::vector<float>(elevationBins.begin() + elevationLeftBin, elevationBins.begin() + elevationRightBin);
+    }
+    return clipped;
+}
+std::vector<float> coloradar::RadarConfig::clipHeatmap(const std::vector<float>& heatmap, float horizontalFov, float verticalFov, float range, bool updateConfig) {
+    int azMaxBin = horizontalFovToAzimuthIdx(horizontalFov);
+    int elMaxBin = verticalFovToElevationIdx(verticalFov);
+    int rangeMaxBin = rangeToRangeIdx(range);
+    return clipHeatmap(heatmap, azMaxBin, elMaxBin, rangeMaxBin, updateConfig);
+}

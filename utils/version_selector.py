@@ -14,8 +14,11 @@ class VersionSelector:
         """
         Initializes the ImageSelector with a given ROS version configuration file.
         """
+        self.default_ros = "jazzy"
         self.version_config = self._load_ros_config(version_config_file)
+        self.lib_versions = self.version_config.get(self.default_ros, {})
         self.available_ros_distros = ", ".join(str(v) for v in self.version_config.keys())
+        self.mac_os = os.uname().sysname == "Darwin"
 
     def _load_ros_config(self, version_config_file: str) -> Dict[Optional[str], Dict]:
         """
@@ -31,17 +34,19 @@ class VersionSelector:
         """
         Validate that the input CUDA version is in the correct X.Y format.
         """
-        if not cuda_version:
+        if not cuda_version or cuda_version.lower() == 'none':
             return None
         if not re.match(r"^\d+\.\d+$", cuda_version):
             raise ValueError("Error: CUDA version must be in the format 'X.Y' where X and Y are numeric.")
+        if cuda_version and self.mac_os:
+            raise ValueError("Error: CUDA not available on Mac.")
         return cuda_version
 
     def validate_ros_version(self, ros_version: Optional[str]) -> Optional[str]:
         """
         Validate that the input ROS version is available.
         """
-        ros_version = ros_version or 'jazzy'
+        ros_version = ros_version or self.default_ros
         if ros_version not in self.version_config:
             raise ValueError(f"Error: ROS version must be one of the following: {self.available_ros_distros}, not {ros_version}")
         return ros_version
@@ -58,6 +63,12 @@ class VersionSelector:
         else:
             tag = f'{cuda_version}-{ros_version}'
         return f'{image_name}:{tag}'
+    
+    def get_lib_version(self, lib_name: str, ros_distro: Optional[str] = None) -> Optional[str]:
+        lib_versions = self.lib_versions or self.version_config.get(ros_distro, {})
+        if not lib_versions:
+            return ''
+        return self.lib_versions.get(lib_name, '') or ''
 
 
 def main():

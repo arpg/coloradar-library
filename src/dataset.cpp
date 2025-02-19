@@ -193,10 +193,17 @@ void saveHeatmapsToHDF5(const std::string& name, H5::H5File& file, const std::ve
     dataset.write(flatHeatmaps.data(), H5::PredType::NATIVE_FLOAT);
 }
 
+void saveDatacubesToHDF5(const std::string& name, const H5::H5File& file, const std::vector<int16_t>& flatDatacubes, const hsize_t& numFrames, const hsize_t& datacubeSize) {
+    std::vector<hsize_t> dims = {numFrames, datacubeSize};
+    H5::DataSpace dataspace(dims.size(), dims.data());
+    H5::PredType datatype = H5::PredType::NATIVE_FLOAT;
+    H5::DataSet dataset = file.createDataSet(name, datatype, dataspace);
+    dataset.write(flatDatacubes.data(), H5::PredType::NATIVE_INT16);
+}
 
 void saveCloudToHDF5(const std::string& name, H5::H5File& file, const std::vector<float>& flatCloud, const int& numDims) {
     int numPoints = flatCloud.size() / numDims;
-    hsize_t dims[2] = {numPoints, numDims};
+    hsize_t dims[2] = {static_cast<hsize_t>(numPoints), static_cast<hsize_t>(numDims)};
     H5::DataSpace dataspace(2, dims);
     H5::PredType datatype = H5::PredType::NATIVE_FLOAT;
     H5::DataSet dataset = file.createDataSet(name, datatype, dataspace);
@@ -234,49 +241,79 @@ void ColoradarPlusDataset::exportCascade(const std::vector<ColoradarPlusRun*> &r
                       posesContentName = "cascade_poses",
                       timestampsContentName = "cascade_timestamps";
 
-    // Process FOV. Representations: num bins, max bin idx, measurement units
-    int cascadeNumAzimuthBins = cascade_->exportConfig()->fov().azimuthIdx;
-    int cascadeNumElevationBins = cascade_->exportConfig()->fov().elevationIdx;
-    int cascadeNumRangeBins;
-    float cascadeHorizontalFov = cascade_->exportConfig()->fov().horizontalDegreesTotal;
-    float cascadeVerticalFov = cascade_->exportConfig()->fov().verticalDegreesTotal;
-    float cascadeRange = cascadeConfig_->clipRange(cascade_->exportConfig()->fov().rangeMeters);
+    // FOV
+    int azimuthMaxBin = cascade_->exportConfig()->fov().azimuthIdx;
+    int elevationMaxBin = cascade_->exportConfig()->fov().elevationIdx;
+    float range = cascadeConfig_->clipRange(cascade_->exportConfig()->fov().rangeMeters);
+    int rangeMaxBin = cascadeConfig_->rangeToRangeIdx(range);
+    if (cascade_->exportConfig()->fov().useDegreeConstraints) {
+        azimuthMaxBin = cascadeConfig_->horizontalFovToAzimuthIdx(cascade_->exportConfig()->fov().horizontalDegreesTotal);
+        elevationMaxBin = cascadeConfig_->verticalFovToElevationIdx(cascade_->exportConfig()->fov().verticalDegreesTotal);
+    }
+    else {
+        azimuthMaxBin = cascadeConfig_->clipAzimuthMaxBin(azimuthMaxBin);
+        elevationMaxBin = cascadeConfig_->clipElevationMaxBin(elevationMaxBin);
+    }
 
-//    if (cascade_->exportConfig()->fov().useDegreeConstraints) {
-//        convertFovToRadarBins(horizontalFov, verticalFov, range, const coloradar::RadarConfig* config, int& azimuthMaxBin, int& elevationMaxBin, int& rangeMaxBin)
-//
-//    }
-//
-//    if (cascade_->exportConfig()->exportClouds() || cascade_->exportConfig()->exportHeatmaps()) {
-//        cascadeRange = cascade_->exportConfig()->fov().rangeMeters;
-//
-//
-//
-//        void coloradar::convertFovToRadarBins(horizontalFov, verticalFov, range, coloradar::RadarConfig* config, azimuthMaxBin, int& elevationMaxBin, int& rangeMaxBin)
-//    }
-//        finalConfig["data_content"].append(heatmapContentName);
-//        int cascadeCloudNumDims = cascade_->exportConfig()->collapseElevation() ? 3 : 4;
-//        int cascadeNumAzimuthBins = cascade_->exportConfig()->fov().azimuthIdx >= 0 && (cascade_->exportConfig()->fov().azimuthIdx + 1) * 2 < cascadeConfig_->numAzimuthBins ?
-//                                    (cascade_->exportConfig()->fov().azimuthIdx + 1) * 2 :
-//                                    cascadeConfig_->numAzimuthBins;
-//        int cascadeNumElevationBins = cascade_->exportConfig()->fov().elevationIdx >= 0 && (cascade_->exportConfig()->fov().elevationIdx + 1) * 2 < cascadeConfig_->numElevationBins ?
-//                                      (cascade_->exportConfig()->fov().elevationIdx + 1) * 2 :
-//                                      cascadeConfig_->numElevationBins;
-//        int cascadeNumRangeBins = cascadeRangeMaxBin >= 0 && cascadeRangeMaxBin + 1 < cascadeConfig_->numPosRangeBins ?
-//                                  cascadeRangeMaxBin + 1 :
-//                                  cascadeConfig_->numPosRangeBins;
-//        int cascadeNumDims = removeCascadeDopplerDim ? 1 : 2;
+    // Data Dimensions
+    CascadeConfig tmpConfig = CascadeConfig(*dynamic_cast<CascadeConfig*>(cascadeConfig_));
+    hsize_t datacubeSize = static_cast<hsize_t>(cascadeConfig_->numElevationBins * cascadeConfig_->numAzimuthBins * cascadeConfig_->numRangeBins * 2);
+    hsize_t numAzimuthBins = (azimuthMaxBin + 1) * 2;
+    hsize_t numElevationBins = (elevationMaxBin + 1) * 2;
+    hsize_t numRangeBins = rangeMaxBin + 1;
+    hsize_t heatmapNumDims = 2;  // intensity, doppler
+    hsize_t cloudNumDims = cascade_->exportConfig()->collapseElevation() ? 5 : 4;  // x, y, (z), intensity, doppler
+    if (cascade_->exportConfig()->removeDopplerDim()) {
+        heatmapNumDims -= 1;
+        cloudNumDims -= 1;
+    }
+    std::vector<hsize_t> heatmapDims;
+    if (numAzimuthBins > 1) heatmapDims.push_back(numAzimuthBins);
+    if (numRangeBins > 1) heatmapDims.push_back(numRangeBins);
+    if (numElevationBins > 1) heatmapDims.push_back(numElevationBins);
+    if (heatmapNumDims > 1) heatmapDims.push_back(heatmapNumDims);
+    if (heatmapDims.empty()) heatmapDims.push_back(1);
+
+    for (auto* run : runs) {
+        // run init
+        std::vector<double> timestamps = run->cascadeTimestamps();
+        hsize_t numFrames = timestamps.size();
+
+        // datacubes
+        if (cascade_->exportConfig()->exportDatacubes()) {
+            std::vector<int16_t> datacubesFlat(numFrames * datacubeSize);
+            for (size_t i = 0; i < numFrames; ++i) {
+                auto datacube = run->getCascadeDatacube(i);
+                std::copy(datacube.begin(), datacube.end(), datacubesFlat.begin() + i * datacube.size());
+            }
+            saveDatacubesToHDF5(datacubeContentName + "_" + run->name, datasetFile, datacubesFlat, numFrames, datacubeSize);
+        }
+
+        // heatmaps
+        if (cascade_->exportConfig()->exportHeatmaps()) {
+            std::vector<float> heatmapsFlat;
+            for (size_t i = 0; i < numFrames; ++i) {
+                auto heatmap = run->getCascadeHeatmap(i);
+                heatmap = clipHeatmapImage(heatmap, azimuthMaxBin, elevationMaxBin, rangeMaxBin, cascadeConfig_);
+                // if (cascade_->exportConfig()->collapseElevation())
+                //     heatmap = collapseHeatmapElevation(heatmap, cascade_->exportConfig()->collapseElevationMinZ(), cascade_->exportConfig()->collapseElevationMaxZ(), cascadeConfig_);
+                // if (cascade_->exportConfig()->removeDopplerDim())
+                //     heatmap = removeDoppler(heatmap);
+                // auto heatmapFlat = flattenHeatmap(heatmap, cascadeConfig_->numAzimuthBins, cascadeConfig_->numElevationBins, cascadeConfig_->numRangeBins, heatmapNumDims);
+                // heatmapsFlat.insert(heatmapsFlat.end(), heatmapFlat.begin(), heatmapFlat.end());
+            }
+            // saveHeatmapsToHDF5(heatmapContentName + "_" + run->name, datasetFile, heatmapsFlat, numFrames, heatmapDims);
+        }
+    }
+
+//        
+
 //        int elStartIdx = (cascadeConfig_->numElevationBins - cascadeNumElevationBins) / 2;
 //        int elEndIdx = elStartIdx + cascadeNumElevationBins;
 //        std::vector<float> elevationBins(cascadeConfig_->elevationBins.begin() + elStartIdx, cascadeConfig_->elevationBins.begin() + elEndIdx);
 //        float cascadeHorizontalFov, cascadeVerticalFov, cascadeRange;
 //        coloradar::convertRadarBinsToFov(cascadeAzimuthMaxBin, cascadeElevationMaxBin, cascadeRangeMaxBin, cascadeConfig_, cascadeHorizontalFov, cascadeVerticalFov, cascadeRange);
-//        std::vector<hsize_t> heatmapDims;
-//        if (cascadeNumAzimuthBins > 1) heatmapDims.push_back(static_cast<hsize_t>(cascadeNumAzimuthBins));
-//        if (cascadeNumRangeBins > 1) heatmapDims.push_back(static_cast<hsize_t>(cascadeNumRangeBins));
-//        if (cascadeNumElevationBins > 1) heatmapDims.push_back(static_cast<hsize_t>(cascadeNumElevationBins));
-//        if (cascadeNumDims > 1) heatmapDims.push_back(static_cast<hsize_t>(cascadeNumDims));
-//        if (heatmapDims.empty()) heatmapDims.push_back(1);
+
 //
 //        for (auto run : runs) {
 //            int numCascadeFrames = run->cascadeTimestamps().size();

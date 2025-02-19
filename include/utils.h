@@ -10,13 +10,14 @@
 
 namespace coloradar {
 
-struct RadarPoint
-{
-  PCL_ADD_POINT4D;
-  float intensity;
-  float doppler;
-  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-} EIGEN_ALIGN16;
+struct RadarPoint {
+    EIGEN_ALIGN16
+    PCL_ADD_POINT4D;
+    float intensity;
+    float doppler;
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+};
+
 
 
 template <Pcl4dPointType PointT, template <PclCloudType> class CloudT> void octreeToPcl(const octomap::OcTree& tree, CloudT<PointT>& cloud);

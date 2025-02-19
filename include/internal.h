@@ -12,7 +12,7 @@
 #include <regex>
 #include <memory>
 #include <Eigen/Dense>
-#include <jsoncpp/json/json.h>
+#include <json/json.h>
 #include <yaml-cpp/yaml.h>
 
 

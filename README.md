@@ -18,10 +18,21 @@ chmod +x build_image.sh
 |-------------|--------------------|--------|
 | noetic      | Ubuntu 20.04 Focal | 3.8    |
 | humble      | Ubuntu 22.04 Jammy | 3.10   |
-| jazzy       | Ubuntu 24.04 Noble | 3.12    |
+| jazzy       | Ubuntu 24.04 Noble | 3.12   |
 
 
 ## 2. Local Build
+Requirements:
+- GCC v.10-12
+- BOOST 1.78+
+- open-mpi
+- VTK
+- openCV
+- PCL v.1.12+
+- octomap
+- Yaml-cpp
+- (optional) PyBind11 v.2.6+
+
 ```bash
 mkdir build && cd build
 cmake ..
