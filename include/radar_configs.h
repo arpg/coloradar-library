@@ -68,6 +68,7 @@ public:
     std::vector<float> azimuthAngles;
     std::vector<float> elevationAngles;
     double dopplerBinWidth;
+    bool hasDoppler = true;
 
     RadarConfig(const int& nAzimuthBeams = 1, const int& nElevationBeams = 1) {};
     RadarConfig(const RadarConfig& other) = default;
@@ -88,6 +89,9 @@ public:
 
     std::vector<float> clipHeatmap(const std::vector<float>& heatmap, int azimuthMaxBin, int elevationMaxBin, int rangeMaxBin, bool updateConfig = true);
     std::vector<float> clipHeatmap(const std::vector<float>& heatmap, float horizontalFov, float verticalFov, float range, bool updateConfig = true);
+    std::vector<float> collapseHeatmapElevation(const std::vector<float>& image, const float& elevationMinMeters = -100.0, const float& elevationMaxMeters = 100.0, bool updateConfig = true);
+    std::vector<float> removeDoppler(const std::vector<float>& image, bool updateConfig = true);
+    std::vector<float> swapHeatmapDimensions(const std::vector<float>& heatmap);
 };
 
 class SingleChipConfig : public RadarConfig {

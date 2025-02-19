@@ -613,3 +613,67 @@ std::vector<float> coloradar::RadarConfig::clipHeatmap(const std::vector<float>&
     int rangeMaxBin = rangeToRangeIdx(range);
     return clipHeatmap(heatmap, azMaxBin, elMaxBin, rangeMaxBin, updateConfig);
 }
+
+std::vector<float> coloradar::RadarConfig::collapseHeatmapElevation(const std::vector<float>& image, const float& elevationMinMeters, const float& elevationMaxMeters, bool updateConfig) {
+    if (elevationMaxMeters < elevationMinMeters) {
+        throw std::out_of_range("elevationMaxMeters must be greater or equal to elevationMinMeters.");
+    }
+    std::vector<float> collapsedHeatmap;
+    collapsedHeatmap.reserve(numAzimuthBins * nRangeBins() * 2);
+    for (int a = 0; a < numAzimuthBins; ++a) {
+        for (int r = 0; r < nRangeBins(); ++r) {
+            float maxIntensity = -std::numeric_limits<float>::infinity();
+            float maxDoppler = 0.0f;
+            for (int e = 0; e < elevationBins.size(); ++e) {
+                float z = r * std::sin(elevationBins[e]);
+                if (z >= elevationMinMeters && z <= elevationMaxMeters) {
+                    int index = (((e * numAzimuthBins + a) * nRangeBins() + r) * 2);
+                    if (image[index] > maxIntensity) {
+                        maxIntensity = image[index];
+                        maxDoppler = image[index + 1];
+                    }
+                }
+            }
+            collapsedHeatmap.push_back(maxIntensity);
+            collapsedHeatmap.push_back(maxDoppler);
+        }
+    }
+    if (updateConfig) {
+        numElevationBins = 0;
+        elevationBins = {};
+    }
+    return collapsedHeatmap;
+}
+
+std::vector<float> coloradar::RadarConfig::removeDoppler(const std::vector<float>& image, bool updateConfig) {
+    std::vector<float> intensityImage;
+    intensityImage.reserve(image.size() / 2);
+    for (size_t i = 0; i < image.size(); i += 2) {
+        intensityImage.push_back(image[i]);
+    }
+    if (updateConfig) {
+        hasDoppler = false;
+    }
+    return intensityImage;
+}
+
+std::vector<float> coloradar::RadarConfig::swapHeatmapDimensions(const std::vector<float>& heatmap) {
+    const size_t numDims = hasDoppler ? 2 : 1;
+    const size_t expectedSize = numElevationBins * numAzimuthBins * nRangeBins() * numDims;
+    if (heatmap.size() != expectedSize) {
+        throw std::runtime_error("Heatmap size does not match the expected dimensions. Expected size: " + std::to_string(expectedSize) + ", Actual size: " + std::to_string(heatmap.size()));
+    }
+    std::vector<float> reorganizedHeatmap(expectedSize);
+    for (int el = 0; el < numElevationBins; ++el) {
+        for (int az = 0; az < numAzimuthBins; ++az) {
+            for (int r = 0; r < nRangeBins(); ++r) {
+                for (int d = 0; d < numDims; ++d) {
+                    size_t originalIndex = (((el * numAzimuthBins + az) * nRangeBins()) + r) * numDims + d;
+                    size_t reorganizedIndex = (((az * nRangeBins() + r) * numElevationBins) + el) * numDims + d;
+                    reorganizedHeatmap[reorganizedIndex] = heatmap[originalIndex];
+                }
+            }
+        }
+    }
+    return reorganizedHeatmap;
+}

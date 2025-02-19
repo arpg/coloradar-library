@@ -102,9 +102,11 @@ class ImageBuild:
             "-t", image_name
         ]
         if PUSH_IMAGES:
-            build_command.extend(["--push", "--platform", "linux/amd64,linux/arm64"])
+            build_command.append("--push")
+            if not cuda_version:
+                build_command.extend(["--platform", "linux/amd64,linux/arm64"])
         else:
-            build_command.extend(["--load"])
+            build_command.append("--load")
         build_command.append(".")
         subprocess.run(build_command, check=True)
 
