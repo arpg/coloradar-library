@@ -49,7 +49,6 @@ RUN apt update && apt install --no-install-recommends -y \
     libdbus-1-dev \
     gobject-introspection \
     libgirepository1.0-dev \
-    libvtk9-dev \
     qtbase5-dev qt5-qmake qtbase5-dev-tools libqt5opengl5-dev
 
 
