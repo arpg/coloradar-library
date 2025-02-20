@@ -71,15 +71,6 @@ endif()
 message(STATUS "Using Python: ${Python_EXECUTABLE} (${Python_VERSION})")
 
 
-# Library Paths
-# set(BOOST_ROOT "/usr/local")
-# set(BOOST_INCLUDEDIR "/usr/local/include")
-# set(BOOST_LIBRARYDIR "/usr/local/lib")
-# set(PYBIND11_ROOT "/usr/local")
-# set(PYBIND11_INCLUDEDIR "/usr/local/include")
-# set(PYBIND11_LIBRARYDIR "/usr/local/lib")
-
-
 find_package(Boost 1.78 REQUIRED COMPONENTS system filesystem thread)
 find_package(MPI REQUIRED)
 find_package(VTK REQUIRED)

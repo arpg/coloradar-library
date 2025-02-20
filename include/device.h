@@ -173,7 +173,21 @@ public:
         validate();
     }
 
+    const bool& collapseElevation() const { return collapseElevation_; }
+    const float& collapseElevationMinZ() const { return collapseElevationMinZ_; }
+    const float& collapseElevationMaxZ() const { return collapseElevationMaxZ_; }
+    const bool& exportClouds() const { return exportClouds_; }
+    const bool& removeIntensityDim() const { return removeIntensityDim_; }
+    const FovConfig& cloudFov() const { return cloudFov_; }
+    const bool& exportMap() const { return exportMap_; }
+    const float& mapOccupancyThresholdPercent() const { return mapOccupancyThresholdPercent_; }
+    const Eigen::Affine3f& mapTransform() const { return mapTransform_; }
+    const bool& exportMapSamples() const { return exportMapSamples_; }
+    const float& mapSampleOccupancyThresholdPercent() const { return mapSampleOccupancyThresholdPercent_; }
+    const bool& allowResample() const { return allowResample_; }
+    const bool& forceResample() const { return forceResample_; }
     const BaseDevice* centerSensor() const { return centerSensor_.get(); }
+    const FovConfig& mapSampleFov() const { return mapSampleFov_; }
 };
 
 class ImuExportConfig : public BaseExportConfig {

@@ -267,7 +267,7 @@ void ColoradarPlusDataset::exportCascade(const std::vector<ColoradarPlusRun*> &r
     for (auto* run : runs) {
         std::vector<double> timestamps = run->cascadeTimestamps();
         hsize_t numFrames = timestamps.size();
-        std::vector<Eigen::Affine3f> basePoses = run->interpolatePoses(run->getPoses<Eigen::Affine3f>(), run->poseTimestamps(), run->cascadeTimestamps());
+        std::vector<Eigen::Affine3f> basePoses = run->interpolatePoses(run->getPoses<Eigen::Affine3f>(), run->poseTimestamps(), timestamps);
         std::vector<Eigen::Affine3f> sensorPoses;
         for (int i = 0; i < numFrames; ++i) {
             sensorPoses[i] = basePoses[i] * cascadeTransform_;
@@ -351,112 +351,60 @@ void ColoradarPlusDataset::exportCascade(const std::vector<ColoradarPlusRun*> &r
 
 void ColoradarPlusDataset::exportLidar(const std::vector<ColoradarPlusRun*> &runs, const H5::H5File &datasetFile) {
     // Constants
-    const std::string datacubeContentName = "cascade_datacubes",
-                      heatmapContentName = "cascade_heatmaps",
-                      cloudContentName = "cascade_clouds",
-                      posesContentName = "cascade_poses",
-                      timestampsContentName = "cascade_timestamps";
-
-    // FOV
-    float range = cascadeConfig_->clipRange(cascade_->exportConfig()->fov().rangeMeters);
-    int rangeMaxBin = cascadeConfig_->rangeToRangeIdx(range);
-    int azimuthMaxBin = cascade_->exportConfig()->fov().azimuthIdx;
-    int elevationMaxBin = cascade_->exportConfig()->fov().elevationIdx;
-    float horizonalFov = cascade_->exportConfig()->fov().horizontalDegreesTotal;
-    float verticalFov = cascade_->exportConfig()->fov().verticalDegreesTotal;
-    if (cascade_->exportConfig()->fov().useDegreeConstraints) {
-        azimuthMaxBin = cascadeConfig_->horizontalFovToAzimuthIdx(cascade_->exportConfig()->fov().horizontalDegreesTotal);
-        elevationMaxBin = cascadeConfig_->verticalFovToElevationIdx(cascade_->exportConfig()->fov().verticalDegreesTotal);
-    }
-    else {
-        azimuthMaxBin = cascadeConfig_->clipAzimuthMaxBin(azimuthMaxBin);
-        elevationMaxBin = cascadeConfig_->clipElevationMaxBin(elevationMaxBin);
-        horizonalFov = cascadeConfig_->azimuthIdxToFovDegrees(azimuthMaxBin);
-        verticalFov = cascadeConfig_->elevationIdxToFovDegrees(elevationMaxBin);
-    }
+    const std::string cloudContentName = "lidar_clouds",
+                      mapContentName = "lidar_map",
+                      mapSampleContentName = "lidar_map_samples",
+                      posesContentName = "lidar_poses",
+                      timestampsContentName = "lidar_timestamps";
 
     for (auto* run : runs) {
-        std::vector<double> timestamps = run->cascadeTimestamps();
+        std::vector<double> timestamps = run->lidarTimestamps();
         hsize_t numFrames = timestamps.size();
-        std::vector<Eigen::Affine3f> basePoses = run->interpolatePoses(run->getPoses<Eigen::Affine3f>(), run->poseTimestamps(), run->cascadeTimestamps());
+        std::vector<Eigen::Affine3f> basePoses = run->interpolatePoses(run->getPoses<Eigen::Affine3f>(), run->poseTimestamps(), timestamps);
         std::vector<Eigen::Affine3f> sensorPoses;
         for (int i = 0; i < numFrames; ++i) {
-            sensorPoses[i] = basePoses[i] * cascadeTransform_;
+            sensorPoses[i] = basePoses[i] * lidarTransform_;
         }
 
         // timestamps
-        if (cascade_->exportConfig()->exportTimestamps()) {
+        if (lidar_->exportConfig()->exportTimestamps()) {
             saveVectorToHDF5(timestampsContentName + "_" + run->name, datasetFile, timestamps);
         }
 
         // poses
-        if (cascade_->exportConfig()->exportPoses()) {
+        if (lidar_->exportConfig()->exportPoses()) {
             savePosesToHDF5(posesContentName + "_" + run->name, datasetFile, sensorPoses);
         }
 
-        // datacubes
-        if (cascade_->exportConfig()->exportDatacubes()) {
-            std::vector<int16_t> datacubesFlat;
-            for (size_t i = 0; i < numFrames; ++i) {
-                auto datacube = run->getCascadeDatacube(i);
-                std::copy(datacube.begin(), datacube.end(), datacubesFlat.begin() + i * datacube.size());
-            }
-            saveDatacubesToHDF5(datacubeContentName + "_" + run->name, datasetFile, datacubesFlat, numFrames, cascadeConfig_);
-        }
-        
-        // heatmaps
-        if (cascade_->exportConfig()->exportHeatmaps()) {
-            CascadeConfig* heatmapConfig = new CascadeConfig(*dynamic_cast<CascadeConfig*>(cascadeConfig_));
-            std::vector<float> heatmapsFlat;
-            for (size_t i = 0; i < numFrames; ++i) {
-                auto heatmap = run->getCascadeHeatmap(i);
-                heatmap = heatmapConfig->clipHeatmap(heatmap, azimuthMaxBin, elevationMaxBin, rangeMaxBin);
-                if (cascade_->exportConfig()->collapseElevation()) {
-                    heatmap = heatmapConfig->collapseHeatmapElevation(heatmap, cascade_->exportConfig()->collapseElevationMinZ(), cascade_->exportConfig()->collapseElevationMaxZ());
-                }
-                if (cascade_->exportConfig()->removeDopplerDim()) {
-                    heatmap = heatmapConfig->removeDoppler(heatmap);
-                }
-                heatmap = heatmapConfig->swapHeatmapDimensions(heatmap);
-                heatmapsFlat.insert(heatmapsFlat.end(), heatmap.begin(), heatmap.end());
-            }
-            saveHeatmapsToHDF5(heatmapContentName + "_" + run->name, datasetFile, heatmapsFlat, numFrames, heatmapConfig);
-        }
-
         // clouds
-        if (cascade_->exportConfig()->exportClouds()) {
-            hsize_t numDims = cascadeConfig_->numElevationBins > 0 ? 5 : 4;  // x, y, (z), intensity, doppler
-            if (!cascadeConfig_->hasDoppler) numDims -= 1;
+        if (lidar_->exportConfig()->exportClouds()) {
+            hsize_t numDims = lidar_->exportConfig()->collapseElevation() ? 3 : 4;  // x, y, (z), intensity
+            if (lidar_->exportConfig()->removeIntensityDim()) numDims -= 1;
 
-            bool buildClouds = false;
-            try {
-                auto cloud = run->getCascadePointcloud(0);
-            } catch (const std::filesystem::filesystem_error& e) {
-                buildClouds = true;
-            }
             std::vector<float> cloudsFlat;
             std::vector<hsize_t> cloudSizes;
             for (size_t i = 0; i < numFrames; ++i) {
-                pcl::PointCloud<RadarPoint> cloud;
-                if (buildClouds) {
-                    cloud = heatmapToPointcloud(run->getCascadeHeatmap(i), cascadeConfig_, cascade_->exportConfig()->intensityThresholdPercent());
-                }
-                else {
-                    cloud = run->getCascadePointcloud(i, cascade_->exportConfig()->intensityThresholdPercent());
-                }
-                filterFov(cloud, horizonalFov, verticalFov, range);
-                if (cascade_->exportConfig()->cloudsInGlobalFrame()) {
-                    pcl::transformPointCloud(cloud, cloud, sensorPoses[i]);
-                }
-                if (cascade_->exportConfig()->collapseElevation()) {
-                    collapseElevation(cloud, cascade_->exportConfig()->collapseElevationMinZ(), cascade_->exportConfig()->collapseElevationMaxZ());
+                auto cloud = run->getLidarPointCloud<pcl::PointCloud<pcl::PointXYZI>>(i);
+                filterFov(
+                    cloud,
+                    lidar_->exportConfig()->cloudFov().horizontalDegreesTotal, 
+                    lidar_->exportConfig()->cloudFov().verticalDegreesTotal, 
+                    lidar_->exportConfig()->cloudFov().rangeMeters
+                );
+                if (lidar_->exportConfig()->collapseElevation()) {
+                    collapseElevation(cloud, lidar_->exportConfig()->collapseElevationMinZ(), lidar_->exportConfig()->collapseElevationMaxZ());
                 }
                 cloudSizes[i] = cloud.size();
-                std::vector<float> cloudFlat = flattenRadarCloud(cloud, cascadeConfig_);
-                cloudsFlat.insert(cloudsFlat.end(), cloudFlat.begin(), cloudFlat.end());
+                // std::vector<float> cloudFlat = flattenRadarCloud(cloud, cascadeConfig_);
+                // cloudsFlat.insert(cloudsFlat.end(), cloudFlat.begin(), cloudFlat.end());
             }
             saveCloudsToHDF5(cloudContentName + "_" + run->name, datasetFile, cloudsFlat, numFrames, cloudSizes, numDims);
         }
+        
+        // map
+
+        // map samples
+
     }
 }
 

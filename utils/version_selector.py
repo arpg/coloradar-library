@@ -24,10 +24,9 @@ class VersionSelector:
         """
         Initializes the VersionSelector with a given ROS version configuration file.
         """
-        self.default_ros = "jazzy"
         self.version_config = self._load_ros_config(version_config_file)
+        self.default_version_settings = self.version_config['jazzy']
         self.available_ros_distros = ", ".join(str(v) for v in self.version_config.keys())
-        self.lib_versions = self.version_config.get(self.default_ros, {})
         self.mac_os = os.uname().sysname == "Darwin"
         self._cuda_tags_cache: Optional[dict] = None 
         self._roscuda_tags_cache: Optional[dict] = None 
@@ -44,8 +43,8 @@ class VersionSelector:
             raise ValueError(f"CUDA version {cuda_version} is not a string.")
         if cuda_version.lower() == 'none':
             return None
-        # if self.mac_os:
-        #     raise ValueError("Error: CUDA not available on Mac.")
+        if self.mac_os:
+            raise ValueError("Error: CUDA not available on Mac.")
         if not re.match(r"^\d+\.\d+$", cuda_version):
             raise ValueError("Error: CUDA version must be in the format 'X.Y' where X and Y are numeric.")
         return cuda_version
@@ -73,20 +72,6 @@ class VersionSelector:
         with open(version_config_file, 'r') as file:
             data = yaml.safe_load(file)
             return {k: v for k, v in data.get('ros_versions', {}).items()}
-
-    def determine_base_image(self, cuda_version: Optional[str], ros_version: Optional[str], detect_local_cuda=True) -> str:
-        """
-        Determine the base image based on CUDA and ROS versions.
-        """
-        cuda_version = self.validate_cuda_version(cuda_version, detect_local=detect_local_cuda)
-        ros_version = self.validate_ros_version(ros_version)
-        ubuntu_version = self.version_config.get(ros_version, {}).get('ubuntu')
-        if cuda_version is None:
-            return f'ubuntu:{ubuntu_version or "24.04"}'
-        else:
-            image_postfix = f'-ubuntu{ubuntu_version or ""}'
-            image_tag = self._get_latest_cuda_tag(cuda_version, image_postfix)
-            return f'nvidia/cuda:{image_tag}'
         
     def get_base_image(self, cuda_version: Optional[str], ros_version: Optional[str], detect_local_cuda: bool = True) -> str:
         """
@@ -102,7 +87,7 @@ class VersionSelector:
             return f'nvidia/cuda:{self._get_latest_cuda_tag(cuda_version, "-ubuntu")}'
         if ros_version:
             return f'ros:{ros_version}' 
-        return 'ubuntu:24.04'
+        return f'ubuntu:{self.default_version_settings["ubuntu"]}'
 
     def _image_exists(self, image: str) -> bool:
         """
@@ -116,7 +101,7 @@ class VersionSelector:
         return result.returncode == 0
 
     def get_lib_version(self, lib_name: str, ros_distro: Optional[str] = None) -> Optional[str]:
-        lib_versions = self.version_config.get(ros_distro, {}) or self.lib_versions
+        lib_versions = self.version_config.get(ros_distro, {}) if ros_distro else self.default_version_settings
         if not lib_versions:
             return ''
         return lib_versions.get(lib_name, '') or ''
@@ -208,7 +193,7 @@ def main():
     args = parser.parse_args()
 
     selector = VersionSelector(version_config_file=args.config)
-    image = selector.determine_base_image(args.cuda, args.ros)
+    image = selector.get_base_image(args.cuda, args.ros)
     print(image)
 
 

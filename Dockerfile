@@ -48,10 +48,12 @@ RUN apt update && apt install --no-install-recommends -y \
     libopenmpi-dev \
     openmpi-bin \
     libjsoncpp-dev \
+    libyaml-cpp-dev \
     libdbus-1-dev \
     gobject-introspection \
     libgirepository1.0-dev \
-    qtbase5-dev qt5-qmake qtbase5-dev-tools libqt5opengl5-dev
+    qtbase5-dev qt5-qmake qtbase5-dev-tools libqt5opengl5-dev \
+    python3-pip
 
 
 # GCC
@@ -127,6 +129,12 @@ RUN mkdir build
 RUN cmake -B build
 RUN make -C build -j$(nproc)
 RUN ./build/coloradar_tests
+
+RUN if [ "$(lsb_release -rs | cut -d. -f1)" -ge 24 ]; then \
+        pip3 install --break-system-packages numpy; \
+    else \
+        pip3 install numpy; \
+    fi
 RUN python3 tests/test_bindings.py
 
 COPY scripts scripts

@@ -12,7 +12,7 @@ ros_versions:
     pcl:
     pybind:
   jazzy:
-    ubuntu: 24.02
+    ubuntu: 24.04
     gcc: 12
     boost:
     pcl:
