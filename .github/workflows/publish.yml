@@ -31,6 +31,9 @@ jobs:
           docker system prune -af --volumes
           df -h
 
+      - name: Run Tests
+        run: python3 utils/tests.py
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
         with:
@@ -57,12 +60,6 @@ jobs:
           DOCKER_BUILDKIT=1 \
           DOCKER_PUSH_IMAGES=true \
           python3 build.py --ros "${{ matrix.ros }}" --cuda "${{ matrix.cuda }}"
-
-      - name: Clean Up Unused Docker Cache
-        run: |
-          docker buildx prune -af
-          ls -lt /tmp/.buildx-cache | tail -n +6 | xargs rm -rf
-          df -h
 
       - name: Logout from Docker Hub
         run: docker logout
