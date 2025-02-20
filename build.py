@@ -39,21 +39,6 @@ class ImageBuild:
             subprocess.run(["docker", "buildx", "create", "--name", self.default_builder, "--use"], check=True)
             subprocess.run(["docker", "buildx", "inspect", "--bootstrap"], check=True)
 
-    def detect_local_cuda(self) -> Optional[str]:
-        """Detect the local CUDA version in X.Y format if available."""
-        if self.version_selector.mac_os:
-            return None
-        print("Detecting local CUDA version...")
-        try:
-            cuda_version_output = subprocess.run(["nvcc", "--version"], capture_output=True, text=True, check=True).stdout
-            match = re.search(r"release (\d+\.\d+)", cuda_version_output)
-            if match:
-                cuda_version = match.group(1)
-                return cuda_version
-        except (FileNotFoundError, subprocess.CalledProcessError):
-            pass
-        return None
-
     def setup(self) -> None:
         """Run initial setup checks."""
         self._check_dependencies()
@@ -72,8 +57,7 @@ class ImageBuild:
 
     def run(self, ros_distro: Optional[str], cuda_version: Optional[str]) -> None:
         """Execute the build process."""
-        cuda_version = self.version_selector.validate_cuda_version(cuda_version)
-        cuda_version = cuda_version or self.detect_local_cuda()
+        cuda_version = self.version_selector.validate_cuda_version(cuda_version, detect_local=True)
         if cuda_version:
             print(f"Using CUDA version: {cuda_version}")
 
@@ -96,16 +80,18 @@ class ImageBuild:
             "docker", "buildx", "build",
             "--build-arg", f"CUDA_ENV={'true' if cuda_version else 'false'}",
             "--build-arg", f"BASE_IMAGE={base_image}",
-            "--build-arg", f"DOCKER_GCC_VERSION={self.version_selector.get_lib_version('gcc')}",
-            "--build-arg", f"DOCKER_BOOST_VERSION={self.version_selector.get_lib_version('boost')}",
-            "--build-arg", f"DOCKER_PCL_VERSION={self.version_selector.get_lib_version('pcl')}",
-            "--build-arg", f"DOCKER_PYBIND_VERSION={self.version_selector.get_lib_version('pybind')}",
+            "--build-arg", f"DOCKER_GCC_VERSION={self.version_selector.get_lib_version('gcc', ros_distro=ros_distro)}",
+            "--build-arg", f"DOCKER_BOOST_VERSION={self.version_selector.get_lib_version('boost', ros_distro=ros_distro)}",
+            "--build-arg", f"DOCKER_PCL_VERSION={self.version_selector.get_lib_version('pcl', ros_distro=ros_distro)}",
+            "--build-arg", f"DOCKER_PYBIND_VERSION={self.version_selector.get_lib_version('pybind', ros_distro=ros_distro)}",
             "-t", image_name
         ]
         if PUSH_IMAGES:
             build_command.append("--push")
-            if not cuda_version:
-                build_command.extend(["--platform", "linux/amd64,linux/arm64"])
+            if cuda_version:
+                build_command.extend(["--platform", "linux/amd64,linux/arm64,linux/arm/v7,windows/amd64"])
+            else:
+                build_command.extend(["--platform", "linux/amd64,windows/amd64"])
         else:
             build_command.append("--load")
         build_command.append(".")

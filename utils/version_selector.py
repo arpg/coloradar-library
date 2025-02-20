@@ -35,23 +35,34 @@ class VersionSelector:
             data = yaml.safe_load(file)
             return {k: v for k, v in data.get('ros_versions', {}).items()}
 
-    def validate_cuda_version(self, cuda_version: Optional[str]) -> Optional[str]:
+    def validate_cuda_version(self, cuda_version: Optional[str], detect_local: bool = True) -> Optional[str]:
         """
         Validate that the input CUDA version is in the correct X.Y format.
         """
-        if not cuda_version or cuda_version.lower() == 'none':
+        if not cuda_version:
+            if detect_local and not self.mac_os:
+                return self.detect_local_cuda()
             return None
+        if not isinstance(cuda_version, str):
+            raise ValueError(f"CUDA version {cuda_version} is not a string.")
+        if cuda_version.lower() == 'none':
+            return None
+        if self.mac_os:
+            raise ValueError("Error: CUDA not available on Mac.")
         if not re.match(r"^\d+\.\d+$", cuda_version):
             raise ValueError("Error: CUDA version must be in the format 'X.Y' where X and Y are numeric.")
-        if cuda_version and self.mac_os:
-            raise ValueError("Error: CUDA not available on Mac.")
         return cuda_version
 
     def validate_ros_version(self, ros_version: Optional[str]) -> Optional[str]:
         """
         Validate that the input ROS version is available.
         """
-        ros_version = ros_version or self.default_ros
+        if not ros_version:
+            return None
+        if not isinstance(ros_version, str):
+            raise ValueError(f"ROS version {ros_version} is not a string.")
+        if ros_version.lower() == 'none':
+            return None
         if ros_version not in self.version_config:
             raise ValueError(f"Error: ROS version must be one of the following: {self.available_ros_distros}, not {ros_version}")
         return ros_version
@@ -60,7 +71,7 @@ class VersionSelector:
         """
         Determine the base image based on CUDA and ROS versions.
         """
-        cuda_version = self.validate_cuda_version(cuda_version)
+        cuda_version = self.validate_cuda_version(cuda_version, detect_local=False)
         ros_version = self.validate_ros_version(ros_version)
 
         image_name = "annazabnus/ros-cuda" if cuda_version else "ros"
@@ -85,10 +96,23 @@ class VersionSelector:
         return result.returncode == 0
 
     def get_lib_version(self, lib_name: str, ros_distro: Optional[str] = None) -> Optional[str]:
-        lib_versions = self.lib_versions or self.version_config.get(ros_distro, {})
+        lib_versions = self.version_config.get(ros_distro, {}) or self.lib_versions
         if not lib_versions:
             return ''
-        return self.lib_versions.get(lib_name, '') or ''
+        return lib_versions.get(lib_name, '') or ''
+
+    def detect_local_cuda(self) -> Optional[str]:
+        """Detect the local CUDA version in X.Y format if available."""
+        print("Detecting local CUDA version...")
+        try:
+            cuda_version_output = subprocess.run(["nvcc", "--version"], capture_output=True, text=True, check=True).stdout
+            match = re.search(r"release (\d+\.\d+)", cuda_version_output)
+            if match:
+                cuda_version = match.group(1)
+                return cuda_version
+        except (FileNotFoundError, subprocess.CalledProcessError):
+            pass
+        return None
 
 
 def main():

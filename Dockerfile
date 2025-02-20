@@ -40,6 +40,8 @@ RUN apt update && apt install --no-install-recommends -y \
     curl \
     build-essential \
     cmake \
+    libeigen3-dev \
+    libflann-dev \
     liboctomap-dev \
     libgtest-dev \
     libopencv-dev \
@@ -50,7 +52,6 @@ RUN apt update && apt install --no-install-recommends -y \
     gobject-introspection \
     libgirepository1.0-dev \
     qtbase5-dev qt5-qmake qtbase5-dev-tools libqt5opengl5-dev
-
 
 
 # GCC

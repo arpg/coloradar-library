@@ -29,7 +29,6 @@ protected:
     std::unique_ptr<BaseExportConfig> exportConfig_;
 
 public:
-    // static const std::string name;
     static inline const std::string name = "base";
     BaseDevice(std::unique_ptr<BaseExportConfig> exportConfig = std::make_unique<BaseExportConfig>()): exportConfig_(std::move(exportConfig)) {}
 
@@ -37,7 +36,6 @@ public:
 
     virtual ~BaseDevice() = default;
 };
-// const std::string BaseDevice::name = "base";
 
 
 // HELPER CLASSES

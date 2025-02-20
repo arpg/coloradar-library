@@ -76,25 +76,6 @@ const Eigen::Affine3f& coloradar::ColoradarPlusDataset::cascadeTransform() const
 const coloradar::RadarConfig* coloradar::ColoradarPlusDataset::cascadeConfig() const { return cascadeConfig_; }
 
 
-void savePosesToHDF5(const std::string& name, H5::H5File& file, const std::vector<Eigen::Affine3f>& poses) {
-    hsize_t dims[2] = { poses.size(), 7 };
-    H5::DataSpace dataspace(2, dims);
-    H5::DataSet dataset = file.createDataSet(name, H5::PredType::NATIVE_DOUBLE, dataspace);
-    std::vector<float> poseData;
-    poseData.reserve(poses.size() * 7);
-    for (const auto& pose : poses) {
-        poseData.push_back(pose.translation().x());
-        poseData.push_back(pose.translation().y());
-        poseData.push_back(pose.translation().z());
-        Eigen::Quaternionf rot(pose.rotation());
-        poseData.push_back(rot.x());
-        poseData.push_back(rot.y());
-        poseData.push_back(rot.z());
-        poseData.push_back(rot.w());
-    }
-    dataset.write(poseData.data(), H5::PredType::NATIVE_FLOAT);
-}
-
 std::vector<float> flattenHeatmap(const std::vector<float>& heatmap, const int& numAzimuthBins, const int& numElevationBins, const int& numRangeBins, const int& numDims) {
     const size_t expectedSize = numElevationBins * numAzimuthBins * numRangeBins * numDims;
     if (heatmap.size() != expectedSize) {
@@ -151,12 +132,6 @@ std::vector<float> flattenLidarCloud(const pcl::PointCloud<pcl::PointXYZI>& clou
         }
     }
     return data;
-}
-
-void saveVectorToHDF5(const std::string& name, H5::H5File& file, const std::vector<double>& vec) {
-    hsize_t dims[1] = { vec.size() };
-    H5::DataSpace dataspace(1, dims);
-    H5::DataSet dataset = file.createDataSet(name, H5::PredType::NATIVE_DOUBLE, dataspace);
 }
 
 void saveCloudToHDF5(const std::string& name, H5::H5File& file, const std::vector<float>& flatCloud, const int& numDims) {
@@ -238,6 +213,31 @@ void saveDatacubesToHDF5(const std::string& name, const H5::H5File& file, const 
     dataset.write(flatDatacubes.data(), H5::PredType::NATIVE_INT16);
 }
 
+void savePosesToHDF5(const std::string& name, const H5::H5File& file, const std::vector<Eigen::Affine3f>& poses) {
+    hsize_t dims[2] = { poses.size(), 7 };
+    H5::DataSpace dataspace(2, dims);
+    H5::DataSet dataset = file.createDataSet(name, H5::PredType::NATIVE_DOUBLE, dataspace);
+    std::vector<float> poseData;
+    poseData.reserve(poses.size() * 7);
+    for (const auto& pose : poses) {
+        poseData.push_back(pose.translation().x());
+        poseData.push_back(pose.translation().y());
+        poseData.push_back(pose.translation().z());
+        Eigen::Quaternionf rot(pose.rotation());
+        poseData.push_back(rot.x());
+        poseData.push_back(rot.y());
+        poseData.push_back(rot.z());
+        poseData.push_back(rot.w());
+    }
+    dataset.write(poseData.data(), H5::PredType::NATIVE_FLOAT);
+}
+
+void saveVectorToHDF5(const std::string& name, const H5::H5File& file, const std::vector<double>& vec) {
+    hsize_t dims[1] = { vec.size() };
+    H5::DataSpace dataspace(1, dims);
+    H5::DataSet dataset = file.createDataSet(name, H5::PredType::NATIVE_DOUBLE, dataspace);
+}
+
 void ColoradarPlusDataset::exportCascade(const std::vector<ColoradarPlusRun*> &runs, const H5::H5File &datasetFile, const DatasetExportConfig &userConfig, Json::Value finalConfig) {
     // Constants
     const std::string datacubeContentName = "cascade_datacubes",
@@ -271,6 +271,16 @@ void ColoradarPlusDataset::exportCascade(const std::vector<ColoradarPlusRun*> &r
         std::vector<Eigen::Affine3f> sensorPoses;
         for (int i = 0; i < numFrames; ++i) {
             sensorPoses[i] = basePoses[i] * cascadeTransform_;
+        }
+
+        // timestamps
+        if (cascade_->exportConfig()->exportTimestamps()) {
+            saveVectorToHDF5(timestampsContentName + "_" + run->name, datasetFile, timestamps);
+        }
+
+        // poses
+        if (cascade_->exportConfig()->exportPoses()) {
+            savePosesToHDF5(posesContentName + "_" + run->name, datasetFile, sensorPoses);
         }
 
         // datacubes

@@ -12,7 +12,7 @@ jobs:
     strategy:
       matrix:
         ros: ["noetic", "jazzy"]
-        cuda: ["", "12.4", "12.6", "12.8"]
+        cuda: ["none", "12.4", "12.6", "12.8"]
 
     steps:
       - name: Checkout Repository
