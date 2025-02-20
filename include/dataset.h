@@ -34,8 +34,8 @@ protected:
     // void readExportConfig(const std::filesystem::path& configPath);
 
     // void exportConfig(config);
-    void exportCascade(const std::vector<ColoradarPlusRun*> &runs, const H5::H5File &datasetFile, const DatasetExportConfig &userConfig, Json::Value finalConfig);
-    // void exportLidar(config);
+    void exportCascade(const std::vector<ColoradarPlusRun*> &runs, const H5::H5File &datasetFile);
+    void exportLidar(const std::vector<ColoradarPlusRun*> &runs, const H5::H5File &datasetFile);
     // void exportImu(config);
     // void exportBaseFrame(config);
     // void exportSingleChip(config); for old dataset

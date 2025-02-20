@@ -52,7 +52,7 @@ class ImageBuild:
                 image_tag += "-"
             image_tag += ros_distro
         if not image_tag:
-            raise ValueError("Neither ROS distribution nor CUDA version specified.")
+            image_tag = "latest"
         return self.image_name_prefix + ":" + image_tag
 
     def run(self, ros_distro: Optional[str], cuda_version: Optional[str]) -> None:
