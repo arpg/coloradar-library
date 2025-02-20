@@ -11,8 +11,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        ros: ["noetic", "jazzy"]
-        cuda: ["none", "12.4", "12.6", "12.8"]
+        ros: ["none", "noetic", "jazzy"]
+        cuda: ["none", "12.6", "12.8"]
 
     steps:
       - name: Checkout Repository
