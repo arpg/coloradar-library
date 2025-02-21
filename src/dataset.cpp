@@ -345,10 +345,13 @@ void ColoradarPlusDataset::exportLidar(const std::vector<ColoradarPlusRun*> &run
 
     auto exportCfg = lidar_->exportConfig();
 
+
     for (auto* run : runs) {
+        std::vector<double> truePoseTimestamps = run->poseTimestamps();
         std::vector<double> timestamps = run->lidarTimestamps();
         hsize_t numFrames = timestamps.size();
-        std::vector<Eigen::Affine3f> basePoses = run->interpolatePoses(run->getPoses<Eigen::Affine3f>(), run->poseTimestamps(), timestamps);
+        auto truePoses = run->getPoses<Eigen::Affine3f>();
+        std::vector<Eigen::Affine3f> basePoses = run->interpolatePoses(truePoses, truePoseTimestamps, timestamps);
         std::vector<Eigen::Affine3f> sensorPoses;
         for (int i = 0; i < numFrames; ++i) {
             sensorPoses[i] = basePoses[i] * lidarTransform_;
@@ -395,34 +398,65 @@ void ColoradarPlusDataset::exportLidar(const std::vector<ColoradarPlusRun*> &run
             hsize_t numDims = exportCfg->collapseElevation() ? 3 : 4;  // x, y, (z), occupancy
             if (exportCfg->removeOccupancyDim()) numDims -= 1;
 
+            if (exportCfg->collapseElevation()) {
+                collapseElevation(map, exportCfg->collapseElevationMinZ(), exportCfg->collapseElevationMaxZ());
+            }
+            filterOccupancy(map, exportCfg->occupancyThresholdPercent() / 100.0, exportCfg->logOddsToProbability());
+
             if (exportCfg->exportMap()) {
-                if (exportCfg->collapseElevation()) {
-                    collapseElevation(map, exportCfg->collapseElevationMinZ(), exportCfg->collapseElevationMaxZ());
-                }
-                filterOccupancy(map, exportCfg->occupancyThresholdPercent() / 100.0, exportCfg->logOddsToProbability());
                 std::vector<float> mapFlat = flattenLidarCloud(map, exportCfg->collapseElevation(), exportCfg->removeOccupancyDim());
                 saveCloudToHDF5(mapContentName + "_" + run->name, datasetFile, mapFlat, numDims);
             }
 
             if (exportCfg->exportMapSamples()) {
-//                hsize_t numSamples = config->centerCensor()->name;
-//                std::vector<float> samplesFlat;
-//                std::vector<hsize_t> cloudSizes(numFrames);
-//                for (size_t i = 0; i < numCascadeFrames; ++i) {
-//                pcl::PointCloud<pcl::PointXYZI> lidarMapSample;
-//                try {
-//                    lidarMapSample = run->readMapFrame(i);
-//                } catch (const std::filesystem::filesystem_error& e) {
-//                    run->sampleMapFrames(mapSampleTotalHorizontalFov, mapSampleTotalVerticalFov, mapSampleMaxRange, mapSamplingBaseToSensorTransform, mapSamplingBasePoses);
-//                    lidarMapSample = run->readMapFrame(i);
-//                }
-//                if (collapseMapSampleElevation)
-//                    coloradar::collapseElevation(lidarMapSample, collapseMapSampleElevationMinZ, collapseMapSampleElevationMaxZ);
-//                cloudSizes[i] = lidarMapSample.size();
-//                auto cloudFlat = flattenLidarCloud(lidarMapSample, collapseMapSampleElevation, true);
-//                framesFlat.insert(framesFlat.end(), cloudFlat.begin(), cloudFlat.end());
-//                }
-                // saveCloudsToHDF5(mapFrameContentName + "_" + run->name, datasetFile, framesFlat, numCascadeFrames, mapFrameNumDims, cloudSizes);
+                std::vector<double> egoTimestamps;
+                Eigen::Affine3f egoTransform;
+                if (exportCfg->centerSensor()->name == CascadeDevice::name) {
+                    egoTimestamps = run->cascadeTimestamps();
+                    egoTransform = cascadeTransform_;
+                } else if (exportCfg->centerSensor()->name == LidarDevice::name) {
+                    egoTimestamps = run->lidarTimestamps();
+                    egoTransform = lidarTransform_;
+                } else if (exportCfg->centerSensor()->name == ImuDevice::name) {
+                    egoTimestamps = run->imuTimestamps();
+                    egoTransform = imuTransform_;
+                } else {
+                    egoTimestamps = run->poseTimestamps();
+                    egoTransform = Eigen::Affine3f::Identity();
+                }
+                hsize_t numSamples = egoTimestamps.size();
+                std::vector<Eigen::Affine3f> egoPoses = run->interpolatePoses(truePoses, truePoseTimestamps, egoTimestamps);
+
+                if (exportCfg->forceResample()) {
+                    run->sampleMapFrames(
+                        exportCfg->mapSampleFov().horizontalDegreesTotal,
+                        exportCfg->mapSampleFov().verticalDegreesTotal,
+                        exportCfg->mapSampleFov().rangeMeters,
+                        egoTransform,
+                        egoPoses
+                    );
+                } else if (exportCfg->allowResample()) {
+                    try {
+                        auto sample = run->readMapFrame(0);
+                    } catch (const std::filesystem::filesystem_error& e) {
+                        run->sampleMapFrames(
+                            exportCfg->mapSampleFov().horizontalDegreesTotal,
+                            exportCfg->mapSampleFov().verticalDegreesTotal,
+                            exportCfg->mapSampleFov().rangeMeters,
+                            egoTransform,
+                            egoPoses
+                        );
+                    }
+                }
+                std::vector<float> samplesFlat;
+                std::vector<hsize_t> sampleSizes(numSamples);
+                for (size_t i = 0; i < numSamples; ++i) {
+                    pcl::PointCloud<pcl::PointXYZI> sample = run->readMapFrame(i);
+                    sampleSizes[i] = sample.size();
+                    auto sampleFlat = flattenLidarCloud(sample, exportCfg->collapseElevation(), exportCfg->removeOccupancyDim());
+                    samplesFlat.insert(samplesFlat.end(), sampleFlat.begin(), sampleFlat.end());
+                }
+                saveCloudsToHDF5(mapSampleContentName + "_" + run->name, datasetFile, samplesFlat, numSamples, sampleSizes, numDims);
             }
         }
     }

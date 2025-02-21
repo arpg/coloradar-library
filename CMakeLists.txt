@@ -81,6 +81,7 @@ find_package(OpenCV REQUIRED)
 find_package(CUDA)
 find_package(HDF5 REQUIRED COMPONENTS C CXX)
 find_package(pybind11 2.6)
+find_package(jsoncpp REQUIRED)
 find_package(yaml-cpp REQUIRED)
 find_package(GTest REQUIRED)
 
