@@ -5,7 +5,7 @@
 #include <Eigen/Core>
 #include <mutex>
 
-#include "coloradar_cuda.h"
+#include "cuda/coloradar_cuda.h"
 
 
 double coloradar::RadarProcessor::blackman(const int& idx, const int& size) {

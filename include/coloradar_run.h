@@ -1,7 +1,8 @@
 #ifndef COLORADAR_RUN_H
 #define COLORADAR_RUN_H
 
-#include "utils.h"
+#include "radar_configs.h"
+#include "device.h"
 
 #include <H5Cpp.h>
 
@@ -93,53 +94,6 @@ public:
     );
     pcl::PointCloud<pcl::PointXYZI> readMapFrame(const int& frameIdx);
 
-//    std::filesystem::path exportToFile(
-//        std::filesystem::path destination = "",
-//
-//        const bool& includeCascadeHeatmaps = false,
-//        const bool& includeCascadePointclouds = false,
-//        const int& cascadeAzimuthMaxBin = -1,
-//        const int& cascadeElevationMaxBin = -1,
-//        const int& cascadeRangeMaxBin = -1,
-//        const bool& removeCascadeDopplerDim = false,
-//        const bool& collapseCascadeElevation = false,
-//        const int& collapseCascadeElevationMinZ = -100,
-//        const int& collapseCascadeElevationMaxZ = 100,
-//        const float& cascadeCloudIntensityThresholdPercent = 0,
-//
-//        const bool& includeLidarFrames = false,
-//        const float& lidarFrameTotalHorizontalFov = 360,
-//        const float& lidarFrameTotalVerticalFov = 180,
-//        const float& lidarFrameMaxRange = 100,
-//        const bool& collapseLidarFrameElevation = false,
-//        const float& collapseLidarFrameElevationMinZ = -100,
-//        const float& collapseLidarFrameElevationMaxZ = 100,
-//
-//        const bool& includeLidarMap = false,
-//        const bool& collapseMapElevation = false,
-//        const float& collapseMapElevationMinZ = -100,
-//        const float& collapseMapElevationMaxZ = 100,
-//
-//        const bool& includeMapFrames = false,
-//        const float& mapSampleTotalHorizontalFov = 360,
-//        const float& mapSampleTotalVerticalFov = 180,
-//        const float& mapSampleMaxRange = 100,
-//        const Eigen::Affine3f& mapSamplingPreTransform = Eigen::Affine3f::Identity(),
-//        std::vector<Eigen::Affine3f> mapSamplingPoses = {},
-//        const bool& collapseMapSampleElevation = false,
-//        const float& collapseMapSampleElevationMinZ = -100,
-//        const float& collapseMapSampleElevationMaxZ = 100,
-//
-//        const bool& removeLidarIntensity = false,
-//
-//        const bool& includeTruePoses = true,
-//        const bool& includeCascadePoses = true,
-//        const bool& includeLidarPoses = true,
-//        const bool& includeTrueTimestamps = true,
-//        const bool& includeCascadeTimestamps = true,
-//        const bool& includeLidarTimestamps = true
-//    );
-
     virtual ~ColoradarPlusRun() = default;
 };
 
@@ -173,6 +127,6 @@ public:
 
 }
 
-#include "coloradar_run.hpp"
+#include "hpp/coloradar_run.hpp"
 
 #endif

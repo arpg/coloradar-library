@@ -2,7 +2,7 @@
 #define COLORADAR_CUDA_H
 
 #include "coloradar_tools.h"
-#include "cuda_kernels.h"
+#include "cuda/kernels.h"
 
 #include <cuda_runtime.h>
 #include <cuComplex.h>

@@ -75,16 +75,19 @@ public:
         std::string deviceName = "radar",
         bool exportPoses = false,
         bool exportTimestamps = false,
+
         bool collapseElevation = false,
         float collapseElevationMinZ = 0.0f,
         float collapseElevationMaxZ = 0.0f,
         bool removeDopplerDim = false,
         FovConfig fov = FovConfig(),
+
         bool exportDatacubes = false,
         bool exportHeatmaps = false,
         bool exportClouds = false,
         float intensityThresholdPercent = 0.0f,
         bool cloudsInGlobalFrame = false
+
     ) : BaseExportConfig(deviceName, exportPoses, exportTimestamps),
         collapseElevation_(collapseElevation),
         collapseElevationMinZ_(collapseElevationMinZ),
@@ -122,11 +125,10 @@ protected:
     FovConfig cloudFov_;
 
     bool exportMap_;
-    float mapOccupancyThresholdPercent_;
-    Eigen::Affine3f mapTransform_;
-
     bool exportMapSamples_;
-    float mapSampleOccupancyThresholdPercent_;
+    bool removeOccupancyDim_;
+    bool logOddsToProbability_;
+    float occupancyThresholdPercent_;
     bool allowResample_;
     bool forceResample_;
     std::unique_ptr<BaseDevice> centerSensor_;
@@ -139,21 +141,25 @@ public:
         std::string deviceName = "lidar",
         bool exportPoses = false,
         bool exportTimestamps = false,
+
         bool collapseElevation = false,
         float collapseElevationMinZ = 0.0f,
         float collapseElevationMaxZ = 0.0f,
+
         bool exportClouds = false,
         bool removeIntensityDim = false,
         FovConfig cloudFov = FovConfig(),
+
         bool exportMap = false,
-        float mapOccupancyThresholdPercent = 0.0f,
-        Eigen::Affine3f mapTransform = Eigen::Affine3f::Identity(),
         bool exportMapSamples = false,
-        float mapSampleOccupancyThresholdPercent = 0.0f,
+        bool removeOccupancyDim = false,
+        bool logOddsToProbability = false,
+        float occupancyThresholdPercent = 0.0f,
         bool allowResample = true,
         bool forceResample = false,
         std::unique_ptr<BaseDevice> centerSensor = std::make_unique<BaseDevice>(),
         FovConfig mapSampleFov = FovConfig()
+
     ) : BaseExportConfig(deviceName, exportPoses, exportTimestamps),
         collapseElevation_(collapseElevation),
         collapseElevationMinZ_(collapseElevationMinZ),
@@ -162,10 +168,10 @@ public:
         removeIntensityDim_(removeIntensityDim),
         cloudFov_(cloudFov),
         exportMap_(exportMap),
-        mapOccupancyThresholdPercent_(mapOccupancyThresholdPercent),
-        mapTransform_(mapTransform),
         exportMapSamples_(exportMapSamples),
-        mapSampleOccupancyThresholdPercent_(mapSampleOccupancyThresholdPercent),
+        removeOccupancyDim_(removeOccupancyDim),
+        logOddsToProbability_(logOddsToProbability),
+        occupancyThresholdPercent_(occupancyThresholdPercent),
         allowResample_(allowResample),
         forceResample_(forceResample),
         centerSensor_(std::move(centerSensor)),
@@ -180,10 +186,10 @@ public:
     const bool& removeIntensityDim() const { return removeIntensityDim_; }
     const FovConfig& cloudFov() const { return cloudFov_; }
     const bool& exportMap() const { return exportMap_; }
-    const float& mapOccupancyThresholdPercent() const { return mapOccupancyThresholdPercent_; }
-    const Eigen::Affine3f& mapTransform() const { return mapTransform_; }
     const bool& exportMapSamples() const { return exportMapSamples_; }
-    const float& mapSampleOccupancyThresholdPercent() const { return mapSampleOccupancyThresholdPercent_; }
+    const bool& removeOccupancyDim() const { return removeOccupancyDim_; }
+    const bool& logOddsToProbability() const { return logOddsToProbability_; }
+    const float& occupancyThresholdPercent() const { return occupancyThresholdPercent_; }
     const bool& allowResample() const { return allowResample_; }
     const bool& forceResample() const { return forceResample_; }
     const BaseDevice* centerSensor() const { return centerSensor_.get(); }

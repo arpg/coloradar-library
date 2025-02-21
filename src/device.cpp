@@ -44,17 +44,14 @@ void LidarExportConfig::validate() {
             throw std::runtime_error("Error in configuring " + deviceName_ + ".cloud_fov: 'vertical_fov_degrees_total' must be a float between 0 and 180.");
         }
     }
-    if (exportMap_) {
-        if (mapOccupancyThresholdPercent_ < 0 || mapOccupancyThresholdPercent_ > 100) {
+    if (exportMap_ || exportMapSamples_) {
+        if (occupancyThresholdPercent_ < 0 || occupancyThresholdPercent_ > 100) {
             throw std::runtime_error("Error in configuring " + deviceName_ + ": 'map_occupancy_threshold_percent' must be a float between 0 and 100.");
         }
     }
     if (exportMapSamples_) {
         if (!centerSensor_) {
             throw std::runtime_error("Error in configuring " + deviceName_ + ": center sensor cannot be set empty.");
-        }
-        if (mapSampleOccupancyThresholdPercent_ < 0 || mapSampleOccupancyThresholdPercent_ > 100) {
-            throw std::runtime_error("Error in configuring " + deviceName_ + ": 'map_sample_occupancy_threshold_percent' must be a float between 0 and 100.");
         }
         if (forceResample_ && !allowResample_) {
             throw std::runtime_error("Error in configuring " + deviceName_ + ": cannot have 'force_resample' set to True when 'allow_resample' is set to False.");

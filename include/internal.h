@@ -7,6 +7,9 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <unordered_map>
+#include <tuple>
+#include <functional>
 #include <sstream>
 #include <fstream>
 #include <regex>
@@ -51,6 +54,6 @@ namespace coloradar::internal {
     Eigen::Vector3f sphericalToCartesian(const double& az, const double& el, const double& range);
 }
 
-#include "internal.hpp"
+#include "hpp/internal.hpp"
 
 #endif

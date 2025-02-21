@@ -46,7 +46,7 @@ else()
     add_compile_options(-fconcepts)
 endif()
 
-cmake_policy(SET CMP0144 NEW)
+# cmake_policy(SET CMP0144 NEW)
 
 # System Paths (macOS & Linux)
 if(APPLE)
@@ -72,6 +72,7 @@ message(STATUS "Using Python: ${Python_EXECUTABLE} (${Python_VERSION})")
 
 
 find_package(Boost 1.78 REQUIRED COMPONENTS system filesystem thread)
+find_package(Threads REQUIRED)
 find_package(MPI REQUIRED)
 find_package(VTK REQUIRED)
 find_package(PCL 1.12 REQUIRED)
@@ -104,25 +105,25 @@ if(APPLE)
     endif()
 endif()
 
-
 set(CUDA_LIBS ${CUDA_LIBRARIES} ${CUDA_CUFFT_LIBRARIES})
-include_directories(${PROJECT_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS} ${YAML_CPP_INCLUDE_DIRS} ${PCL_INCLUDE_DIRS} ${OCTOMAP_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS} ${HDF5_INCLUDE_DIRS} ${JSONCPP_INCLUDE_DIRS})
 
 
 ### LIB
 
+include_directories(${PROJECT_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS} ${YAML_CPP_INCLUDE_DIRS} ${PCL_INCLUDE_DIRS} ${OCTOMAP_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS} ${HDF5_INCLUDE_DIRS} ${JSONCPP_INCLUDE_DIRS})
+
 add_library(coloradar_lib SHARED
     src/internal.cpp
+    src/utils/pcl_functions.cpp
+    src/utils/octo_pointcloud.cpp
+
     src/radar_configs.cpp
     src/device.cpp
-    src/dataset_configs.cpp
-    src/pcl_functions.cpp
-    src/octo_pointcloud.cpp
+    # src/dataset_configs.cpp
     src/coloradar_run.cpp
     src/dataset.cpp
 )
-target_link_libraries(coloradar_lib ${YAML_CPP_LIBRARIES} ${PCL_LIBRARIES} ${OCTOMAP_LIBRARIES} ${HDF5_LIBRARIES} ${JSONCPP_LIBRARIES})
-
+target_link_libraries(coloradar_lib Threads::Threads ${YAML_CPP_LIBRARIES} ${PCL_LIBRARIES} ${OCTOMAP_LIBRARIES} ${HDF5_LIBRARIES} ${JSONCPP_LIBRARIES})
 
 if(pybind11_FOUND)
     message(STATUS "Pybind11 found, compiling Python bindings.")
@@ -138,8 +139,8 @@ if(CUDA_FOUND)
     set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -std=c++20")
 
     cuda_add_library(coloradar_cuda SHARED
-        src/cuda_kernels.cu
-        src/radar_processing.cu
+        src/cuda/kernels.cu
+        src/cuda/radar_processing.cu
     )
     target_link_libraries(coloradar_cuda coloradar_lib ${CUDA_LIBS})
     include_directories(${CUDA_INCLUDE_DIRS})

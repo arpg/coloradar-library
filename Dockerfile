@@ -7,6 +7,12 @@ ENV CUDA_ENV=${CUDA_ENV}
 SHELL ["/bin/bash", "-c"]
 WORKDIR /tmp
 
+# Lib versions
+ARG DOCKER_GCC_VERSION=""
+ARG DOCKER_BOOST_VERSION=""
+ARG DOCKER_PCL_VERSION=""
+ARG DOCKER_PYBIND_VERSION=""
+
 
 # Base image check
 RUN set -eux; \
@@ -57,7 +63,6 @@ RUN apt update && apt install --no-install-recommends -y \
 
 
 # GCC
-ARG DOCKER_GCC_VERSION=""
 RUN if [ -n "$DOCKER_GCC_VERSION" ]; then \
         add-apt-repository -y ppa:ubuntu-toolchain-r/test && \
         apt update && \
@@ -69,7 +74,6 @@ RUN gcc --version && g++ --version && cmake --version
 
 
 # BOOST
-ARG DOCKER_BOOST_VERSION=""
 RUN if [ -n "$DOCKER_BOOST_VERSION" ]; then \
         CONVERTED_VERSION=${DOCKER_BOOST_VERSION//./_} && \
         wget https://sourceforge.net/projects/boost/files/boost/${DOCKER_BOOST_VERSION}/boost_${CONVERTED_VERSION}.tar.gz/download -O boost_${CONVERTED_VERSION}.tar.gz && \
@@ -83,7 +87,6 @@ RUN if [ -n "$DOCKER_BOOST_VERSION" ]; then \
 
 
 # PCL
-ARG DOCKER_PCL_VERSION=""
 RUN if [ -n "$DOCKER_PCL_VERSION" ]; then \
         wget https://github.com/PointCloudLibrary/pcl/archive/refs/tags/pcl-${DOCKER_PCL_VERSION}.tar.gz -O pcl-${DOCKER_PCL_VERSION}.tar.gz && \
         tar xzf pcl-${DOCKER_PCL_VERSION}.tar.gz && \
@@ -91,7 +94,7 @@ RUN if [ -n "$DOCKER_PCL_VERSION" ]; then \
         mkdir build && \
         cd build && \
         cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local -DBUILD_SHARED_LIBS=ON -DBUILD_apps=OFF -DBUILD_examples=OFF .. && \
-        make -j$(nproc) && \
+        make -j2 && \
         make install; \
     else \
         apt install -y libpcl-dev; \
@@ -99,7 +102,6 @@ RUN if [ -n "$DOCKER_PCL_VERSION" ]; then \
 
 
 # Pybind11
-ARG DOCKER_PYBIND_VERSION=""
 RUN if [ -n "$DOCKER_PYBIND_VERSION" ]; then \
         wget https://github.com/pybind/pybind11/archive/refs/tags/v${DOCKER_PYBIND_VERSION}.tar.gz -O pybind11.tar.gz && \
         tar xzf pybind11.tar.gz && \

@@ -65,23 +65,19 @@ devices:
       vertical_fov_degrees_total: 180
       range_meters: 10
 
-    # - global  map
+    # - global octomap and ego-centric map samples
     export_map: True
-    # filter by occupancy probability
-    map_occupancy_threshold_percent: 0
-    transform_map:
-      apply: False
-      displacement_xyz_meters: 0 0 0
-      rotation_xyzw_quat: 0 0 0 1
-
-    # - ego-centric map samples
     export_map_samples: True
+    # save spatial coordinates without occupancy values
+    remove_occupancy_dim: False
+    # return occupancy values as [0; 1] instead of (-inf; inf)
+    convert_log_odds_to_probability: False
     # filter by occupancy probability
-    map_sample_occupancy_threshold_percent: 0
+    occupancy_threshold_percent: 0
     # False to fail if samples don't exist on disk
     allow_resample: True
     # True to always rewrite existing samples, False to fetch samples from disk if they exist
-    force_resample: False
+    force_resample: True
     # sampling perspective options: base, lidar, cascade
     center_sensor: cascade_radar
     map_sample_fov:

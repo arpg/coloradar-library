@@ -12,8 +12,6 @@ void coloradar::octreeToPcl(const octomap::OcTree& tree, CloudT<PointT>& cloud) 
         point.y = coords.y();
         point.z = coords.z();
         point.intensity = it->getLogOdds();
-        // if (std::fmod(point.x, 0.25) != 0 || std::fmod(point.y, 0.25) != 0 || std::fmod(point.z, 0.25) != 0)
-        //    std::cout << "Warning: Non-centered voxel detected: " << point.x << ", " << point.y << ", " << point.z << std::endl;
         cloud.push_back(point);
     }
 }
@@ -46,7 +44,6 @@ struct PointKeyHash {
     }
 };
 
-    // std::cout << "collapsing cloud elevation, maxIntensityMap.size() " << maxIntensityMap.size() << ", cloud.size() " << cloud.size() << std::endl;
 
 template <coloradar::Pcl4dPointType PointT, template <typename> class CloudT>
 void coloradar::collapseElevation(CloudT<PointT>& cloud, const float& elevationMinMeters, const float& elevationMaxMeters) {
@@ -56,16 +53,13 @@ void coloradar::collapseElevation(CloudT<PointT>& cloud, const float& elevationM
     std::unordered_map<PointKey, PointT, PointKeyHash> maxIntensityMap;
     maxIntensityMap.reserve(cloud.size());
     for (const auto& point : cloud) {
-        // std::cout << "collapsing cloud elevation, checking key " << point.x << " " << point.y << std::endl;
         if (point.z >= elevationMinMeters && point.z <= elevationMaxMeters) {
             PointKey key(point.x, point.y, precision);
             auto iter = maxIntensityMap.find(key);
             if (iter == maxIntensityMap.end() || point.intensity > iter->second.intensity) {
-                // std::cout << "adding key " << key.x << " " << key.y << std::endl;
                 maxIntensityMap[key] = point;
             }
         }
-        // break;
     }
     cloud.clear();
     cloud.reserve(maxIntensityMap.size());
@@ -94,6 +88,26 @@ void coloradar::collapseElevation(CloudT<PointT>& cloud) {
         collapsedPoint.z = 0.0f;
         cloud.push_back(collapsedPoint);
     }
+}
+
+template <coloradar::Pcl4dPointType PointT, template <typename> class CloudT>
+void coloradar::filterOccupancy(CloudT<PointT>& cloud, const float& probabilityThreshold, const bool& saveProbabilities) {
+    if (probabilityThreshold < 0.0f || probabilityThreshold > 1.0f) {
+        throw std::out_of_range("Invalid probability threshold: expected value from 0 to 1, got " + std::to_string(probabilityThreshold));
+    }
+    if (probabilityThreshold == 0.0f && !saveProbabilities) return;
+
+    CloudT<PointT> filteredCloud;
+    filteredCloud.reserve(cloud.size());
+    for (const auto& point : cloud) {
+        float probability = 1.0f / (1.0f + std::exp(-point.intensity));
+        if (probability >= probabilityThreshold) {
+            PointT newPoint = point;
+            if (saveProbabilities) newPoint.intensity = probability;
+            filteredCloud.push_back(newPoint);
+        }
+    }
+    cloud.swap(filteredCloud);
 }
 
 

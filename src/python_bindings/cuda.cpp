@@ -2,7 +2,7 @@
 #include <pybind11/numpy.h>
 #include <pybind11/stl.h>
 #include <cstring>
-#include "coloradar_cuda.h"
+#include "cuda/coloradar_cuda.h"
 
 namespace py = pybind11;
 
