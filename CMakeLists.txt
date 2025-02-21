@@ -6,6 +6,9 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Compiler
+add_compile_options(-include cmath)
+add_definitions(-D__STRICT_ANSI__)
+add_definitions(-DNDEBUG)
 if(APPLE)
     find_program(CLANG_COMPILER 
         NAMES clang clang-16 clang-15 clang-14
@@ -27,6 +30,7 @@ if(APPLE)
 
     add_definitions(-DWITH_SSE=OFF)
 else()
+    add_compile_options(-include cassert)
     find_program(GCC_COMPILER 
         NAMES gcc-12 gcc-11 gcc-10 
         PATHS /usr/bin /usr/local/bin /opt/homebrew/bin
@@ -99,13 +103,37 @@ if(APPLE)
         message(FATAL_ERROR "yaml-cpp not found! Install it via Homebrew.")
     endif()
 
-    find_path(JSONCPP_INCLUDE_DIR json/json.h PATHS /opt/homebrew/include /opt/homebrew/Cellar/jsoncpp/1.9.6/include/jsoncpp)
+    find_path(JSONCPP_INCLUDE_DIRS json.h PATHS /opt/homebrew/Cellar/jsoncpp/1.9.6/include/jsoncpp/json)
     find_library(JSONCPP_LIBRARIES NAMES jsoncpp PATHS /opt/homebrew/lib /opt/homebrew/Cellar/jsoncpp/1.9.6/lib)
-    if (JSONCPP_INCLUDE_DIR AND JSONCPP_LIBRARIES)
+    if (JSONCPP_INCLUDE_DIRS AND JSONCPP_LIBRARIES)
         message(STATUS "Found jsoncpp: ${JSONCPP_LIBRARIES}")
     else()
         message(FATAL_ERROR "jsoncpp not found! Install it via Homebrew.")
     endif()
+else()
+    # set(CMAKE_PREFIX_PATH "/usr/include/jsoncpp/json" ${CMAKE_PREFIX_PATH})
+    find_path(JSONCPP_INCLUDE_DIRS json.h
+    PATHS
+        /usr/include
+        /usr/include/jsoncpp/json
+        NO_DEFAULT_PATH
+    )
+    # message(STATUS "JSONCPP_INCLUDE_DIR: ${JSONCPP_INCLUDE_DIR}")
+    # find_path(JSONCPP_ALT_INCLUDE_DIR json.h
+    # PATHS
+    #     /usr/include
+    #     /usr/include/json-c
+    #     /usr/include/jsoncpp
+    #     NO_DEFAULT_PATH
+    # )
+    # message(STATUS "JSONCPP_ALT_INCLUDE_DIR: ${JSONCPP_ALT_INCLUDE_DIR}")
+    # if (JSONCPP_INCLUDE_DIR AND JSONCPP_ALT_INCLUDE_DIR)
+    #     set(JSONCPP_INCLUDE_DIRS ${JSONCPP_INCLUDE_DIR} ${JSONCPP_ALT_INCLUDE_DIR})
+    #     message(STATUS "Found jsoncpp headers: ${JSONCPP_INCLUDE_DIRS}")
+    # else()
+    #     message(FATAL_ERROR "jsoncpp headers not found.")
+    # endif()
+
 endif()
 
 set(CUDA_LIBS ${CUDA_LIBRARIES} ${CUDA_CUFFT_LIBRARIES})
@@ -113,7 +141,7 @@ set(CUDA_LIBS ${CUDA_LIBRARIES} ${CUDA_CUFFT_LIBRARIES})
 
 ### LIB
 
-include_directories(${PROJECT_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS} ${YAML_CPP_INCLUDE_DIRS} ${PCL_INCLUDE_DIRS} ${OCTOMAP_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS} ${HDF5_INCLUDE_DIRS} ${JSONCPP_INCLUDE_DIRS})
+include_directories(${PROJECT_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS} ${YAML_CPP_INCLUDE_DIRS} ${PCL_INCLUDE_DIRS} ${OCTOMAP_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS} ${HDF5_INCLUDE_DIRS} ${JSONCPP_INCLUDE_DIRS} ${JSONCPP_INCLUDE_DIRS}/json)
 
 add_library(coloradar_lib SHARED
     src/internal.cpp

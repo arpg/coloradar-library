@@ -1,7 +1,6 @@
 #include "coloradar_tools.h"
 
 #include <gtest/gtest.h>
-#include <cmath>
 #include <random>
 #include <pcl/io/pcd_io.h>
 #include <yaml-cpp/yaml.h>

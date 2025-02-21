@@ -63,16 +63,6 @@ std::vector<std::string> DatasetExportConfig::parseRuns(const YAML::Node &config
     return validateRuns(runs);
 }
 
-//std::string DatasetExportConfig::parseDeviceName(const YAML::Node &config, const std::string &nestedKey, std::string defaultValue) {
-//    YAML::Node node = findNode(config, nestedKey);
-//    if (!node.IsDefined() || node.IsNull()) {
-//        return defaultValue;
-//    }
-//    std::string deviceName = node.as<std::string>();
-//    validateDeviceName(deviceName);
-//    return deviceName;
-//}
-
 bool DatasetExportConfig::parseBoolKey(const YAML::Node &config, const std::string &nestedKey, bool defaultValue) {
     YAML::Node node = findNode(config, nestedKey);
     if (!node.IsDefined() || node.IsNull()) {
@@ -157,7 +147,6 @@ DatasetExportConfig::DatasetExportConfig(
     singleChipCfg_(singleChipCfg) {}
 
 
-
 DatasetExportConfig::DatasetExportConfig(const std::string &yamlFilePath) {
     YAML::Node config = YAML::LoadFile(yamlFilePath);
     validateConfigYaml(config);
@@ -165,88 +154,15 @@ DatasetExportConfig::DatasetExportConfig(const std::string &yamlFilePath) {
     runs_ = parseRuns(config);
     exportTransforms_ = parseBoolKey(config, "global.export_transforms", exportTransforms_);
 
-//    cascade_.exportPoses = parseBoolKey(config, "devices.cascade_radar.export_poses", cascade_.exportPoses);
-//    cascade_.exportTimestamps = parseBoolKey(config, "devices.cascade_radar.export_timestamps", cascade_.exportTimestamps);
-//    cascade_.fov.azimuthIdx = parseIntKey(config, "devices.cascade_radar.fov_azimuth_idx", cascade_.fov.azimuthIdx);
-//    cascade_.fov.elevationIdx = parseIntKey(config, "devices.cascade_radar.fov_elevation_idx", cascade_.fov.elevationIdx);
-//    cascade_.fov.horizontalDegreesTotal = parseFloatKey(config, "devices.cascade_radar.horizontal_fov_degrees_total", cascade_.fov.horizontalDegreesTotal);
-//    cascade_.fov.verticalDegreesTotal = parseFloatKey(config, "devices.cascade_radar.vertical_fov_degrees_total", cascade_.fov.verticalDegreesTotal);
-//    cascade_.fov.rangeMeters = parseFloatKey(config, "devices.cascade_radar.range_meters", cascade_.fov.rangeMeters);
-//    cascade_.collapseElevation = parseBoolKey(config, "devices.cascade_radar.collapse_elevation", cascade_.collapseElevation);
-//    cascade_.collapseElevationMinZ = parseFloatKey(config, "devices.cascade_radar.collapse_elevation_min_z_meters", cascade_.collapseElevationMinZ);
-//    cascade_.collapseElevationMaxZ = parseFloatKey(config, "devices.cascade_radar.collapse_elevation_max_z_meters", cascade_.collapseElevationMaxZ);
-//    cascade_.removeDopplerDim = parseBoolKey(config, "devices.cascade_radar.remove_doppler_dim", cascade_.removeDopplerDim);
-//    cascade_.exportDatacubes = parseBoolKey(config, "devices.cascade_radar.export_datacubes", cascade_.exportDatacubes);
-//    cascade_.exportHeatmaps = parseBoolKey(config, "devices.cascade_radar.export_heatmaps", cascade_.exportHeatmaps);
-//    cascade_.exportClouds = parseBoolKey(config, "devices.cascade_radar.export_clouds", cascade_.exportClouds);
-//    cascade_.intensityThresholdPercent = parseFloatKey(config, "devices.cascade_radar.intensity_threshold_percent", cascade_.intensityThresholdPercent);
-//    cascade_.cloudsInGlobalFrame = parseBoolKey(config, "devices.cascade_radar.clouds_in_global_frame", cascade_.cloudsInGlobalFrame);
-//
-//    lidar_.exportPoses = parseBoolKey(config, "devices.lidar.export_poses", lidar_.exportPoses);
-//    lidar_.exportTimestamps = parseBoolKey(config, "devices.lidar.export_timestamps", lidar_.exportTimestamps);
-//    lidar_.collapseElevation = parseBoolKey(config, "devices.lidar.collapse_elevation", lidar_.collapseElevation);
-//    lidar_.collapseElevationMinZ = parseFloatKey(config, "devices.lidar.collapse_elevation_min_z_meters", lidar_.collapseElevationMinZ);
-//    lidar_.collapseElevationMaxZ = parseFloatKey(config, "devices.lidar.collapse_elevation_max_z_meters", lidar_.collapseElevationMaxZ);
-//    lidar_.exportClouds = parseBoolKey(config, "devices.lidar.export_clouds", lidar_.exportClouds);
-//    lidar_.removeIntensityDim = parseBoolKey(config, "devices.lidar.remove_intensity_dim", lidar_.removeIntensityDim);
-//    lidar_.cloudFov.horizontalDegreesTotal = parseFloatKey(config, "devices.lidar.cloud_fov.horizontal_fov_degrees_total", lidar_.cloudFov.horizontalDegreesTotal);
-//    lidar_.cloudFov.verticalDegreesTotal = parseFloatKey(config, "devices.lidar.cloud_fov.vertical_fov_degrees_total", lidar_.cloudFov.verticalDegreesTotal);
-//    lidar_.cloudFov.rangeMeters = parseFloatKey(config, "devices.lidar.cloud_fov.range_meters", lidar_.cloudFov.rangeMeters);
-//    lidar_.exportMap = parseBoolKey(config, "devices.lidar.export_map", lidar_.exportMap);
-//    lidar_.mapOccupancyThresholdPercent = parseFloatKey(config, "devices.lidar.map_occupancy_threshold_percent", lidar_.mapOccupancyThresholdPercent);
-//    lidar_.exportMapSamples = parseBoolKey(config, "devices.lidar.export_map_samples", lidar_.exportMapSamples);
-//    lidar_.mapSampleOccupancyThresholdPercent = parseFloatKey(config, "devices.lidar.map_sample_occupancy_threshold_percent", lidar_.mapSampleOccupancyThresholdPercent);
-//    lidar_.allowResample = parseBoolKey(config, "devices.lidar.allow_resample", lidar_.allowResample);
-//    lidar_.forceResample = parseBoolKey(config, "devices.lidar.force_resample", lidar_.forceResample);
-//    lidar_.centerSensor = parseDeviceName(config, "devices.lidar.center_sensor", lidar_.centerSensor);
-//    lidar_.mapSampleFov.horizontalDegreesTotal = parseFloatKey(config, "devices.lidar.map_sample_fov.horizontal_fov_degrees_total", lidar_.mapSampleFov.horizontalDegreesTotal);
-//    lidar_.mapSampleFov.verticalDegreesTotal = parseFloatKey(config, "devices.lidar.map_sample_fov.vertical_fov_degrees_total", lidar_.mapSampleFov.verticalDegreesTotal);
-//    lidar_.mapSampleFov.rangeMeters = parseFloatKey(config, "devices.lidar.map_sample_fov.range_meters", lidar_.mapSampleFov.rangeMeters);
-//
-//    base_.exportPoses = parseBoolKey(config, "devices.base_frame.export_poses", base_.exportPoses);
-//    base_.exportTimestamps = parseBoolKey(config, "devices.base_frame.export_timestamps", base_.exportTimestamps);
-//
-//    imu_.exportData = parseBoolKey(config, "devices.imu.export_data", imu_.exportData);
-//    imu_.exportPoses = parseBoolKey(config, "devices.imu.export_poses", imu_.exportPoses);
-//    imu_.exportTimestamps = parseBoolKey(config, "devices.imu.export_timestamps", imu_.exportTimestamps);
-//
-//    singleChip_.exportPoses = parseBoolKey(config, "devices.single_chip_radar.export_poses", singleChip_.exportPoses);
-//    singleChip_.exportTimestamps = parseBoolKey(config, "devices.single_chip_radar.export_timestamps", singleChip_.exportTimestamps);
-//    singleChip_.fov.azimuthIdx = parseIntKey(config, "devices.single_chip_radar.fov_azimuth_idx", singleChip_.fov.azimuthIdx);
-//    singleChip_.fov.elevationIdx = parseIntKey(config, "devices.single_chip_radar.fov_elevation_idx", singleChip_.fov.elevationIdx);
-//    singleChip_.fov.rangeMeters = parseFloatKey(config, "devices.single_chip_radar.fov_range_meters", singleChip_.fov.rangeMeters);
-//    singleChip_.collapseElevation = parseBoolKey(config, "devices.single_chip_radar.collapse_elevation", singleChip_.collapseElevation);
-//    singleChip_.collapseElevationMinZ = parseFloatKey(config, "devices.single_chip_radar.collapse_elevation_min_z_meters", singleChip_.collapseElevationMinZ);
-//    singleChip_.collapseElevationMaxZ = parseFloatKey(config, "devices.single_chip_radar.collapse_elevation_max_z_meters", singleChip_.collapseElevationMaxZ);
-//    singleChip_.removeDopplerDim = parseBoolKey(config, "devices.single_chip_radar.remove_doppler_dim", singleChip_.removeDopplerDim);
-//    singleChip_.exportDatacubes = parseBoolKey(config, "devices.single_chip_radar.export_datacubes", singleChip_.exportDatacubes);
-//    singleChip_.exportHeatmaps = parseBoolKey(config, "devices.single_chip_radar.export_heatmaps", singleChip_.exportHeatmaps);
-//    singleChip_.exportClouds = parseBoolKey(config, "devices.single_chip_radar.export_clouds", singleChip_.exportClouds);
-//    singleChip_.intensityThresholdPercent = parseFloatKey(config, "devices.single_chip_radar.intensity_threshold_percent", singleChip_.intensityThresholdPercent);
-//    singleChip_.cloudsInGlobalFrame = parseBoolKey(config, "devices.single_chip_radar.clouds_in_global_frame", singleChip_.cloudsInGlobalFrame);
-}
+    // for (auto* device in {&cascadeCfg_ &baseCfg_, &imuCfg_, &singleChipCfg_}) {
+        //if (lidarCfg_.deviceName() == device->name {
+            
+        //}
+    //     device->loadFromFile(config);
+    // }
 
-//DatasetExportConfig::DatasetExportConfig(
-//    const std::filesystem::path &destinationFilePath,
-//    const std::vector<std::string> &runs,
-//    bool exportTransforms,
-//    const RadarExportConfig &cascade,
-//    const LidarExportConfig &lidar,
-//    const BaseExportConfig &base,
-//    const ImuExportConfig &imu,
-//    const RadarExportConfig &singleChip
-//)
-//    : destinationFilePath_(validateDestination(destinationFilePath)),
-//      runs_(validateRuns(runs)),
-//      exportTransforms_(exportTransforms),
-//      cascade_(cascade),
-//      lidar_(lidar),
-//      base_(base),
-//      imu_(imu),
-//      singleChip_(singleChip)
-//{
-//    validateDeviceName(lidar_.centerSensor);
-//}
+    // set lidar center device
+}
 
 const std::filesystem::path &DatasetExportConfig::destinationFilePath() const {
     return destinationFilePath_;

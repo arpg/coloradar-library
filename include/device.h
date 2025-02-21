@@ -6,6 +6,8 @@
 
 namespace coloradar {
 
+bool validateDeviceName(const std::string &deviceName);
+
 // BASE CLASSES
 
 #include <memory>
@@ -28,6 +30,8 @@ public:
 
     const bool& exportPoses() const { return exportPoses_; }
     const bool& exportTimestamps() const { return exportTimestamps_; }
+
+    virtual void loadFromFile(const YAML::Node& deviceNode);
 };
 
 class BaseDevice {
@@ -131,6 +135,8 @@ public:
     const bool& exportClouds() const { return exportClouds_; }
     const float& intensityThresholdPercent() const { return intensityThresholdPercent_; }
     const bool& cloudsInGlobalFrame() const { return cloudsInGlobalFrame_; }
+
+    void loadFromFile(const YAML::Node& deviceNode) override;
 };
 
 class LidarExportConfig : public BaseExportConfig {
@@ -254,6 +260,8 @@ public:
     const bool& forceResample() const { return forceResample_; }
     const BaseDevice* centerSensor() const { return centerSensor_.get(); }
     const FovConfig& mapSampleFov() const { return mapSampleFov_; }
+
+    void loadFromFile(const YAML::Node& deviceNode) override;
 };
 
 class ImuExportConfig : public BaseExportConfig {
@@ -265,6 +273,8 @@ public:
         : BaseExportConfig(deviceName, exportPoses, exportTimestamps), exportData_(exportData) {}
 
     const bool& exportData() const { return exportData_; }
+
+    void loadFromFile(const YAML::Node& deviceNode) override;
 };
 
 

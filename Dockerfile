@@ -46,6 +46,7 @@ RUN apt update && apt install --no-install-recommends -y \
     curl \
     build-essential \
     cmake \
+    libvtk* vtk* \
     libeigen3-dev \
     libflann-dev \
     liboctomap-dev \
@@ -140,7 +141,7 @@ COPY CMakeLists.txt .
 
 RUN mkdir build
 RUN cmake -B build
-RUN make -C build -j$(nproc)
+RUN make -C build
 RUN ./build/coloradar_tests
 
 RUN if [ "$(lsb_release -rs | cut -d. -f1)" -ge 24 ]; then \

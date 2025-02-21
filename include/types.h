@@ -1,6 +1,8 @@
 #ifndef TYPES_H
 #define TYPES_H
 
+#include <cmath>
+#include <Eigen/Core>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 #include <octomap/octomap.h>
