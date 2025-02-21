@@ -57,6 +57,9 @@ public:
     const Eigen::Affine3f& cascadeTransform() const;
     const RadarConfig* cascadeConfig() const;
 
+    std::filesystem::path exportToFile(const DatasetExportConfig &exportConfig);
+    std::filesystem::path exportToFile(const std::string &yamlConfigPath);
+
 //    std::filesystem::path exportToFile(
 //        std::vector<ColoradarPlusRun*> runs = {},
 //        std::filesystem::path destination = "",

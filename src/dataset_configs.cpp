@@ -138,6 +138,25 @@ std::vector<std::string> DatasetExportConfig::validateRuns(const std::vector<std
     return runs;
 }
 
+DatasetExportConfig::DatasetExportConfig(
+    const std::filesystem::path &destinationFilePath,
+    const std::vector<std::string> &runs,
+    bool exportTransforms,
+    const RadarExportConfig &cascadeCfg,
+    const LidarExportConfig &lidarCfg,
+    const BaseExportConfig &baseCfg,
+    const ImuExportConfig &imuCfg,
+    const RadarExportConfig &singleChipCfg
+) : destinationFilePath_(validateDestination(destinationFilePath)),
+    runs_(validateRuns(runs)),
+    exportTransforms_(exportTransforms),
+    cascadeCfg_(cascadeCfg),
+    lidarCfg_(lidarCfg),
+    baseCfg_(baseCfg),
+    imuCfg_(imuCfg),
+    singleChipCfg_(singleChipCfg) {}
+
+
 
 DatasetExportConfig::DatasetExportConfig(const std::string &yamlFilePath) {
     YAML::Node config = YAML::LoadFile(yamlFilePath);

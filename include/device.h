@@ -8,6 +8,9 @@ namespace coloradar {
 
 // BASE CLASSES
 
+#include <memory>
+#include <string>
+
 class BaseExportConfig {
 protected:
     std::string deviceName_;
@@ -20,6 +23,9 @@ public:
         : deviceName_(deviceName), exportPoses_(exportPoses), exportTimestamps_(exportTimestamps) {
         validate();
     }
+    BaseExportConfig(const BaseExportConfig& other) = default;
+    BaseExportConfig& operator=(const BaseExportConfig& other) = default;
+
     const bool& exportPoses() const { return exportPoses_; }
     const bool& exportTimestamps() const { return exportTimestamps_; }
 };
@@ -27,10 +33,21 @@ public:
 class BaseDevice {
 protected:
     std::unique_ptr<BaseExportConfig> exportConfig_;
-
 public:
     static inline const std::string name = "base";
-    BaseDevice(std::unique_ptr<BaseExportConfig> exportConfig = std::make_unique<BaseExportConfig>()): exportConfig_(std::move(exportConfig)) {}
+
+    BaseDevice(std::unique_ptr<BaseExportConfig> exportConfig = std::make_unique<BaseExportConfig>())
+        : exportConfig_(std::move(exportConfig)) {}
+        
+    BaseDevice(const BaseDevice& other)
+        : exportConfig_(other.exportConfig_ ? std::make_unique<BaseExportConfig>(*other.exportConfig_) : nullptr) {}
+
+    BaseDevice& operator=(const BaseDevice& other) {
+        if (this != &other) {
+            exportConfig_ = other.exportConfig_ ? std::make_unique<BaseExportConfig>(*other.exportConfig_) : nullptr;
+        }
+        return *this;
+    }
 
     virtual const BaseExportConfig* exportConfig() const { return exportConfig_.get(); }
 
@@ -101,6 +118,8 @@ public:
         cloudsInGlobalFrame_(cloudsInGlobalFrame) {
         validate();
     }
+    RadarExportConfig(const RadarExportConfig& other) = default;
+    RadarExportConfig& operator=(const RadarExportConfig& other) = default;
 
     const bool& collapseElevation() const { return collapseElevation_; }
     const float& collapseElevationMinZ() const { return collapseElevationMinZ_; }
@@ -178,6 +197,47 @@ public:
         mapSampleFov_(mapSampleFov) {
         validate();
     }
+    // Copy
+    LidarExportConfig(const LidarExportConfig& other) 
+    : BaseExportConfig(other),
+      collapseElevation_(other.collapseElevation_),
+      collapseElevationMinZ_(other.collapseElevationMinZ_),
+      collapseElevationMaxZ_(other.collapseElevationMaxZ_),
+      exportClouds_(other.exportClouds_),
+      removeIntensityDim_(other.removeIntensityDim_),
+      cloudFov_(other.cloudFov_),
+      exportMap_(other.exportMap_),
+      exportMapSamples_(other.exportMapSamples_),
+      removeOccupancyDim_(other.removeOccupancyDim_),
+      logOddsToProbability_(other.logOddsToProbability_),
+      occupancyThresholdPercent_(other.occupancyThresholdPercent_),
+      allowResample_(other.allowResample_),
+      forceResample_(other.forceResample_),
+      centerSensor_(other.centerSensor_ ? std::make_unique<BaseDevice>(*other.centerSensor_) : nullptr),
+      mapSampleFov_(other.mapSampleFov_) {}
+
+    // Assignment
+    LidarExportConfig& operator=(const LidarExportConfig& other) {
+        if (this != &other) {
+            BaseExportConfig::operator=(other);
+            collapseElevation_ = other.collapseElevation_;
+            collapseElevationMinZ_ = other.collapseElevationMinZ_;
+            collapseElevationMaxZ_ = other.collapseElevationMaxZ_;
+            exportClouds_ = other.exportClouds_;
+            removeIntensityDim_ = other.removeIntensityDim_;
+            cloudFov_ = other.cloudFov_;
+            exportMap_ = other.exportMap_;
+            exportMapSamples_ = other.exportMapSamples_;
+            removeOccupancyDim_ = other.removeOccupancyDim_;
+            logOddsToProbability_ = other.logOddsToProbability_;
+            occupancyThresholdPercent_ = other.occupancyThresholdPercent_;
+            allowResample_ = other.allowResample_;
+            forceResample_ = other.forceResample_;
+            centerSensor_ = other.centerSensor_ ? std::make_unique<BaseDevice>(*other.centerSensor_) : nullptr;
+            mapSampleFov_ = other.mapSampleFov_;
+        }
+        return *this;
+    }
 
     const bool& collapseElevation() const { return collapseElevation_; }
     const float& collapseElevationMinZ() const { return collapseElevationMinZ_; }
@@ -213,13 +273,55 @@ public:
 class RadarDevice : public BaseDevice {
 protected:
     std::unique_ptr<RadarExportConfig> exportConfig_;
+
 public:
     static inline const std::string name = "radar";
-    RadarDevice(std::unique_ptr<RadarExportConfig> exportConfig = std::make_unique<RadarExportConfig>()): exportConfig_(std::move(exportConfig)) {}
+
+    RadarDevice(std::unique_ptr<RadarExportConfig> exportConfig = std::make_unique<RadarExportConfig>())
+        : exportConfig_(std::move(exportConfig)) {}
+
+    RadarDevice(const RadarDevice& other)
+        : BaseDevice(other),
+            exportConfig_(other.exportConfig_ ? std::make_unique<RadarExportConfig>(*other.exportConfig_) : nullptr) {}
+
+    RadarDevice& operator=(const RadarDevice& other) {
+        if (this != &other) {
+            BaseDevice::operator=(other);
+            exportConfig_ = other.exportConfig_ ? std::make_unique<RadarExportConfig>(*other.exportConfig_) : nullptr;
+        }
+        return *this;
+    }
 
     const RadarExportConfig* exportConfig() const override { return exportConfig_.get(); }
     virtual ~RadarDevice() = default;
 };
+    
+class LidarDevice : public BaseDevice {
+protected:
+    std::unique_ptr<LidarExportConfig> exportConfig_;
+
+public:
+    static inline const std::string name = "lidar";
+
+    LidarDevice(std::unique_ptr<LidarExportConfig> exportConfig = std::make_unique<LidarExportConfig>())
+        : exportConfig_(std::move(exportConfig)) {}
+
+    LidarDevice(const LidarDevice& other)
+        : BaseDevice(other),
+            exportConfig_(other.exportConfig_ ? std::make_unique<LidarExportConfig>(*other.exportConfig_) : nullptr) {}
+
+    LidarDevice& operator=(const LidarDevice& other) {
+        if (this != &other) {
+            BaseDevice::operator=(other);
+            exportConfig_ = other.exportConfig_ ? std::make_unique<LidarExportConfig>(*other.exportConfig_) : nullptr;
+        }
+        return *this;
+    }
+
+    const LidarExportConfig* exportConfig() const override { return exportConfig_.get(); }
+    virtual ~LidarDevice() = default;
+};
+    
 
 
 class SingleChipDevice : public RadarDevice {
@@ -233,18 +335,6 @@ class CascadeDevice : public RadarDevice {
 public:
     static inline const std::string name = "cascade_radar";
     CascadeDevice(std::unique_ptr<RadarExportConfig> exportConfig = std::make_unique<RadarExportConfig>()) : RadarDevice(std::move(exportConfig)) {}
-};
-
-
-class LidarDevice : public BaseDevice {
-protected:
-    std::unique_ptr<LidarExportConfig> exportConfig_;
-public:
-    static inline const std::string name = "lidar";
-    LidarDevice(std::unique_ptr<LidarExportConfig> exportConfig = std::make_unique<LidarExportConfig>()): exportConfig_(std::move(exportConfig)) {}
-
-    const LidarExportConfig* exportConfig() const override { return exportConfig_.get(); }
-    virtual ~LidarDevice() = default;
 };
 
 

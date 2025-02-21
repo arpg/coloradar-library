@@ -462,6 +462,14 @@ void ColoradarPlusDataset::exportLidar(const std::vector<ColoradarPlusRun*> &run
     }
 }
 
+std::filesystem::path ColoradarPlusDataset::exportToFile(const DatasetExportConfig &exportConfig) {
+    return exportConfig.destinationFilePath();
+}
+std::filesystem::path ColoradarPlusDataset::exportToFile(const std::string &yamlConfigPath) {
+    DatasetExportConfig exportConfig = DatasetExportConfig(yamlConfigPath);
+    return exportToFile(exportConfig);
+}
+
 }
 
 

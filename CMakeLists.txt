@@ -24,6 +24,8 @@ if(APPLE)
     set(CMAKE_CXX_COMPILER ${CLANGXX_COMPILER} CACHE PATH "C++ compiler" FORCE)
     message(STATUS "Using Clang compiler: ${CLANG_COMPILER}")
     message(STATUS "Using Clang++ compiler: ${CLANGXX_COMPILER}")
+
+    add_definitions(-DWITH_SSE=OFF)
 else()
     find_program(GCC_COMPILER 
         NAMES gcc-12 gcc-11 gcc-10 
@@ -120,7 +122,8 @@ add_library(coloradar_lib SHARED
 
     src/radar_configs.cpp
     src/device.cpp
-    # src/dataset_configs.cpp
+    
+    src/dataset_configs.cpp
     src/coloradar_run.cpp
     src/dataset.cpp
 )

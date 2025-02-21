@@ -93,7 +93,18 @@ RUN if [ -n "$DOCKER_PCL_VERSION" ]; then \
         cd pcl-pcl-${DOCKER_PCL_VERSION} && \
         mkdir build && \
         cd build && \
-        cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local -DBUILD_SHARED_LIBS=ON -DBUILD_apps=OFF -DBUILD_examples=OFF .. && \
+        if [ "$(uname -m)" != "x86_64" ]; then \
+            SSE_FLAG="-DWITH_SSE=OFF -DWITH_SSE2=OFF -DWITH_SSE3=OFF -DWITH_SSE4_1=OFF -DWITH_SSE4_2=OFF -DWITH_SSSE3=OFF -DWITH_AVX=OFF -DWITH_AVX2=OFF"; \
+        else \
+            SSE_FLAG=""; \
+        fi && \
+        cmake -DCMAKE_BUILD_TYPE=Release \
+              -DCMAKE_INSTALL_PREFIX=/usr/local \
+              -DBUILD_SHARED_LIBS=ON \
+              -DBUILD_apps=OFF \
+              -DBUILD_examples=OFF \
+              -DCMAKE_CXX_FLAGS="-march=native -U__SSE2__ -U__SSE3__ -U__SSE4_1__ -U__SSE4_2__" \
+              ${SSE_FLAG} .. && \
         make -j2 && \
         make install; \
     else \

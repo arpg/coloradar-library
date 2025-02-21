@@ -12,11 +12,11 @@ protected:
     std::vector<std::string> runs_ = {};
     bool exportTransforms_ = false;
 
-//    RadarExportConfig        cascade_;
-//    LidarExportConfig        lidar_;
-//    BaseExportConfig         base_;
-//    ImuExportConfig          imu_;
-//    RadarExportConfig        singleChip_;
+    RadarExportConfig        cascadeCfg_;
+    LidarExportConfig        lidarCfg_;
+    ImuExportConfig          imuCfg_;
+    BaseExportConfig         baseCfg_;
+    RadarExportConfig        singleChipCfg_;
 
     YAML::Node findNode(const YAML::Node &config, const std::string &key);
     void validateConfigYaml(const YAML::Node &config);
@@ -33,29 +33,29 @@ protected:
 public:
     DatasetExportConfig(const std::string &yamlFilePath);
 
-//    DatasetExportConfig(
-//        const std::filesystem::path &destinationFilePath = "dataset.h5",
-//        const std::vector<std::string> &runs = {},
-//        bool exportTransforms = false,
-//        const RadarExportConfig &cascade = RadarExportConfig(),
-//        const LidarExportConfig &lidar = LidarExportConfig(),
-//        const BaseExportConfig &base = BaseExportConfig(),
-//        const ImuExportConfig &imu = ImuExportConfig(),
-//        const RadarExportConfig &singleChip = RadarExportConfig()
-//    );
+    DatasetExportConfig(
+        const std::filesystem::path &destinationFilePath = "dataset.h5",
+        const std::vector<std::string> &runs = {},
+        bool exportTransforms = false,
+        const RadarExportConfig &cascadeCfg = RadarExportConfig(),
+        const LidarExportConfig &lidarCfg = LidarExportConfig(),
+        const BaseExportConfig &baseCfg = BaseExportConfig(),
+        const ImuExportConfig &imuCfg = ImuExportConfig(),
+        const RadarExportConfig &singleChipCfg = RadarExportConfig()
+    );
 
     const std::filesystem::path &destinationFilePath() const;
     const std::vector<std::string> &runs() const;
     bool exportTransforms() const;
     // const std::set<std::string> devices() const;
 
-//    const RadarExportConfig        &cascade() const;
-//    const LidarExportConfig        &lidar() const;
-//    const BaseExportConfig         &base() const;
-//    const ImuExportConfig          &imu() const;
-//    const RadarExportConfig        &singleChip() const;
+   const RadarExportConfig        &cascade() const { return cascadeCfg_; }
+   const LidarExportConfig        &lidar() const { return lidarCfg_; }
+   const ImuExportConfig          &base() const { return imuCfg_; }
+   const BaseExportConfig         &imu() const { return baseCfg_; }
+   // const RadarExportConfig        &singleChip() const { return ; }
 
-    // void fitParameters(ColoradarPlusDataset* dataset);
+   // std::filesystem::path ColoradarPlusDataset::exportToFile(const DatasetExportConfig &exportConfig);
 
     // void exportConfig(config);
     // void exportCascade(ColoradarPlusDataset* dataset);
