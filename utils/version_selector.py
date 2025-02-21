@@ -4,7 +4,7 @@ import re
 import requests
 import subprocess
 import yaml
-from typing import Optional, Dict
+from typing import Optional, Tuple
 
 
 NVIDIA_DOCKERHUB_URL = "https://hub.docker.com/v2/repositories/nvidia/cuda/tags"
@@ -24,8 +24,9 @@ class VersionSelector:
         """
         Initializes the VersionSelector with a given ROS version configuration file.
         """
-        self.version_config = self._load_ros_config(version_config_file)
-        self.default_version_settings = self.version_config['jazzy']
+        self.version_config, self.ubuntu_config, self.ros_versions = {}, {}, {}
+        self._load_ros_config(version_config_file)
+        self.default_version_settings = self.ubuntu_config['24.04']
         self.available_ros_distros = ", ".join(str(v) for v in self.version_config.keys())
         self.mac_os = os.uname().sysname == "Darwin"
         self._cuda_tags_cache: Optional[dict] = None 
@@ -63,7 +64,7 @@ class VersionSelector:
             raise ValueError(f"Error: ROS version must be one of the following: {self.available_ros_distros}, not {ros_version}")
         return ros_version
         
-    def _load_ros_config(self, version_config_file: str) -> Dict[Optional[str], Dict]:
+    def _load_ros_config(self, version_config_file: str) -> None:
         """
         Load ROS configuration from a YAML file.
         """
@@ -71,9 +72,14 @@ class VersionSelector:
             raise FileNotFoundError(f"Configuration file not found: {version_config_file}")
         with open(version_config_file, 'r') as file:
             data = yaml.safe_load(file)
-            return {k: v for k, v in data.get('ros_versions', {}).items()}
+        self.ros_versions = data.get('ros_versions', {})
+        self.ubuntu_config = data.get('ubuntu_versions', {})
+        for r, u in self.ros_versions.items():
+            lib_versions = self.ubuntu_config.get(u, {})
+            lib_versions['ubuntu'] = u
+            self.version_config[r] = lib_versions
         
-    def get_base_image(self, cuda_version: Optional[str], ros_version: Optional[str], detect_local_cuda: bool = True) -> str:
+    def get_base_image(self, cuda_version: Optional[str], ros_version: Optional[str], detect_local_cuda: bool = True) -> Tuple[str, str]:
         """
         Determine the base image based on CUDA and ROS versions.
         """
@@ -83,11 +89,18 @@ class VersionSelector:
             if ros_version:
                 tag = f'{cuda_version}-{ros_version}'
                 self.check_roscuda_tag(tag)
-                return f'annazabnus/ros-cuda:{tag}'
-            return f'nvidia/cuda:{self._get_latest_cuda_tag(cuda_version, "-ubuntu")}'
-        if ros_version:
-            return f'ros:{ros_version}' 
-        return f'ubuntu:{self.default_version_settings["ubuntu"]}'
+                base_image = f'annazabnus/ros-cuda:{tag}'
+                ubuntu_version = self.ros_versions[ros_version]
+            else:
+                tag, ubuntu_version = self._get_latest_cuda_tag(cuda_version, "-ubuntu")
+                base_image = f'nvidia/cuda:{tag}'
+        elif ros_version:
+            base_image = f'ros:{ros_version}'
+            ubuntu_version = self.ros_versions[ros_version]
+        else:
+            ubuntu_version = self.default_version_settings["ubuntu"]
+            base_image = f'ubuntu:{ubuntu_version}'
+        return base_image, ubuntu_version
 
     def _image_exists(self, image: str) -> bool:
         """
@@ -100,13 +113,13 @@ class VersionSelector:
         )
         return result.returncode == 0
 
-    def get_lib_version(self, lib_name: str, ros_distro: Optional[str] = None) -> Optional[str]:
-        lib_versions = self.version_config.get(ros_distro, {}) if ros_distro else self.default_version_settings
+    def get_lib_version(self, lib_name: str, ubuntu_version: Optional[str] = None) -> Optional[str]:
+        lib_versions = self.ubuntu_config.get(ubuntu_version, {}) if ubuntu_version else self.default_version_settings
         if not lib_versions:
             return ''
         return lib_versions.get(lib_name, '') or ''
 
-    def _get_latest_cuda_tag(self, cuda_version: str, base_image_postfix: str) -> str:
+    def _get_latest_cuda_tag(self, cuda_version: str, base_image_postfix: str) -> Tuple[str, Optional[str]]:
         """
         Query Docker Hub to find the latest patch version for a given CUDA X.Y version.
         Uses cached results if available.
@@ -124,10 +137,12 @@ class VersionSelector:
                     if patch_version > latest_patch_version:
                         latest_patch = tag
                         latest_patch_version = patch_version
-        if latest_patch:
-            return latest_patch
-        else:
+        if not latest_patch:
             raise ImageNotFoundError(f"No matching CUDA image found for version {cuda_version} containing {base_image_postfix}.")
+        if 'ubuntu' in latest_patch:
+            ubuntu_version = re.search(r"ubuntu(\d+\.\d+)", latest_patch).group(1)
+            return latest_patch, ubuntu_version
+        return latest_patch, None
 
     def _fetch_nvidia_tags(self) -> list:
         """

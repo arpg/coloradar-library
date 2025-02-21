@@ -30,7 +30,6 @@ if(APPLE)
 
     add_definitions(-DWITH_SSE=OFF)
 else()
-    add_compile_options(-include cassert)
     find_program(GCC_COMPILER 
         NAMES gcc-12 gcc-11 gcc-10 
         PATHS /usr/bin /usr/local/bin /opt/homebrew/bin
@@ -52,7 +51,6 @@ else()
     add_compile_options(-fconcepts)
 endif()
 
-# cmake_policy(SET CMP0144 NEW)
 
 # System Paths (macOS & Linux)
 if(APPLE)

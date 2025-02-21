@@ -26,7 +26,7 @@ class TestBaseImage(unittest.TestCase):
     def test_no_arguments(self):
         for cuda in self.EMPTY_VALS:
             for ros in self.EMPTY_VALS:
-                base_image = self.selector.get_base_image(cuda, ros, detect_local_cuda=False)
+                base_image, ubuntu_version = self.selector.get_base_image(cuda, ros, detect_local_cuda=False)
                 self.assertEqual(base_image, "ubuntu:24.04")
 
     def test_invalid_cuda(self):
@@ -76,15 +76,15 @@ class TestBaseImage(unittest.TestCase):
     def test_valid_ros_base(self):
         for cuda in self.EMPTY_VALS:
             for ros in self.ROS_VALID:
-                base_image = self.selector.get_base_image(cuda, ros, detect_local_cuda=False)
+                base_image, ubuntu_version = self.selector.get_base_image(cuda, ros, detect_local_cuda=False)
                 assert base_image == f'ros:{ros}'
 
     def test_valid_nvidia_base(self):
         for kwargs in self.VALID_KWARGS:
-            base_image = self.selector.get_base_image(detect_local_cuda=False, **kwargs)
+            base_image, ubuntu_version = self.selector.get_base_image(detect_local_cuda=False, **kwargs)
             self.assertEqual(base_image, f'annazabnus/ros-cuda:{kwargs["cuda_version"]}-{kwargs["ros_version"]}')
             for ros in self.EMPTY_VALS:
-                base_image = self.selector.get_base_image(kwargs['cuda_version'], ros, detect_local_cuda=False)
+                base_image, ubuntu_version = self.selector.get_base_image(kwargs['cuda_version'], ros, detect_local_cuda=False)
                 assert base_image.startswith('nvidia/cuda:') and kwargs['cuda_version'] in base_image
 
 

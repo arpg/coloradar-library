@@ -67,7 +67,7 @@ class ImageBuild:
 
         image_name = self.get_image_name(ros_distro=ros_distro, cuda_version=cuda_version)
         try:
-            base_image = self.version_selector.get_base_image(cuda_version, ros_distro)
+            base_image, ubuntu_version = self.version_selector.get_base_image(cuda_version, ros_distro, detect_local_cuda=False)
         # Not raising error when custom base image not found
         except CustomImageNotFoundError as e:
             print(e)
@@ -76,16 +76,16 @@ class ImageBuild:
         print(f'Using base image: {base_image}')
 
         print(f'Building image: {image_name}')
+        build_args = []
+        for lib_name in self.version_selector.default_version_settings:
+            build_args.append("--build-arg")
+            build_args.append(f"DOCKER_{lib_name.upper()}_VERSION={self.version_selector.get_lib_version(lib_name, ubuntu_version)}")
         build_command = [
             "docker", "buildx", "build",
             "--build-arg", f"CUDA_ENV={'true' if cuda_version else 'false'}",
             "--build-arg", f"BASE_IMAGE={base_image}",
-            "--build-arg", f"DOCKER_GCC_VERSION={self.version_selector.get_lib_version('gcc', ros_distro=ros_distro)}",
-            "--build-arg", f"DOCKER_BOOST_VERSION={self.version_selector.get_lib_version('boost', ros_distro=ros_distro)}",
-            "--build-arg", f"DOCKER_PCL_VERSION={self.version_selector.get_lib_version('pcl', ros_distro=ros_distro)}",
-            "--build-arg", f"DOCKER_PYBIND_VERSION={self.version_selector.get_lib_version('pybind', ros_distro=ros_distro)}",
             "-t", image_name
-        ]
+        ] + build_args
         if PUSH_IMAGES:
             build_command.append("--push")
             if not cuda_version:

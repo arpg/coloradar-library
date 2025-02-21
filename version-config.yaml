@@ -1,18 +1,23 @@
 ros_versions:
-  noetic:
-    ubuntu: 20.04
+  noetic: "20.04"
+  humble: "22.04"
+  jazzy: "24.04"
+
+ubuntu_versions:
+  "20.04":
+    vtk: 7
     gcc: 10
     boost: 1.78.0
     pcl: 1.12.0
     pybind: 2.10.4
-  humble:
-    ubuntu: 22.04
+  "22.04":
+    vtk: 9
     gcc: 12
     boost: 1.78.0
     pcl:
     pybind:
-  jazzy:
-    ubuntu: 24.04
+  "24.04":
+    vtk: 9
     gcc: 12
     boost:
     pcl:

@@ -53,6 +53,7 @@ public:
         return *this;
     }
 
+    void loadExportConfig(const BaseExportConfig* config) { if (config) *exportConfig_ = *config; }
     virtual const BaseExportConfig* exportConfig() const { return exportConfig_.get(); }
 
     virtual ~BaseDevice() = default;

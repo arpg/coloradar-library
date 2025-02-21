@@ -1,13 +1,14 @@
 ARG BASE_IMAGE
 FROM ${BASE_IMAGE} AS base
 
-
+ENV DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC
 ARG CUDA_ENV
 ENV CUDA_ENV=${CUDA_ENV}
 SHELL ["/bin/bash", "-c"]
 WORKDIR /tmp
 
 # Lib versions
+ARG DOCKER_VTK_VERSION=""
 ARG DOCKER_GCC_VERSION=""
 ARG DOCKER_BOOST_VERSION=""
 ARG DOCKER_PCL_VERSION=""
@@ -41,12 +42,12 @@ RUN ARCH=$(dpkg --print-architecture); \
     apt update && apt upgrade -y
 
 RUN apt update && apt install --no-install-recommends -y \
+    tzdata \
     software-properties-common \
     wget \
     curl \
     build-essential \
     cmake \
-    libvtk* vtk* \
     libeigen3-dev \
     libflann-dev \
     liboctomap-dev \
@@ -61,6 +62,13 @@ RUN apt update && apt install --no-install-recommends -y \
     libgirepository1.0-dev \
     qtbase5-dev qt5-qmake qtbase5-dev-tools libqt5opengl5-dev \
     python3-pip
+
+
+# VTK
+RUN if [ -n "$DOCKER_VTK_VERSION" ]; then \
+        apt update && \
+        apt install --no-install-recommends -y libvtk${DOCKER_VTK_VERSION}-dev python3-vtk${DOCKER_VTK_VERSION}; \
+    fi
 
 
 # GCC

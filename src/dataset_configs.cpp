@@ -154,12 +154,14 @@ DatasetExportConfig::DatasetExportConfig(const std::string &yamlFilePath) {
     runs_ = parseRuns(config);
     exportTransforms_ = parseBoolKey(config, "global.export_transforms", exportTransforms_);
 
-    // for (auto* device in {&cascadeCfg_ &baseCfg_, &imuCfg_, &singleChipCfg_}) {
-        //if (lidarCfg_.deviceName() == device->name {
-            
-        //}
-    //     device->loadFromFile(config);
-    // }
+    // надо поставить центр сенсор лидара на инициализированный объект вместо пустого
+    // for init cfg: if center sensor is the same class then reassign
+//     for (auto* deviceCfg in {&cascadeCfg_, &lidarCfg_, &baseCfg_, &imuCfg_, &singleChipCfg_}) {
+//        if (lidarCfg_.centerSensor() // is the same class as deviceCfg) {
+//            lidarCfg_.centerSensor()
+//        }
+//         device->loadFromFile(config);
+//     }
 
     // set lidar center device
 }
