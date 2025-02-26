@@ -30,15 +30,15 @@ protected:
     // std::vector<std::unique_ptr<BaseDevice>> devices;
 
     // void exportConfig(config);
+    void exportBaseDevice(const std::vector<ColoradarPlusRun*> &runs, const H5::H5File &datasetFile);
+    void exportImu(const std::vector<ColoradarPlusRun*> &runs, const H5::H5File &datasetFile);
     void exportCascade(const std::vector<ColoradarPlusRun*> &runs, const H5::H5File &datasetFile);
     void exportLidar(const std::vector<ColoradarPlusRun*> &runs, const H5::H5File &datasetFile);
-    // void exportImu(config);
-    // void exportBaseFrame(config);
+
     // void exportSingleChip(config); for old dataset
     // void exportCamera(config); later
 
 public:
-    // ColoradarPlusDataset(const std::filesystem::path& pathToDataset);
     explicit ColoradarPlusDataset(const std::filesystem::path& pathToDataset);
     ColoradarPlusDataset(const ColoradarPlusDataset&) = delete;
     ColoradarPlusDataset& operator=(const ColoradarPlusDataset&) = delete;

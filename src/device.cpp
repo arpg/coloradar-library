@@ -145,11 +145,16 @@ void LidarExportConfig::validate() {
 }
 
 void BaseExportConfig::loadFromFile(const YAML::Node& deviceNode) {
+    if (!deviceNode.IsDefined() || deviceNode.IsNull()) {
+        return;
+    }
     exportPoses_ = parseBoolKey(deviceNode, "export_poses", exportPoses_);
     exportTimestamps_ = parseBoolKey(deviceNode, "export_timestamps", exportTimestamps_);
 }
 
 void RadarExportConfig::loadFromFile(const YAML::Node& deviceNode) {
+    BaseExportConfig::loadFromFile(deviceNode);
+
     collapseElevation_ = parseBoolKey(deviceNode, "collapse_elevation", collapseElevation_);
     collapseElevationMinZ_ = parseFloatKey(deviceNode, "collapse_elevation_min_z_meters", collapseElevationMinZ_);
     collapseElevationMaxZ_ = parseFloatKey(deviceNode, "collapse_elevation_max_z_meters", collapseElevationMaxZ_);
@@ -169,6 +174,8 @@ void RadarExportConfig::loadFromFile(const YAML::Node& deviceNode) {
 }
 
 void LidarExportConfig::loadFromFile(const YAML::Node& deviceNode) {
+    BaseExportConfig::loadFromFile(deviceNode);
+
     collapseElevation_ = parseBoolKey(deviceNode, "collapse_elevation", collapseElevation_);
     collapseElevationMinZ_ = parseFloatKey(deviceNode, "collapse_elevation_min_z_meters", collapseElevationMinZ_);
     collapseElevationMaxZ_ = parseFloatKey(deviceNode, "collapse_elevation_max_z_meters", collapseElevationMaxZ_);
@@ -201,10 +208,13 @@ void LidarExportConfig::loadFromFile(const YAML::Node& deviceNode) {
         centerSensor_ = std::make_unique<SingleChipDevice>();
     } else if (centerSensorName == ImuDevice::name) {
         centerSensor_ = std::make_unique<ImuDevice>();
+    } else {
+        throw std::runtime_error("Error: Unknown center sensor '" + centerSensorName + "'");
     }
 }
 
 void ImuExportConfig::loadFromFile(const YAML::Node& deviceNode) {
+    BaseExportConfig::loadFromFile(deviceNode);
     exportData_ = parseBoolKey(deviceNode, "export_data", exportData_);
 }
 

@@ -222,6 +222,58 @@ void saveVectorToHDF5(const std::string& name, const H5::H5File& file, const std
     H5::DataSet dataset = file.createDataSet(name, H5::PredType::NATIVE_DOUBLE, dataspace);
 }
 
+void ColoradarPlusDataset::exportBaseDevice(const std::vector<ColoradarPlusRun*> &runs, const H5::H5File &datasetFile) {
+    // Constants
+    const std::string posesContentName = "base_poses",
+                      timestampsContentName = "base_timestamps";
+
+    auto exportCfg = base_device_->exportConfig();
+
+    for (auto* run : runs) {
+        std::vector<double> timestamps = run->poseTimestamps();
+        hsize_t numFrames = timestamps.size();
+        std::vector<Eigen::Affine3f> basePoses = run->getPoses<Eigen::Affine3f>();
+
+        // timestamps
+        if (exportCfg->exportTimestamps()) {
+            saveVectorToHDF5(timestampsContentName + "_" + run->name, datasetFile, timestamps);
+        }
+
+        // poses
+        if (exportCfg->exportPoses()) {
+            savePosesToHDF5(posesContentName + "_" + run->name, datasetFile, basePoses);
+        }
+    }
+}
+
+void ColoradarPlusDataset::exportImu(const std::vector<ColoradarPlusRun*> &runs, const H5::H5File &datasetFile) {
+    // Constants
+    const std::string posesContentName = "imu_poses",
+                      timestampsContentName = "imu_timestamps";
+
+    auto exportCfg = imu_->exportConfig();
+
+    for (auto* run : runs) {
+        std::vector<double> timestamps = run->imuTimestamps();
+        hsize_t numFrames = timestamps.size();
+       std::vector<Eigen::Affine3f> basePoses = run->interpolatePoses(run->getPoses<Eigen::Affine3f>(), run->poseTimestamps(), timestamps);
+        std::vector<Eigen::Affine3f> sensorPoses;
+        for (int i = 0; i < numFrames; ++i) {
+            sensorPoses[i] = basePoses[i] * imuTransform_;
+        }
+
+        // timestamps
+        if (exportCfg->exportTimestamps()) {
+            saveVectorToHDF5(timestampsContentName + "_" + run->name, datasetFile, timestamps);
+        }
+
+        // poses
+        if (exportCfg->exportPoses()) {
+            savePosesToHDF5(posesContentName + "_" + run->name, datasetFile, sensorPoses);
+        }
+    }
+}
+
 void ColoradarPlusDataset::exportCascade(const std::vector<ColoradarPlusRun*> &runs, const H5::H5File &datasetFile) {
     // Constants
     const std::string datacubeContentName = "cascade_datacubes",

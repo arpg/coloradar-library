@@ -92,7 +92,7 @@ class VersionSelector:
                 base_image = f'annazabnus/ros-cuda:{tag}'
                 ubuntu_version = self.ros_versions[ros_version]
             else:
-                tag, ubuntu_version = self._get_latest_cuda_tag(cuda_version, "-ubuntu")
+                tag, ubuntu_version = self._get_latest_cuda_tag(cuda_version)
                 base_image = f'nvidia/cuda:{tag}'
         elif ros_version:
             base_image = f'ros:{ros_version}'
@@ -119,30 +119,33 @@ class VersionSelector:
             return ''
         return lib_versions.get(lib_name, '') or ''
 
-    def _get_latest_cuda_tag(self, cuda_version: str, base_image_postfix: str) -> Tuple[str, Optional[str]]:
+    def _get_latest_cuda_tag(self, cuda_version: str, ubuntu_version: Optional[str] = None) -> Tuple[
+        str, Optional[str]]:
         """
         Query Docker Hub to find the latest patch version for a given CUDA X.Y version.
-        Uses cached results if available.
+        Uses cached results if available. If ubuntu_version is provided, selects the latest tag matching that Ubuntu version.
+        Otherwise, selects the tag with the latest Ubuntu version.
         """
         if self._cuda_tags_cache is None:  # Fetch only once
             self._cuda_tags_cache = self._fetch_nvidia_tags()
 
-        latest_patch = None
+        latest_tag = None
         latest_patch_version = -1
+        latest_ubuntu_version = 0.0
+        tag_contains = f'ubuntu{ubuntu_version or ""}'
+
         for tag in self._cuda_tags_cache:
-            if tag.startswith(cuda_version) and base_image_postfix in tag and not any(t in tag for t in IGNORE_OS_TAGS):
-                match = re.match(rf"{cuda_version}\.(\d+)", tag)
+            if tag.startswith(cuda_version) and tag_contains in tag and not any(t in tag for t in IGNORE_OS_TAGS):
+                match = re.match(rf"{cuda_version}\.(\d+).*-ubuntu(\d+\.\d+)", tag)
                 if match:
-                    patch_version = int(match.group(1))
-                    if patch_version > latest_patch_version:
-                        latest_patch = tag
-                        latest_patch_version = patch_version
-        if not latest_patch:
-            raise ImageNotFoundError(f"No matching CUDA image found for version {cuda_version} containing {base_image_postfix}.")
-        if 'ubuntu' in latest_patch:
-            ubuntu_version = re.search(r"ubuntu(\d+\.\d+)", latest_patch).group(1)
-            return latest_patch, ubuntu_version
-        return latest_patch, None
+                    patch_version, tag_ubuntu_version = int(match[1]), float(match[2])
+                    if (patch_version > latest_patch_version or
+                            (patch_version == latest_patch_version and (latest_ubuntu_version is None or tag_ubuntu_version > latest_ubuntu_version))):
+                        latest_tag, latest_patch_version, latest_ubuntu_version = tag, patch_version, tag_ubuntu_version
+
+        if not latest_tag:
+            raise ImageNotFoundError(f"No matching CUDA image found for version {cuda_version} and Ubuntu {ubuntu_version or 'latest'}.")
+        return latest_tag, latest_ubuntu_version
 
     def _fetch_nvidia_tags(self) -> list:
         """

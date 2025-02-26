@@ -23,12 +23,16 @@ void DatasetExportConfig::validateConfigYaml(const YAML::Node &config) {
     if (!devicesNode.IsDefined() || devicesNode.IsNull()) {
         return;
     }
+//    std::set<std::string> allowedDevices = {"cascade_radar", "lidar", "base", "imu", "single_chip_radar"};
 //    for (const auto &device : devicesNode) {
 //        std::string deviceName = device.first.as<std::string>();
-//        if (devices_.find(deviceName) == devices_.end()) {
-//            std::cerr << "Warning: Unknown device " << deviceName << ", skipping." << std::endl;
+//        if (allowedDevices.find(deviceName) == allowedDevices.end()) {
+//            std::cerr << "Warning: Unknown device '" << deviceName << "', skipping. Allowed devices: ";
+//            for (const auto &allowed : allowedDevices) {
+//                std::cerr << allowed << " ";
+//            }
+//            std::cerr << std::endl;
 //        }
-//        else
 //    }
 }
 
@@ -154,17 +158,21 @@ DatasetExportConfig::DatasetExportConfig(const std::string &yamlFilePath) {
     runs_ = parseRuns(config);
     exportTransforms_ = parseBoolKey(config, "global.export_transforms", exportTransforms_);
 
-    // надо поставить центр сенсор лидара на инициализированный объект вместо пустого
-    // for init cfg: if center sensor is the same class then reassign
-//     for (auto* deviceCfg in {&cascadeCfg_, &lidarCfg_, &baseCfg_, &imuCfg_, &singleChipCfg_}) {
-//        if (lidarCfg_.centerSensor() // is the same class as deviceCfg) {
-//            lidarCfg_.centerSensor()
-//        }
-//         device->loadFromFile(config);
-//     }
+    cascadeCfg_.loadFromFile(findNode(config, "devices.cascade_radar"));
+    lidarCfg_.loadFromFile(findNode(config, "devices.lidar"));
+    baseCfg_.loadFromFile(findNode(config, "devices.base"));
+    imuCfg_.loadFromFile(findNode(config, "devices.imu"));
+    singleChipCfg_.loadFromFile(findNode(config, "devices.single_chip_radar"));
 
-    // set lidar center device
+    std::vector<BaseExportConfig*> deviceConfigs = {&cascadeCfg_, &lidarCfg_, &baseCfg_, &imuCfg_, &singleChipCfg_};
+    for (auto* deviceCfg : deviceConfigs) {
+        if (lidarCfg_.centerSensor() &&
+            typeid(*lidarCfg_.centerSensor()->exportConfig()) == typeid(*deviceCfg)) {
+            lidarCfg_.centerSensor()->loadExportConfig(deviceCfg);
+        }
+    }
 }
+
 
 const std::filesystem::path &DatasetExportConfig::destinationFilePath() const {
     return destinationFilePath_;
