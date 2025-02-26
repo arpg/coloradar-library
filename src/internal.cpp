@@ -1,7 +1,5 @@
 #include "internal.h"
 
-#include <stdexcept>
-
 
 void coloradar::internal::checkPathExists(const std::filesystem::path& path) {
     if (!std::filesystem::exists(path)) {

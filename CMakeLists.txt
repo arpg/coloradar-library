@@ -4,11 +4,11 @@ project(coloradar_lib VERSION 1.0 LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 # Compiler
-add_compile_options(-include cmath)
-add_definitions(-D__STRICT_ANSI__)
 add_definitions(-DNDEBUG)
+
 if(APPLE)
     find_program(CLANG_COMPILER 
         NAMES clang clang-16 clang-15 clang-14
@@ -31,17 +31,17 @@ if(APPLE)
     add_definitions(-DWITH_SSE=OFF)
 else()
     find_program(GCC_COMPILER 
-        NAMES gcc-12 gcc-11 gcc-10 
-        PATHS /usr/bin /usr/local/bin /opt/homebrew/bin
+        NAMES gcc-12 gcc-11
+        PATHS /usr/bin /usr/local/bin
         NO_DEFAULT_PATH
     )
     find_program(GPP_COMPILER 
-        NAMES g++-12 g++-11 g++-10
-        PATHS /usr/bin /usr/local/bin /opt/homebrew/bin
+        NAMES g++-12 g++-11
+        PATHS /usr/bin /usr/local/bin
         NO_DEFAULT_PATH
     )
     if (NOT GCC_COMPILER OR NOT GPP_COMPILER)
-        message(FATAL_ERROR "No suitable GCC compiler found! Please ensure GCC version 10, 11, or 12 is installed.")
+        message(FATAL_ERROR "No suitable GCC compiler found! Please ensure GCC version 11, or 12 is installed.")
     endif()
     string(REGEX REPLACE "gcc-([0-9]+)" "g++-\\1" GPP_COMPILER ${GCC_COMPILER})
     set(CMAKE_C_COMPILER ${GCC_COMPILER} CACHE PATH "C compiler" FORCE)
@@ -153,7 +153,7 @@ add_library(coloradar_lib SHARED
     src/coloradar_run.cpp
     src/dataset.cpp
 )
-target_link_libraries(coloradar_lib Threads::Threads ${YAML_CPP_LIBRARIES} ${PCL_LIBRARIES} ${OCTOMAP_LIBRARIES} ${HDF5_LIBRARIES} ${JSONCPP_LIBRARIES})
+target_link_libraries(coloradar_lib stdc++fs Threads::Threads ${YAML_CPP_LIBRARIES} ${PCL_LIBRARIES} ${OCTOMAP_LIBRARIES} ${HDF5_LIBRARIES} ${JSONCPP_LIBRARIES})
 
 if(pybind11_FOUND)
     message(STATUS "Pybind11 found, compiling Python bindings.")
@@ -164,7 +164,7 @@ else()
 endif()
 
 
-if(CUDA_FOUND)
+if(CUDA_FOUND AND NOT ("$ENV{CUDA_ENV}" STREQUAL "False" OR "$ENV{CUDA_ENV}" STREQUAL "false"))
     message(STATUS "CUDA found, compiling CUDA code.")
     set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -std=c++20")
 
@@ -180,7 +180,7 @@ if(CUDA_FOUND)
         target_link_libraries(coloradar_cuda_lib PRIVATE coloradar_cuda)
     endif()
 else()
-    message(STATUS "CUDA not found, skipping CUDA compilation.")
+    message(STATUS "($ENV{CUDA_ENV}) CUDA not found, skipping CUDA compilation.")
 endif()
 
 

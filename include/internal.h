@@ -1,22 +1,9 @@
 #ifndef INTERNAL_H
 #define INTERNAL_H
 
-#include "types.h"
 
-#include <filesystem>
-#include <string>
-#include <vector>
-#include <map>
-#include <unordered_map>
-#include <tuple>
-#include <functional>
-#include <sstream>
-#include <fstream>
-#include <regex>
-#include <memory>
+#include "types.h"
 #include <Eigen/Dense>
-#include <json.h>
-#include <yaml-cpp/yaml.h>
 
 
 namespace coloradar::internal {
@@ -54,6 +41,8 @@ namespace coloradar::internal {
     Eigen::Vector3f sphericalToCartesian(const double& az, const double& el, const double& range);
 }
 
+
 #include "hpp/internal.hpp"
+
 
 #endif

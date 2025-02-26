@@ -48,6 +48,7 @@ RUN apt update && apt install --no-install-recommends -y \
     curl \
     build-essential \
     cmake \
+    manpages-dev \
     libeigen3-dev \
     libflann-dev \
     liboctomap-dev \
@@ -66,8 +67,7 @@ RUN apt update && apt install --no-install-recommends -y \
 
 # VTK
 RUN if [ -n "$DOCKER_VTK_VERSION" ]; then \
-        apt update && \
-        apt install --no-install-recommends -y libvtk${DOCKER_VTK_VERSION}-dev python3-vtk${DOCKER_VTK_VERSION}; \
+        apt update && apt install --no-install-recommends -y libvtk${DOCKER_VTK_VERSION}-dev python3-vtk${DOCKER_VTK_VERSION}; \
     fi
 
 
