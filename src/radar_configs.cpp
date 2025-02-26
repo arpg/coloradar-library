@@ -316,6 +316,9 @@ void coloradar::RadarConfig::initPhaseFrequencyParams(const std::filesystem::pat
 
 
 void coloradar::RadarConfig::initInternalParams() {
+    std::cout << "Initializing internal radar params." << std::endl;
+    std::cout << "numAzimuthBeams: " << numAzimuthBeams << ", numElevationBeams: " << numElevationBeams << std::endl;
+
     azimuthApertureLen = 0;
     elevationApertureLen = 0;
     numVirtualElements = 0;
@@ -325,6 +328,8 @@ void coloradar::RadarConfig::initInternalParams() {
     azimuthAngles.resize(numAzimuthBeams);
     elevationAngles.resize(numElevationBeams);
     numAngles = numAzimuthBeams * numElevationBeams;
+
+    std::cout << "Initializing internal arrays." << std::endl;
 
     for (int tx_idx = 0; tx_idx < numTxAntennas; tx_idx++)
     {
@@ -379,6 +384,7 @@ void coloradar::RadarConfig::initInternalParams() {
         elevationAngles[i] = asin(phase_dif / (2. * M_PI * d));
         phase_dif += el_d_phase;
     }
+    std::cout << "Finished initializing internal radar params." << std::endl;
 }
 
 coloradar::SingleChipConfig::SingleChipConfig(const std::filesystem::path& calibDir, const int& nAzimuthBeams, const int& nElevationBeams) : coloradar::RadarConfig(nAzimuthBeams, nElevationBeams) {

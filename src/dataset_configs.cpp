@@ -6,35 +6,37 @@
 
 namespace coloradar {
 
+
 YAML::Node DatasetExportConfig::findNode(const YAML::Node &config, const std::string &nestedKey) {
     std::istringstream iss(nestedKey);
     std::string token;
     YAML::Node node = config;
+
     while (std::getline(iss, token, '.')) {
-        if (!node[token])
-            return YAML::Node();
-        node = node[token];
+        if (!node.IsMap()) {
+            return YAML::Node();  // Return empty node if the current node isn't a map
+        }
+        if (!node[token]) {
+            return YAML::Node();  // Return empty node if the key isn't found
+        }
+        node = node[token];  // Move to the nested node
     }
-    return node;
+    return YAML::Clone(node);  // Ensure it returns a deep copy
 }
+
 
 void DatasetExportConfig::validateConfigYaml(const YAML::Node &config) {
     YAML::Node devicesNode = findNode(config, "devices");
+    std::cout << "Root keys after find node: ";
+    for (auto it = config.begin(); it != config.end(); ++it) {
+        std::cout << it->first.as<std::string>() << " ";
+    }
+    std::cout << std::endl;
     if (!devicesNode.IsDefined() || devicesNode.IsNull()) {
         return;
     }
-//    std::set<std::string> allowedDevices = {"cascade_radar", "lidar", "base", "imu", "single_chip_radar"};
-//    for (const auto &device : devicesNode) {
-//        std::string deviceName = device.first.as<std::string>();
-//        if (allowedDevices.find(deviceName) == allowedDevices.end()) {
-//            std::cerr << "Warning: Unknown device '" << deviceName << "', skipping. Allowed devices: ";
-//            for (const auto &allowed : allowedDevices) {
-//                std::cerr << allowed << " ";
-//            }
-//            std::cerr << std::endl;
-//        }
-//    }
 }
+
 
 std::filesystem::path DatasetExportConfig::parseDestination(const YAML::Node &config, const std::filesystem::path &defaultDestination) {
     YAML::Node node = findNode(config, "global.destination");
@@ -51,6 +53,7 @@ std::vector<std::string> DatasetExportConfig::parseRuns(const YAML::Node &config
     YAML::Node node = findNode(config, "global.runs");
     std::vector<std::string> runs;
     if (!node.IsDefined() || node.IsNull()) {
+        std::cout << "Runs node not found" << std::endl;
         return runs;
     }
     if (node.IsScalar()) {
@@ -64,6 +67,7 @@ std::vector<std::string> DatasetExportConfig::parseRuns(const YAML::Node &config
     } else {
         throw std::runtime_error("Invalid format for 'runs' key.");
     }
+    std::cout << "Found runs: " << runs[0] << ", " << runs[1] << std::endl;
     return validateRuns(runs);
 }
 
@@ -153,7 +157,16 @@ DatasetExportConfig::DatasetExportConfig(
 
 DatasetExportConfig::DatasetExportConfig(const std::string &yamlFilePath) {
     YAML::Node config = YAML::LoadFile(yamlFilePath);
+    std::cout << "Root keys in YAML: ";
+    for (auto it = config.begin(); it != config.end(); ++it) {
+        std::cout << it->first.as<std::string>() << " ";
+    }
+    std::cout << std::endl;
     validateConfigYaml(config);
+    std::cout << "Root keys after validation: ";
+    for (auto it = config.begin(); it != config.end(); ++it) {
+        std::cout << it->first.as<std::string>() << " ";
+    }
     destinationFilePath_ = parseDestination(config, destinationFilePath_);
     runs_ = parseRuns(config);
     exportTransforms_ = parseBoolKey(config, "global.export_transforms", exportTransforms_);
@@ -185,57 +198,5 @@ const std::vector<std::string> &DatasetExportConfig::runs() const {
 bool DatasetExportConfig::exportTransforms() const {
     return exportTransforms_;
 }
-
-//const std::set<std::string> &DatasetExportConfig::devices() const {
-//    return devices_;
-//}
-//
-//const RadarExportConfig &DatasetExportConfig::cascade() const {
-//    return cascade_;
-//}
-//
-//const LidarExportConfig &DatasetExportConfig::lidar() const {
-//    return lidar_;
-//}
-//
-//const BaseExportConfig &DatasetExportConfig::base() const {
-//    return base_;
-//}
-//
-//const ImuExportConfig &DatasetExportConfig::imu() const {
-//    return imu_;
-//}
-//
-//const RadarExportConfig &DatasetExportConfig::singleChip() const {
-//    return singleChip_;
-//}
-
-//void DatasetExportConfig::fitRadarParameters(RadarExportConfig* radarConfig, ColoradarPlusDataset* dataset) {
-//    if
-//}
-
-//void DatasetExportConfig::fitParameters(ColoradarPlusDataset* dataset) {
-//    std::vector<std::string> existingRuns = dataset->listRuns();
-//    if (runs_.empty()) {
-//        runs_ = existingRuns;
-//    } else {
-//        std::vector<std::string> finalRuns = {};
-//        for (const auto &runName : runs_) {
-//            if std::find(existingRuns.begin(), existingRuns.end(), runName) != existingRuns.end() {
-//                finalRuns.push_back(runName);
-//            } else {
-//                std::cerr << "Warning: Unknown run " << runName << ", skipping." << std::endl;
-//            }
-//        }
-//        if (finalRuns.empty()) {
-//            throw std::runtime_error("No valid runs specified.");
-//        }
-//        runs_ = finalRuns;
-//    }
-//
-//    for (auto radarConfig : {cascade_, singleChip_}) {
-//
-//    }
-//}
 
 }

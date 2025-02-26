@@ -70,7 +70,7 @@ public:
     double dopplerBinWidth;
     bool hasDoppler = true;
 
-    RadarConfig(const int& nAzimuthBeams = 1, const int& nElevationBeams = 1) {};
+    RadarConfig(const int& nAzimuthBeams = 1, const int& nElevationBeams = 1) : numAzimuthBeams(nAzimuthBeams), numElevationBeams(nElevationBeams) {};
     RadarConfig(const RadarConfig& other) = default;
     Json::Value toJson() const;
 
