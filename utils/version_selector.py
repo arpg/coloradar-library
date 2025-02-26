@@ -119,8 +119,7 @@ class VersionSelector:
             return ''
         return lib_versions.get(lib_name, '') or ''
 
-    def _get_latest_cuda_tag(self, cuda_version: str, ubuntu_version: Optional[str] = None) -> Tuple[
-        str, Optional[str]]:
+    def _get_latest_cuda_tag(self, cuda_version: str, ubuntu_version: Optional[str] = None) -> Tuple[str, Optional[str]]:
         """
         Query Docker Hub to find the latest patch version for a given CUDA X.Y version.
         Uses cached results if available. If ubuntu_version is provided, selects the latest tag matching that Ubuntu version.
@@ -145,7 +144,7 @@ class VersionSelector:
 
         if not latest_tag:
             raise ImageNotFoundError(f"No matching CUDA image found for version {cuda_version} and Ubuntu {ubuntu_version or 'latest'}.")
-        return latest_tag, latest_ubuntu_version
+        return latest_tag, str(latest_ubuntu_version)
 
     def _fetch_nvidia_tags(self) -> list:
         """
