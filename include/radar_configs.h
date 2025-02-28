@@ -75,7 +75,7 @@ public:
     Json::Value toJson() const;
 
     const int& nRangeBins() const;
-    const float& maxRange() const;
+    float maxRange() const;
     int clipAzimuthMaxBin(const int& azMaxBin);
     int clipElevationMaxBin(const int& elMaxBin);
     int clipRangeMaxBin(const int& rangeMaxBin);

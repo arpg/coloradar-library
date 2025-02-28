@@ -223,30 +223,65 @@ void coloradar::ColoradarPlusRun::createLidarOctomap(
     saveLidarOctomap(map);
 }
 
-void coloradar::ColoradarPlusRun::sampleMapFrames(
+pcl::PointCloud<pcl::PointXYZI> coloradar::ColoradarPlusRun::sampleMapFrame(
     const float& horizontalFov,
     const float& verticalFov,
     const float& range,
-    const Eigen::Affine3f& baseToSensorTransform,
-    std::vector<Eigen::Affine3f> basePoses
+    const Eigen::Affine3f& povPose,
+    const pcl::PointCloud<pcl::PointXYZI>& mapCloud
 ) {
+    float maxRange = range == 0 ? std::numeric_limits<float>::max() : range;
+    pcl::PointCloud<pcl::PointXYZI> sample;
+    pcl::transformPointCloud(mapCloud, sample, povPose);
+    filterFov(sample, horizontalFov, verticalFov, maxRange);
+    return sample;
+}
+
+std::vector<pcl::PointCloud<pcl::PointXYZI>> coloradar::ColoradarPlusRun::sampleMapFrames(
+    const float& horizontalFov,
+    const float& verticalFov,
+    const float& range,
+    const std::vector<Eigen::Affine3f>& povPoses
+) {
+    if (povPoses.empty()) throw std::runtime_error("Empty sampling poses.");
+    pcl::PointCloud<pcl::PointXYZI> mapCloud = readLidarOctomap();
+    std::vector<pcl::PointCloud<pcl::PointXYZI>> samples(povPoses.size());
+    for (size_t i = 0; i < povPoses.size(); ++i) {
+        samples[i] = sampleMapFrame(horizontalFov, verticalFov, range, povPoses[i], mapCloud);
+    }
+    return samples;
+}
+
+void coloradar::ColoradarPlusRun::saveMapFrames(const std::vector<pcl::PointCloud<pcl::PointXYZI>>& frames) {
+    if (frames.empty()) throw std::runtime_error("Empty frames.");
     for (const auto& entry : std::filesystem::directory_iterator(lidarMapsDirPath_)) {
         if (entry.is_regular_file() && entry.path().filename() != "map.pcd") {
             std::filesystem::remove(entry.path());
         }
     }
-    float maxRange = range == 0 ? std::numeric_limits<float>::max() : range;
-    if (basePoses.empty())
-        basePoses = getPoses<Eigen::Affine3f>();
-    pcl::PointCloud<pcl::PointXYZI> mapCloud = readLidarOctomap();
-    for (size_t i = 0; i < basePoses.size(); ++i) {
-        Eigen::Affine3f sensorToMapT = baseToSensorTransform.inverse() * basePoses[i].inverse();
-        pcl::PointCloud<pcl::PointXYZI> centeredCloud;
-        pcl::transformPointCloud(mapCloud, centeredCloud, sensorToMapT);
-        filterFov(centeredCloud, horizontalFov, verticalFov, maxRange);
+    for (size_t i = 0; i < frames.size(); ++i) {
         std::filesystem::path frameFilePath = lidarMapsDirPath_ / ("frame_" + std::to_string(i) + ".pcd");
-        pcl::io::savePCDFile(frameFilePath, centeredCloud);
+        pcl::io::savePCDFile(frameFilePath, frames[i]);
     }
+}
+
+void coloradar::ColoradarPlusRun::createMapSamples(
+    const float& horizontalFov,
+    const float& verticalFov,
+    const float& range,
+    const std::vector<double>& sensorTimestamps,
+    const Eigen::Affine3f& baseToSensorTransform
+) {
+    std::vector<Eigen::Affine3f> basePoses = getPoses<Eigen::Affine3f>();
+    if (!sensorTimestamps.empty()) {
+        basePoses = interpolatePoses(basePoses, poseTimestamps_, sensorTimestamps);
+    }
+    std::vector<Eigen::Affine3f> sensorToMapT(basePoses.size());
+    for (size_t i = 0; i < basePoses.size(); ++i) {
+        sensorToMapT[i] = baseToSensorTransform.inverse() * basePoses[i].inverse();
+    }
+    std::vector<pcl::PointCloud<pcl::PointXYZI>> samples = sampleMapFrames(horizontalFov, verticalFov, range, sensorToMapT);
+    saveMapFrames(samples);
 }
 
 pcl::PointCloud<pcl::PointXYZI> coloradar::ColoradarPlusRun::readMapFrame(const int& frameIdx) {
@@ -255,138 +290,6 @@ pcl::PointCloud<pcl::PointXYZI> coloradar::ColoradarPlusRun::readMapFrame(const 
     coloradar::internal::checkPathExists(frameFilePath);
     pcl::io::loadPCDFile<pcl::PointXYZI>(frameFilePath.string(), cloud);
     return cloud;
-}
-
-
-
-void coloradar::ColoradarPlusRun::saveVectorToHDF5(const std::string& name, H5::H5File& file, const std::vector<double>& vec) {
-    hsize_t dims[1] = { vec.size() };
-    H5::DataSpace dataspace(1, dims);
-    H5::DataSet dataset = file.createDataSet(name, H5::PredType::NATIVE_DOUBLE, dataspace);
-}
-
-void coloradar::ColoradarPlusRun::savePosesToHDF5(const std::string& name, H5::H5File& file, const std::vector<Eigen::Affine3f>& poses) {
-    hsize_t dims[2] = { poses.size(), 7 };  // N * (x, y, z, qx, qy, qz, qw)
-    H5::DataSpace dataspace(2, dims);
-    H5::DataSet dataset = file.createDataSet(name, H5::PredType::NATIVE_DOUBLE, dataspace);
-    std::vector<float> poseData;
-    poseData.reserve(poses.size() * 7);
-    for (const auto& pose : poses) {
-        poseData.push_back(pose.translation().x());
-        poseData.push_back(pose.translation().y());
-        poseData.push_back(pose.translation().z());
-        Eigen::Quaternionf rot(pose.rotation());
-        poseData.push_back(rot.x());
-        poseData.push_back(rot.y());
-        poseData.push_back(rot.z());
-        poseData.push_back(rot.w());
-    }
-    dataset.write(poseData.data(), H5::PredType::NATIVE_FLOAT);
-}
-
-void coloradar::ColoradarPlusRun::saveHeatmapToHDF5(const int& idx, H5::H5File& file, const std::vector<float>& heatmap, const int& numAzimuthBins, const int& numElevationBins, const int& numRangeBins, const int& numDims) {
-    const size_t expectedSize = numElevationBins * numAzimuthBins * numRangeBins * numDims;
-    if (heatmap.size() != expectedSize) {
-        throw std::runtime_error("Heatmap size does not match the expected dimensions. Expected size: " + std::to_string(expectedSize) + ", Actual size: " + std::to_string(heatmap.size()));
-    }
-    std::vector<float> reorganizedHeatmap(expectedSize);
-    for (int el = 0; el < numElevationBins; ++el) {
-        for (int az = 0; az < numAzimuthBins; ++az) {
-            for (int r = 0; r < numRangeBins; ++r) {
-                for (int d = 0; d < numDims; ++d) {
-                    size_t originalIndex = (((el * numAzimuthBins + az) * numRangeBins) + r) * numDims + d;
-                    size_t reorganizedIndex = (((az * numRangeBins + r) * numElevationBins) + el) * numDims + d;
-                    reorganizedHeatmap[reorganizedIndex] = heatmap[originalIndex];
-                }
-            }
-        }
-    }
-    std::vector<hsize_t> dims;
-    if (numAzimuthBins > 1) dims.push_back(static_cast<hsize_t>(numAzimuthBins));
-    if (numRangeBins > 1) dims.push_back(static_cast<hsize_t>(numRangeBins));
-    if (numElevationBins > 1) dims.push_back(static_cast<hsize_t>(numElevationBins));
-    if (numDims > 1) dims.push_back(static_cast<hsize_t>(numDims));
-    if (dims.empty()) dims.push_back(1);
-
-    H5::DataSpace dataspace(dims.size(), dims.data());
-    H5::PredType datatype = H5::PredType::NATIVE_FLOAT;
-    H5::DataSet dataset = file.createDataSet("heatmap_" + std::to_string(idx), datatype, dataspace);
-    dataset.write(reorganizedHeatmap.data(), H5::PredType::NATIVE_FLOAT);
-}
-
-void coloradar::ColoradarPlusRun::saveRadarCloudToHDF5(const int& idx, H5::H5File& file, const pcl::PointCloud<coloradar::RadarPoint>& cloud, bool collapseElevation) {
-    size_t numPoints = cloud.size();
-    size_t numDims = collapseElevation ? 3 : 4;
-    std::vector<float> data;
-    if (numPoints > 0) {
-        data.resize(numPoints * numDims);
-        if (collapseElevation) {
-            for (size_t i = 0; i < numPoints; ++i) {
-                data[i * numDims + 0] = cloud[i].x;
-                data[i * numDims + 1] = cloud[i].y;
-                data[i * numDims + 2] = cloud[i].intensity;
-            }
-        } else {
-            for (size_t i = 0; i < numPoints; ++i) {
-                data[i * numDims + 0] = cloud[i].x;
-                data[i * numDims + 1] = cloud[i].y;
-                data[i * numDims + 2] = cloud[i].z;
-                data[i * numDims + 3] = cloud[i].intensity;
-            }
-        }
-    }
-    hsize_t dims[2] = {numPoints, numDims};
-    H5::DataSpace dataspace(2, dims);
-    H5::PredType datatype = H5::PredType::NATIVE_FLOAT;
-    std::string datasetName = "radar_cloud_" + std::to_string(idx);
-    H5::DataSet dataset = file.createDataSet(datasetName, datatype, dataspace);
-    if (numPoints > 0) {
-        dataset.write(data.data(), H5::PredType::NATIVE_FLOAT);
-    }
-}
-
-void coloradar::ColoradarPlusRun::saveLidarCloudToHDF5(const std::string& name, H5::H5File& file, const pcl::PointCloud<pcl::PointXYZI>& cloud, bool includeIntensity, bool collapseElevation) {
-    size_t numPoints = cloud.size();
-    size_t numDims = collapseElevation ? 3 : 4;
-    if (!includeIntensity) numDims--;
-    std::vector<float> data;
-    if (numPoints > 0) {
-        data.resize(numPoints * numDims);
-        if (collapseElevation) {
-            if (includeIntensity) {
-                for (size_t i = 0; i < numPoints; ++i) {
-                    data[i * numDims + 0] = cloud[i].x;
-                    data[i * numDims + 1] = cloud[i].y;
-                    data[i * numDims + 2] = cloud[i].intensity;
-                }
-            } else {
-                for (size_t i = 0; i < numPoints; ++i) {
-                    data[i * numDims + 0] = cloud[i].x;
-                    data[i * numDims + 1] = cloud[i].y;
-                }
-            }
-        } else if (includeIntensity) {
-            for (size_t i = 0; i < numPoints; ++i) {
-                data[i * numDims + 0] = cloud[i].x;
-                data[i * numDims + 1] = cloud[i].y;
-                data[i * numDims + 2] = cloud[i].z;
-                data[i * numDims + 3] = cloud[i].intensity;
-            }
-        } else {
-            for (size_t i = 0; i < numPoints; ++i) {
-                data[i * numDims + 0] = cloud[i].x;
-                data[i * numDims + 1] = cloud[i].y;
-                data[i * numDims + 2] = cloud[i].z;
-            }
-        }
-    }
-    hsize_t dims[2] = {numPoints, numDims};
-    H5::DataSpace dataspace(2, dims);
-    H5::PredType datatype = H5::PredType::NATIVE_FLOAT;
-    H5::DataSet dataset = file.createDataSet(name, datatype, dataspace);
-    if (numPoints > 0) {
-        dataset.write(data.data(), H5::PredType::NATIVE_FLOAT);
-    }
 }
 
 

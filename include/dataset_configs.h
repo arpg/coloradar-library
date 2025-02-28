@@ -18,13 +18,9 @@ protected:
     BaseExportConfig         baseCfg_;
     RadarExportConfig        singleChipCfg_;
 
-    YAML::Node findNode(const YAML::Node &config, const std::string &key);
     void validateConfigYaml(const YAML::Node &config);
-    std::filesystem::path parseDestination(const YAML::Node &config, const std::filesystem::path &defaultDestination);
-    std::vector<std::string> parseRuns(const YAML::Node &config);
-    bool parseBoolKey(const YAML::Node &config, const std::string &key, bool defaultValue);
-    int parseIntKey(const YAML::Node &config, const std::string &key, int defaultValue);
-    float parseFloatKey(const YAML::Node &config, const std::string &key, float defaultValue);
+    std::filesystem::path parseDestination(const YAML::Node &destinationValue, const std::filesystem::path &defaultDestination);
+    std::vector<std::string> parseRuns(const YAML::Node &runsValue);
 
     std::filesystem::path validateDestination(const std::filesystem::path &destination);
     std::vector<std::string> validateRuns(const std::vector<std::string> &runs);
@@ -50,8 +46,8 @@ public:
 
    const RadarExportConfig        &cascade() const { return cascadeCfg_; }
    const LidarExportConfig        &lidar() const { return lidarCfg_; }
-   const ImuExportConfig          &base() const { return imuCfg_; }
-   const BaseExportConfig         &imu() const { return baseCfg_; }
+   const BaseExportConfig         &base() const { return baseCfg_; }
+   const ImuExportConfig          &imu() const { return imuCfg_; }
    // const RadarExportConfig        &singleChip() const { return ; }
 };
 

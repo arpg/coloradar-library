@@ -21,3 +21,37 @@ Eigen::Vector3f coloradar::internal::sphericalToCartesian(const double& azimuth,
     float z = range * sin(elevation);
     return Eigen::Vector3f(x, y, z);
 }
+
+
+bool coloradar::internal::parseBoolYamlKey(const YAML::Node &nodeValue, bool defaultValue) {
+    if (!nodeValue) {
+        return defaultValue;
+    }
+    try {
+        return nodeValue.as<bool>();
+    } catch (const YAML::BadConversion &) {
+        throw std::runtime_error("Malformed bool value");
+    }
+}
+
+int coloradar::internal::parseIntYamlKey(const YAML::Node &nodeValue, int defaultValue) {
+    if (!nodeValue) {
+        return defaultValue;
+    }
+    try {
+        return nodeValue.as<int>();
+    } catch (const YAML::BadConversion &) {
+        throw std::runtime_error("Malformed int value");
+    }
+}
+
+float coloradar::internal::parseFloatYamlKey(const YAML::Node &nodeValue, float defaultValue) {
+    if (!nodeValue) {
+        return defaultValue;
+    }
+    try {
+        return nodeValue.as<float>();
+    } catch (const YAML::BadConversion &) {
+        throw std::runtime_error("Malformed float value");
+    }
+}

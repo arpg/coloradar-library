@@ -29,10 +29,10 @@ protected:
     std::unique_ptr<LidarDevice> lidar_;
     // std::vector<std::unique_ptr<BaseDevice>> devices;
 
-    std::vector<std::string> exportBaseDevice(std::vector<ColoradarPlusRun*> runs, const H5::H5File &datasetFile);
-    std::vector<std::string> exportImu(std::vector<ColoradarPlusRun*> runs, const H5::H5File &datasetFile);
-    std::vector<std::string> exportCascade(std::vector<ColoradarPlusRun*> runs, const H5::H5File &datasetFile);
-    std::vector<std::string> exportLidar(std::vector<ColoradarPlusRun*> runs, const H5::H5File &datasetFile);
+    std::vector<std::string> exportBaseDevice(const BaseExportConfig &config, std::vector<ColoradarPlusRun*> runs, const H5::H5File &datasetFile);
+    std::vector<std::string> exportImu(const ImuExportConfig &config, std::vector<ColoradarPlusRun*> runs, const H5::H5File &datasetFile);
+    std::vector<std::string> exportCascade(const RadarExportConfig &config, std::vector<ColoradarPlusRun*> runs, const H5::H5File &datasetFile);
+    std::vector<std::string> exportLidar(const LidarExportConfig &config, std::vector<ColoradarPlusRun*> runs, const H5::H5File &datasetFile);
     // void exportSingleChip(config); for old dataset
     // void exportCamera(config); later
 

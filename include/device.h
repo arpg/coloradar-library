@@ -53,8 +53,8 @@ public:
         return *this;
     }
 
-    void loadExportConfig(const BaseExportConfig* config) { if (config) *exportConfig_ = *config; }
-    virtual BaseExportConfig* exportConfig() { return exportConfig_.get(); }
+    const void loadExportConfig(const BaseExportConfig* config) const { if (config) *exportConfig_ = *config; }
+    const virtual BaseExportConfig* exportConfig() const { return exportConfig_.get(); }
 
     virtual ~BaseDevice() = default;
 };
@@ -259,7 +259,7 @@ public:
     const float& occupancyThresholdPercent() const { return occupancyThresholdPercent_; }
     const bool& allowResample() const { return allowResample_; }
     const bool& forceResample() const { return forceResample_; }
-    BaseDevice* centerSensor() { return centerSensor_.get(); }
+    const BaseDevice* centerSensor() const { return centerSensor_.get(); }
     const FovConfig& mapSampleFov() const { return mapSampleFov_; }
 
     void loadFromFile(const YAML::Node& deviceNode) override;
@@ -303,7 +303,7 @@ public:
         return *this;
     }
 
-    RadarExportConfig* exportConfig() override { return exportConfig_.get(); }
+    const RadarExportConfig* exportConfig() const override { return exportConfig_.get(); }
     virtual ~RadarDevice() = default;
 };
     
@@ -329,7 +329,7 @@ public:
         return *this;
     }
 
-    LidarExportConfig* exportConfig() override { return exportConfig_.get(); }
+    const LidarExportConfig* exportConfig() const override { return exportConfig_.get(); }
     virtual ~LidarDevice() = default;
 };
     
@@ -356,7 +356,7 @@ public:
     static inline const std::string name = "imu";
     ImuDevice(std::unique_ptr<ImuExportConfig> exportConfig = std::make_unique<ImuExportConfig>()): exportConfig_(std::move(exportConfig)) {}
 
-    ImuExportConfig* exportConfig() override { return exportConfig_.get(); }
+    const ImuExportConfig* exportConfig() const override { return exportConfig_.get(); }
     virtual ~ImuDevice() = default;
 };
 

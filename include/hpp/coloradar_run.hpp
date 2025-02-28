@@ -32,6 +32,11 @@ std::vector<PoseT> coloradar::ColoradarPlusRun::getPoses() {
 
 template<coloradar::PoseType PoseT>
 std::vector<PoseT> coloradar::ColoradarPlusRun::interpolatePoses(const std::vector<PoseT>& poses, const std::vector<double>& poseTimestamps, const std::vector<double>& targetTimestamps) {
+    if (poses.empty()) throw std::runtime_error("Cannot interpolate empty poses.");
+    if (poseTimestamps.empty()) throw std::runtime_error("Cannot interpolate over empty pose timestamps.");
+    if (targetTimestamps.empty()) throw std::runtime_error("Cannot interpolate over empty target timestamps.");
+    if (poses.size() != poseTimestamps.size()) throw std::runtime_error("The length of poses and poses' timestamps vectors must match.");
+
     std::vector<PoseT> interpolatedPoses;
     size_t tsStartIdx = 0, tsEndIdx = poseTimestamps.size() - 1;
     size_t tsIdx = tsStartIdx;

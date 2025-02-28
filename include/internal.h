@@ -23,7 +23,7 @@ namespace coloradar::internal {
     template<coloradar::PclPoseType PoseT> Eigen::Quaternionf toEigenQuat(const PoseT& pose);
     template<coloradar::OctoPoseType PoseT> Eigen::Vector3f toEigenTrans(const PoseT& pose);
     template<coloradar::OctoPoseType PoseT> Eigen::Quaternionf toEigenQuat(const PoseT& pose);
-;
+
     template<typename TransT> TransT fromEigenTrans(const Eigen::Vector3f& r);
     template<typename RotationT> RotationT fromEigenQuat(const Eigen::Quaternionf& r);
     template<> octomath::Vector3 fromEigenTrans(const Eigen::Vector3f& r);
@@ -39,8 +39,11 @@ namespace coloradar::internal {
     template<typename PointT, typename CloudT> void filterFov(CloudT& cloud, const float& horizontalFov, const float& verticalFov, const float& range);
 
     Eigen::Vector3f sphericalToCartesian(const double& az, const double& el, const double& range);
-}
 
+    bool parseBoolYamlKey(const YAML::Node &nodeValue, bool defaultValue);
+    int parseIntYamlKey(const YAML::Node &nodeValue, int defaultValue);
+    float parseFloatYamlKey(const YAML::Node &nodeValue, float defaultValue);
+}
 
 #include "hpp/internal.hpp"
 

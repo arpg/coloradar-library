@@ -14,36 +14,29 @@ void DatasetExportConfig::validateConfigYaml(const YAML::Node &config) {
             throw std::runtime_error("Missing node: " + std::string(nodeName));
         }
     }
-    std::cout << "Root keys after find node: ";
-    for (auto it = config.begin(); it != config.end(); ++it) {
-        std::cout << it->first.as<std::string>() << " ";
-    }
 }
 
-
-std::filesystem::path DatasetExportConfig::parseDestination(const YAML::Node &config, const std::filesystem::path &defaultDestination) {
-    YAML::Node node; // = findNode(config, "global.destination");
+std::filesystem::path DatasetExportConfig::parseDestination(const YAML::Node &destinationValue, const std::filesystem::path &defaultDestination) {
     std::filesystem::path destination;
-    if (!node.IsDefined() || node.IsNull()) {
+    if (!destinationValue) {
         destination = defaultDestination;
     } else {
-        destination = node.as<std::string>();
+        destination = destinationValue.as<std::string>();
     }
     return validateDestination(destination);
 }
 
-std::vector<std::string> DatasetExportConfig::parseRuns(const YAML::Node &config) {
-    YAML::Node node; // = findNode(config, "global.runs");
+std::vector<std::string> DatasetExportConfig::parseRuns(const YAML::Node &runsValue) {
     std::vector<std::string> runs;
-    if (!node.IsDefined() || node.IsNull()) {
+    if (!runsValue) {
         std::cout << "Runs node not found" << std::endl;
         return runs;
     }
-    if (node.IsScalar()) {
-        std::string run = node.as<std::string>();
+    if (runsValue.IsScalar()) {
+        std::string run = runsValue.as<std::string>();
         runs.push_back(run);
-    } else if (node.IsSequence()) {
-        for (const auto &n : node) {
+    } else if (runsValue.IsSequence()) {
+        for (const auto &n : runsValue) {
             std::string run = n.as<std::string>();
             runs.push_back(run);
         }
@@ -52,42 +45,6 @@ std::vector<std::string> DatasetExportConfig::parseRuns(const YAML::Node &config
     }
     std::cout << "Found runs: " << runs[0] << ", " << runs[1] << std::endl;
     return validateRuns(runs);
-}
-
-bool DatasetExportConfig::parseBoolKey(const YAML::Node &config, const std::string &nestedKey, bool defaultValue) {
-    YAML::Node node; // = findNode(config, nestedKey);
-    if (!node.IsDefined() || node.IsNull()) {
-        return defaultValue;
-    }
-    try {
-        return node.as<bool>();
-    } catch (const YAML::BadConversion &) {
-        throw std::runtime_error("Malformed bool value for key: " + nestedKey);
-    }
-}
-
-int DatasetExportConfig::parseIntKey(const YAML::Node &config, const std::string &nestedKey, int defaultValue) {
-    YAML::Node node; // = findNode(config, nestedKey);
-    if (!node.IsDefined() || node.IsNull()) {
-        return defaultValue;
-    }
-    try {
-        return node.as<int>();
-    } catch (const YAML::BadConversion &) {
-        throw std::runtime_error("Malformed int value for key: " + nestedKey);
-    }
-}
-
-float DatasetExportConfig::parseFloatKey(const YAML::Node &config, const std::string &nestedKey, float defaultValue) {
-    YAML::Node node; // = findNode(config, nestedKey);
-    if (!node.IsDefined() || node.IsNull()) {
-        return defaultValue;
-    }
-    try {
-        return node.as<float>();
-    } catch (const YAML::BadConversion &) {
-        throw std::runtime_error("Malformed float value for key: " + nestedKey);
-    }
 }
 
 std::filesystem::path DatasetExportConfig::validateDestination(const std::filesystem::path &destination) {
@@ -140,25 +97,17 @@ DatasetExportConfig::DatasetExportConfig(
 
 DatasetExportConfig::DatasetExportConfig(const std::string &yamlFilePath) {
     YAML::Node config = YAML::LoadFile(yamlFilePath);
-    std::cout << "Root keys in YAML: ";
-    for (auto it = config.begin(); it != config.end(); ++it) {
-        std::cout << it->first.as<std::string>() << " ";
-    }
-    std::cout << std::endl;
     validateConfigYaml(config);
-    std::cout << "Root keys after validation: ";
-    for (auto it = config.begin(); it != config.end(); ++it) {
-        std::cout << it->first.as<std::string>() << " ";
-    }
-    destinationFilePath_ = parseDestination(config, destinationFilePath_);
-    runs_ = parseRuns(config);
-    exportTransforms_ = parseBoolKey(config, "global.export_transforms", exportTransforms_);
+    destinationFilePath_ = parseDestination(config["global"]["destination_file"], destinationFilePath_);
+    runs_ = parseRuns(config["global"]["runs"]);
+    exportTransforms_ = coloradar::internal::parseBoolYamlKey(config["global"]["export_transforms"], exportTransforms_);
 
-    // cascadeCfg_.loadFromFile(findNode(config, "devices.cascade_radar"));
-    // lidarCfg_.loadFromFile(findNode(config, "devices.lidar"));
-    // baseCfg_.loadFromFile(findNode(config, "devices.base"));
-    // imuCfg_.loadFromFile(findNode(config, "devices.imu"));
-    // singleChipCfg_.loadFromFile(findNode(config, "devices.single_chip_radar"));
+    cascadeCfg_.loadFromFile(config["devices"]["cascade_radar"]);
+    lidarCfg_.loadFromFile(config["devices"]["lidar"]);
+    baseCfg_.loadFromFile(config["devices"]["base"]);
+    imuCfg_.loadFromFile(config["devices"]["imu"]);
+    std::cout << "Validating IMU export config: " << "exportPoses(): " << imuCfg_.exportPoses() << ", exportTimestamps(): " << imuCfg_.exportTimestamps() << ", exportData(): " << imuCfg_.exportData() << std::endl;
+    singleChipCfg_.loadFromFile(config["devices"]["single_chip_radar"]);
 
     std::vector<BaseExportConfig*> deviceConfigs = {&cascadeCfg_, &lidarCfg_, &baseCfg_, &imuCfg_, &singleChipCfg_};
     for (auto* deviceCfg : deviceConfigs) {

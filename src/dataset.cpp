@@ -222,13 +222,12 @@ void saveVectorToHDF5(const std::string& name, const H5::H5File& file, const std
     H5::DataSet dataset = file.createDataSet(name, H5::PredType::NATIVE_DOUBLE, dataspace);
 }
 
-std::vector<std::string> ColoradarPlusDataset::exportBaseDevice(std::vector<ColoradarPlusRun*> runs, const H5::H5File &datasetFile) {
+std::vector<std::string> ColoradarPlusDataset::exportBaseDevice(const BaseExportConfig &config, std::vector<ColoradarPlusRun*> runs, const H5::H5File &datasetFile) {
     // Constants
     const std::string posesContentName = "base_poses",
                       timestampsContentName = "base_timestamps";
 
     std::vector<std::string> content;
-    auto exportCfg = base_device_->exportConfig();
 
     for (auto* run : runs) {
         std::vector<double> timestamps = run->poseTimestamps();
@@ -236,55 +235,60 @@ std::vector<std::string> ColoradarPlusDataset::exportBaseDevice(std::vector<Colo
         std::vector<Eigen::Affine3f> basePoses = run->getPoses<Eigen::Affine3f>();
 
         // timestamps
-        if (exportCfg->exportTimestamps()) {
+        if (config.exportTimestamps()) {
             saveVectorToHDF5(timestampsContentName + "_" + run->name, datasetFile, timestamps);
             content.push_back(timestampsContentName);
         }
 
         // poses
-        if (exportCfg->exportPoses()) {
+        if (config.exportPoses()) {
             savePosesToHDF5(posesContentName + "_" + run->name, datasetFile, basePoses);
             content.push_back(posesContentName);
         }
     }
+    std::cout << "Finished exporting base device." << std::endl;
     return content;
 }
 
-std::vector<std::string> ColoradarPlusDataset::exportImu(std::vector<ColoradarPlusRun*> runs, const H5::H5File &datasetFile) {
+std::vector<std::string> ColoradarPlusDataset::exportImu(const ImuExportConfig &config, std::vector<ColoradarPlusRun*> runs, const H5::H5File &datasetFile) {
     // Constants
     const std::string posesContentName = "imu_poses",
                       timestampsContentName = "imu_timestamps";
 
     std::vector<std::string> content;
-    auto exportCfg = imu_->exportConfig();
 
     for (auto* run : runs) {
         std::vector<double> timestamps = run->imuTimestamps();
         hsize_t numFrames = timestamps.size();
-       std::vector<Eigen::Affine3f> basePoses = run->interpolatePoses(run->getPoses<Eigen::Affine3f>(), run->poseTimestamps(), timestamps);
-        std::vector<Eigen::Affine3f> sensorPoses;
+        std::cout << run->name << "IMU pose interpolation: " << run->getPoses<Eigen::Affine3f>().size() << " base poses, " << run->poseTimestamps().size() << " base pose timestamps, " << numFrames << " imu timestamps" << std::endl;
+        std::vector<Eigen::Affine3f> basePoses = run->interpolatePoses(run->getPoses<Eigen::Affine3f>(), run->poseTimestamps(), timestamps);
+        std::cout << run->name << "IMU pose interpolation finished: " << basePoses.size() << " poses." << std::endl;
+        std::vector<Eigen::Affine3f> sensorPoses(numFrames);
         for (int i = 0; i < numFrames; ++i) {
             sensorPoses[i] = basePoses[i] * imuTransform_;
         }
 
         // timestamps
-        if (exportCfg->exportTimestamps()) {
+        // std::cout << "IMU config.exportTimestamps(): " << config.exportTimestamps() << std::endl;
+        if (config.exportTimestamps()) {
             saveVectorToHDF5(timestampsContentName + "_" + run->name, datasetFile, timestamps);
             content.push_back(timestampsContentName);
         }
 
         // poses
-        if (exportCfg->exportPoses()) {
+        // std::cout << "IMU config.exportPoses(): " << config.exportPoses() << std::endl;
+        if (config.exportPoses()) {
             savePosesToHDF5(posesContentName + "_" + run->name, datasetFile, sensorPoses);
             content.push_back(posesContentName);
         }
 
         // data: TBD
     }
+    std::cout << "Finished exporting imu." << std::endl;
     return content;
 }
 
-std::vector<std::string> ColoradarPlusDataset::exportCascade(std::vector<ColoradarPlusRun*> runs, const H5::H5File &datasetFile) {
+std::vector<std::string> ColoradarPlusDataset::exportCascade(const RadarExportConfig &config, std::vector<ColoradarPlusRun*> runs, const H5::H5File &datasetFile) {
     // Constants
     const std::string datacubeContentName = "cascade_datacubes",
                       heatmapContentName = "cascade_heatmaps",
@@ -293,18 +297,23 @@ std::vector<std::string> ColoradarPlusDataset::exportCascade(std::vector<Colorad
                       timestampsContentName = "cascade_timestamps";
 
     std::vector<std::string> content;
-    auto exportCfg = cascade_->exportConfig();
 
     // FOV
-    float range = cascadeConfig_->clipRange(exportCfg->fov().rangeMeters);
+    float range = cascadeConfig_->clipRange(config.fov().rangeMeters);
+    std::cout << "range" << range << std::endl;
     int rangeMaxBin = cascadeConfig_->rangeToRangeIdx(range);
-    int azimuthMaxBin = exportCfg->fov().azimuthIdx;
-    int elevationMaxBin = exportCfg->fov().elevationIdx;
-    float horizontalFov = exportCfg->fov().horizontalDegreesTotal;
-    float verticalFov = exportCfg->fov().verticalDegreesTotal;
-    if (exportCfg->fov().useDegreeConstraints) {
-        azimuthMaxBin = cascadeConfig_->horizontalFovToAzimuthIdx(exportCfg->fov().horizontalDegreesTotal);
-        elevationMaxBin = cascadeConfig_->verticalFovToElevationIdx(exportCfg->fov().verticalDegreesTotal);
+    std::cout << "rangeMaxBin " << rangeMaxBin << std::endl;
+    int azimuthMaxBin = config.fov().azimuthIdx;
+    std::cout << "azimuthMaxBin " << azimuthMaxBin << std::endl;
+    int elevationMaxBin = config.fov().elevationIdx;
+    std::cout << "elevationMaxBin " << elevationMaxBin << std::endl;
+    float horizontalFov = config.fov().horizontalDegreesTotal;
+    std::cout << "horizontalFov " << horizontalFov << std::endl;
+    float verticalFov = config.fov().verticalDegreesTotal;
+    std::cout << "verticalFov " << verticalFov << std::endl;
+    if (config.fov().useDegreeConstraints) {
+        azimuthMaxBin = cascadeConfig_->horizontalFovToAzimuthIdx(config.fov().horizontalDegreesTotal);
+        elevationMaxBin = cascadeConfig_->verticalFovToElevationIdx(config.fov().verticalDegreesTotal);
     }
     else {
         azimuthMaxBin = cascadeConfig_->clipAzimuthMaxBin(azimuthMaxBin);
@@ -314,28 +323,30 @@ std::vector<std::string> ColoradarPlusDataset::exportCascade(std::vector<Colorad
     }
 
     for (auto* run : runs) {
+        std::cout << run->name << "CASCADE" << std::endl;
         std::vector<double> timestamps = run->cascadeTimestamps();
         hsize_t numFrames = timestamps.size();
         std::vector<Eigen::Affine3f> basePoses = run->interpolatePoses(run->getPoses<Eigen::Affine3f>(), run->poseTimestamps(), timestamps);
-        std::vector<Eigen::Affine3f> sensorPoses;
+        std::vector<Eigen::Affine3f> sensorPoses(numFrames);
         for (int i = 0; i < numFrames; ++i) {
             sensorPoses[i] = basePoses[i] * cascadeTransform_;
         }
 
         // timestamps
-        if (exportCfg->exportTimestamps()) {
+        if (config.exportTimestamps()) {
             saveVectorToHDF5(timestampsContentName + "_" + run->name, datasetFile, timestamps);
             content.push_back(timestampsContentName);
         }
 
         // poses
-        if (exportCfg->exportPoses()) {
+        if (config.exportPoses()) {
             savePosesToHDF5(posesContentName + "_" + run->name, datasetFile, sensorPoses);
             content.push_back(posesContentName);
         }
 
         // datacubes
-        if (exportCfg->exportDatacubes()) {
+        std::cout << "config.exportDatacubes()" << config.exportDatacubes() << std::endl;
+        if (config.exportDatacubes()) {
             std::vector<int16_t> datacubesFlat;
             for (size_t i = 0; i < numFrames; ++i) {
                 auto datacube = run->getCascadeDatacube(i);
@@ -346,16 +357,17 @@ std::vector<std::string> ColoradarPlusDataset::exportCascade(std::vector<Colorad
         }
         
         // heatmaps
-        if (exportCfg->exportHeatmaps()) {
+        std::cout << "config.exportHeatmaps()" << config.exportHeatmaps() << std::endl;
+        if (config.exportHeatmaps()) {
             CascadeConfig* heatmapConfig = new CascadeConfig(*dynamic_cast<CascadeConfig*>(cascadeConfig_));
             std::vector<float> heatmapsFlat;
             for (size_t i = 0; i < numFrames; ++i) {
                 auto heatmap = run->getCascadeHeatmap(i);
                 heatmap = heatmapConfig->clipHeatmap(heatmap, azimuthMaxBin, elevationMaxBin, rangeMaxBin);
-                if (exportCfg->collapseElevation()) {
-                    heatmap = heatmapConfig->collapseHeatmapElevation(heatmap, exportCfg->collapseElevationMinZ(), exportCfg->collapseElevationMaxZ());
+                if (config.collapseElevation()) {
+                    heatmap = heatmapConfig->collapseHeatmapElevation(heatmap, config.collapseElevationMinZ(), config.collapseElevationMaxZ());
                 }
-                if (exportCfg->removeDopplerDim()) {
+                if (config.removeDopplerDim()) {
                     heatmap = heatmapConfig->removeDoppler(heatmap);
                 }
                 heatmap = heatmapConfig->swapHeatmapDimensions(heatmap);
@@ -366,7 +378,8 @@ std::vector<std::string> ColoradarPlusDataset::exportCascade(std::vector<Colorad
         }
 
         // clouds
-        if (exportCfg->exportClouds()) {
+        std::cout << "config.exportClouds()" << config.exportClouds() << std::endl;
+        if (config.exportClouds()) {
             hsize_t numDims = cascadeConfig_->numElevationBins > 0 ? 5 : 4;  // x, y, (z), intensity, doppler
             if (!cascadeConfig_->hasDoppler) numDims -= 1;
 
@@ -381,17 +394,17 @@ std::vector<std::string> ColoradarPlusDataset::exportCascade(std::vector<Colorad
             for (size_t i = 0; i < numFrames; ++i) {
                 pcl::PointCloud<RadarPoint> cloud;
                 if (buildClouds) {
-                    cloud = heatmapToPointcloud(run->getCascadeHeatmap(i), cascadeConfig_, exportCfg->intensityThresholdPercent());
+                    cloud = heatmapToPointcloud(run->getCascadeHeatmap(i), cascadeConfig_, config.intensityThresholdPercent());
                 }
                 else {
-                    cloud = run->getCascadePointcloud(i, exportCfg->intensityThresholdPercent());
+                    cloud = run->getCascadePointcloud(i, config.intensityThresholdPercent());
                 }
                 filterFov(cloud, horizontalFov, verticalFov, range);
-                if (exportCfg->cloudsInGlobalFrame()) {
+                if (config.cloudsInGlobalFrame()) {
                     pcl::transformPointCloud(cloud, cloud, sensorPoses[i]);
                 }
-                if (exportCfg->collapseElevation()) {
-                    collapseElevation(cloud, exportCfg->collapseElevationMinZ(), exportCfg->collapseElevationMaxZ());
+                if (config.collapseElevation()) {
+                    collapseElevation(cloud, config.collapseElevationMinZ(), config.collapseElevationMaxZ());
                 }
                 cloudSizes[i] = cloud.size();
                 std::vector<float> cloudFlat = flattenRadarCloud(cloud, cascadeConfig_);
@@ -401,10 +414,11 @@ std::vector<std::string> ColoradarPlusDataset::exportCascade(std::vector<Colorad
             content.push_back(cloudContentName);
         }
     }
+    std::cout << "Finished exporting cascade." << std::endl;
     return content;
 }
 
-std::vector<std::string> ColoradarPlusDataset::exportLidar(std::vector<ColoradarPlusRun*> runs, const H5::H5File &datasetFile) {
+std::vector<std::string> ColoradarPlusDataset::exportLidar(const LidarExportConfig &config, std::vector<ColoradarPlusRun*> runs, const H5::H5File &datasetFile) {
     // Constants
     const std::string cloudContentName = "lidar_clouds",
                       mapContentName = "lidar_map",
@@ -413,7 +427,6 @@ std::vector<std::string> ColoradarPlusDataset::exportLidar(std::vector<Coloradar
                       timestampsContentName = "lidar_timestamps";
 
     std::vector<std::string> content;
-    auto exportCfg = lidar_->exportConfig();
 
     for (auto* run : runs) {
         std::vector<double> truePoseTimestamps = run->poseTimestamps();
@@ -421,27 +434,27 @@ std::vector<std::string> ColoradarPlusDataset::exportLidar(std::vector<Coloradar
         hsize_t numFrames = timestamps.size();
         auto truePoses = run->getPoses<Eigen::Affine3f>();
         std::vector<Eigen::Affine3f> basePoses = run->interpolatePoses(truePoses, truePoseTimestamps, timestamps);
-        std::vector<Eigen::Affine3f> sensorPoses;
+        std::vector<Eigen::Affine3f> sensorPoses(numFrames);
         for (int i = 0; i < numFrames; ++i) {
             sensorPoses[i] = basePoses[i] * lidarTransform_;
         }
 
         // timestamps
-        if (exportCfg->exportTimestamps()) {
+        if (config.exportTimestamps()) {
             saveVectorToHDF5(timestampsContentName + "_" + run->name, datasetFile, timestamps);
             content.push_back(timestampsContentName);
         }
 
         // poses
-        if (exportCfg->exportPoses()) {
+        if (config.exportPoses()) {
             savePosesToHDF5(posesContentName + "_" + run->name, datasetFile, sensorPoses);
             content.push_back(posesContentName);
         }
 
         // clouds
-        if (exportCfg->exportClouds()) {
-            hsize_t numDims = exportCfg->collapseElevation() ? 3 : 4;  // x, y, (z), intensity
-            if (exportCfg->removeIntensityDim()) numDims -= 1;
+        if (config.exportClouds()) {
+            hsize_t numDims = config.collapseElevation() ? 3 : 4;  // x, y, (z), intensity
+            if (config.removeIntensityDim()) numDims -= 1;
 
             std::vector<float> cloudsFlat;
             std::vector<hsize_t> cloudSizes;
@@ -449,15 +462,15 @@ std::vector<std::string> ColoradarPlusDataset::exportLidar(std::vector<Coloradar
                 auto cloud = run->getLidarPointCloud<pcl::PointCloud<pcl::PointXYZI>>(i);
                 filterFov(
                     cloud,
-                    exportCfg->cloudFov().horizontalDegreesTotal, 
-                    exportCfg->cloudFov().verticalDegreesTotal, 
-                    exportCfg->cloudFov().rangeMeters
+                    config.cloudFov().horizontalDegreesTotal,
+                    config.cloudFov().verticalDegreesTotal,
+                    config.cloudFov().rangeMeters
                 );
-                if (exportCfg->collapseElevation()) {
-                    collapseElevation(cloud, exportCfg->collapseElevationMinZ(), exportCfg->collapseElevationMaxZ());
+                if (config.collapseElevation()) {
+                    collapseElevation(cloud, config.collapseElevationMinZ(), config.collapseElevationMaxZ());
                 }
                 cloudSizes[i] = cloud.size();
-                std::vector<float> cloudFlat = flattenLidarCloud(cloud, exportCfg->collapseElevation(), exportCfg->removeIntensityDim());
+                std::vector<float> cloudFlat = flattenLidarCloud(cloud, config.collapseElevation(), config.removeIntensityDim());
                 cloudsFlat.insert(cloudsFlat.end(), cloudFlat.begin(), cloudFlat.end());
             }
             saveCloudsToHDF5(cloudContentName + "_" + run->name, datasetFile, cloudsFlat, numFrames, cloudSizes, numDims);
@@ -465,32 +478,32 @@ std::vector<std::string> ColoradarPlusDataset::exportLidar(std::vector<Coloradar
         }
         
         // map and samples
-        if (exportCfg->exportMap() || exportCfg->exportMapSamples()) {
+        if (config.exportMap() || config.exportMapSamples()) {
             pcl::PointCloud<pcl::PointXYZI> map = run->readLidarOctomap();
-            hsize_t numDims = exportCfg->collapseElevation() ? 3 : 4;  // x, y, (z), occupancy
-            if (exportCfg->removeOccupancyDim()) numDims -= 1;
+            hsize_t numDims = config.collapseElevation() ? 3 : 4;  // x, y, (z), occupancy
+            if (config.removeOccupancyDim()) numDims -= 1;
 
-            if (exportCfg->collapseElevation()) {
-                collapseElevation(map, exportCfg->collapseElevationMinZ(), exportCfg->collapseElevationMaxZ());
+            if (config.collapseElevation()) {
+                collapseElevation(map, config.collapseElevationMinZ(), config.collapseElevationMaxZ());
             }
-            filterOccupancy(map, exportCfg->occupancyThresholdPercent() / 100.0, exportCfg->logOddsToProbability());
+            filterOccupancy(map, config.occupancyThresholdPercent() / 100.0, config.logOddsToProbability());
 
-            if (exportCfg->exportMap()) {
-                std::vector<float> mapFlat = flattenLidarCloud(map, exportCfg->collapseElevation(), exportCfg->removeOccupancyDim());
+            if (config.exportMap()) {
+                std::vector<float> mapFlat = flattenLidarCloud(map, config.collapseElevation(), config.removeOccupancyDim());
                 saveCloudToHDF5(mapContentName + "_" + run->name, datasetFile, mapFlat, numDims);
                 content.push_back(mapContentName);
             }
 
-            if (exportCfg->exportMapSamples()) {
+            if (config.exportMapSamples()) {
                 std::vector<double> egoTimestamps;
                 Eigen::Affine3f egoTransform;
-                if (exportCfg->centerSensor()->name == CascadeDevice::name) {
+                if (config.centerSensor()->name == CascadeDevice::name) {
                     egoTimestamps = run->cascadeTimestamps();
                     egoTransform = cascadeTransform_;
-                } else if (exportCfg->centerSensor()->name == LidarDevice::name) {
+                } else if (config.centerSensor()->name == LidarDevice::name) {
                     egoTimestamps = run->lidarTimestamps();
                     egoTransform = lidarTransform_;
-                } else if (exportCfg->centerSensor()->name == ImuDevice::name) {
+                } else if (config.centerSensor()->name == ImuDevice::name) {
                     egoTimestamps = run->imuTimestamps();
                     egoTransform = imuTransform_;
                 } else {
@@ -498,26 +511,28 @@ std::vector<std::string> ColoradarPlusDataset::exportLidar(std::vector<Coloradar
                     egoTransform = Eigen::Affine3f::Identity();
                 }
                 hsize_t numSamples = egoTimestamps.size();
-                std::vector<Eigen::Affine3f> egoPoses = run->interpolatePoses(truePoses, truePoseTimestamps, egoTimestamps);
+                // std::vector<Eigen::Affine3f> egoPoses = run->interpolatePoses(truePoses, truePoseTimestamps, egoTimestamps);
 
-                if (exportCfg->forceResample()) {
-                    run->sampleMapFrames(
-                        exportCfg->mapSampleFov().horizontalDegreesTotal,
-                        exportCfg->mapSampleFov().verticalDegreesTotal,
-                        exportCfg->mapSampleFov().rangeMeters,
-                        egoTransform,
-                        egoPoses
+                if (config.forceResample()) {
+                    std::cout << "Sampling map for run " << run->name << std::endl;
+                    run->createMapSamples(
+                        config.mapSampleFov().horizontalDegreesTotal,
+                        config.mapSampleFov().verticalDegreesTotal,
+                        config.mapSampleFov().rangeMeters,
+                        egoTimestamps,
+                        egoTransform
                     );
-                } else if (exportCfg->allowResample()) {
+                } else if (config.allowResample()) {
                     try {
                         auto sample = run->readMapFrame(0);
                     } catch (const std::filesystem::filesystem_error& e) {
-                        run->sampleMapFrames(
-                            exportCfg->mapSampleFov().horizontalDegreesTotal,
-                            exportCfg->mapSampleFov().verticalDegreesTotal,
-                            exportCfg->mapSampleFov().rangeMeters,
-                            egoTransform,
-                            egoPoses
+                        std::cout << "Sampling map for run " << run->name << std::endl;
+                        run->createMapSamples(
+                            config.mapSampleFov().horizontalDegreesTotal,
+                            config.mapSampleFov().verticalDegreesTotal,
+                            config.mapSampleFov().rangeMeters,
+                            egoTimestamps,
+                            egoTransform
                         );
                     }
                 }
@@ -526,7 +541,7 @@ std::vector<std::string> ColoradarPlusDataset::exportLidar(std::vector<Coloradar
                 for (size_t i = 0; i < numSamples; ++i) {
                     pcl::PointCloud<pcl::PointXYZI> sample = run->readMapFrame(i);
                     sampleSizes[i] = sample.size();
-                    auto sampleFlat = flattenLidarCloud(sample, exportCfg->collapseElevation(), exportCfg->removeOccupancyDim());
+                    auto sampleFlat = flattenLidarCloud(sample, config.collapseElevation(), config.removeOccupancyDim());
                     samplesFlat.insert(samplesFlat.end(), sampleFlat.begin(), sampleFlat.end());
                 }
                 saveCloudsToHDF5(mapSampleContentName + "_" + run->name, datasetFile, samplesFlat, numSamples, sampleSizes, numDims);
@@ -534,10 +549,13 @@ std::vector<std::string> ColoradarPlusDataset::exportLidar(std::vector<Coloradar
             }
         }
     }
+    std::cout << "Finished exporting lidar." << std::endl;
     return content;
 }
 
 std::filesystem::path ColoradarPlusDataset::exportToFile(const DatasetExportConfig &exportConfig) {
+    std::cout << "Initialized IMU export config: " << "exportPoses(): " << exportConfig.imu().exportPoses() << ", exportTimestamps(): " << exportConfig.imu().exportTimestamps() << ", exportData(): " << exportConfig.imu().exportData() << std::endl;
+    
     std::vector<ColoradarPlusRun*> runObjects;
     if (exportConfig.runs().empty()) {
         runObjects = getRuns();
@@ -555,10 +573,10 @@ std::filesystem::path ColoradarPlusDataset::exportToFile(const DatasetExportConf
     finalConfig["data_content"] = Json::arrayValue;
 
     for (const auto &contentList : {
-        exportBaseDevice(runObjects, datasetFile),
-        exportImu(runObjects, datasetFile),
-        exportCascade(runObjects, datasetFile),
-        exportLidar(runObjects, datasetFile)})
+        exportBaseDevice(exportConfig.base(), runObjects, datasetFile),
+        exportImu(exportConfig.imu(), runObjects, datasetFile),
+        exportCascade(exportConfig.cascade(), runObjects, datasetFile),
+        exportLidar(exportConfig.lidar(), runObjects, datasetFile)})
     {
         for (const auto &content : contentList) {
             finalConfig["data_content"].append(content);
@@ -573,6 +591,7 @@ std::filesystem::path ColoradarPlusDataset::exportToFile(const DatasetExportConf
     configDataset.write(configString, strType);
     return exportConfig.destinationFilePath();
 }
+
 std::filesystem::path ColoradarPlusDataset::exportToFile(const std::string &yamlConfigPath) {
     DatasetExportConfig exportConfig = DatasetExportConfig(yamlConfigPath);
     std::cout << "Initialized export config." << std::endl;

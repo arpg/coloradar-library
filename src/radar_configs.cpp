@@ -519,7 +519,7 @@ Json::Value coloradar::RadarConfig::toJson() const {
 
 void coloradar::RadarConfig::setNumRangeBins(const int& num) { numPosRangeBins = num; }
 const int& coloradar::RadarConfig::nRangeBins() const { return numPosRangeBins; }
-const float& coloradar::RadarConfig::maxRange() const { return std::ceil(nRangeBins() * rangeBinWidth * 100.0f) / 100.0f; }
+float coloradar::RadarConfig::maxRange() const { return std::ceil(nRangeBins() * rangeBinWidth * 100.0f) / 100.0f; }
 
 int coloradar::RadarConfig::clipAzimuthMaxBin(const int& azMaxBin) { 
     return azMaxBin >= 0 && (azMaxBin + 1) * 2 < numAzimuthBins ? azMaxBin : numAzimuthBins / 2; 
