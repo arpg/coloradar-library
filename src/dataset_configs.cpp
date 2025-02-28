@@ -7,39 +7,22 @@
 namespace coloradar {
 
 
-YAML::Node DatasetExportConfig::findNode(const YAML::Node &config, const std::string &nestedKey) {
-    std::istringstream iss(nestedKey);
-    std::string token;
-    YAML::Node node = config;
-
-    while (std::getline(iss, token, '.')) {
-        if (!node.IsMap()) {
-            return YAML::Node();  // Return empty node if the current node isn't a map
-        }
-        if (!node[token]) {
-            return YAML::Node();  // Return empty node if the key isn't found
-        }
-        node = node[token];  // Move to the nested node
-    }
-    return YAML::Clone(node);  // Ensure it returns a deep copy
-}
-
-
 void DatasetExportConfig::validateConfigYaml(const YAML::Node &config) {
-    YAML::Node devicesNode = findNode(config, "devices");
+    std::cout << std::endl;
+    for (auto nodeName : {"global", "devices"}) {
+        if (!config[nodeName]) {
+            throw std::runtime_error("Missing node: " + std::string(nodeName));
+        }
+    }
     std::cout << "Root keys after find node: ";
     for (auto it = config.begin(); it != config.end(); ++it) {
         std::cout << it->first.as<std::string>() << " ";
-    }
-    std::cout << std::endl;
-    if (!devicesNode.IsDefined() || devicesNode.IsNull()) {
-        return;
     }
 }
 
 
 std::filesystem::path DatasetExportConfig::parseDestination(const YAML::Node &config, const std::filesystem::path &defaultDestination) {
-    YAML::Node node = findNode(config, "global.destination");
+    YAML::Node node; // = findNode(config, "global.destination");
     std::filesystem::path destination;
     if (!node.IsDefined() || node.IsNull()) {
         destination = defaultDestination;
@@ -50,7 +33,7 @@ std::filesystem::path DatasetExportConfig::parseDestination(const YAML::Node &co
 }
 
 std::vector<std::string> DatasetExportConfig::parseRuns(const YAML::Node &config) {
-    YAML::Node node = findNode(config, "global.runs");
+    YAML::Node node; // = findNode(config, "global.runs");
     std::vector<std::string> runs;
     if (!node.IsDefined() || node.IsNull()) {
         std::cout << "Runs node not found" << std::endl;
@@ -72,7 +55,7 @@ std::vector<std::string> DatasetExportConfig::parseRuns(const YAML::Node &config
 }
 
 bool DatasetExportConfig::parseBoolKey(const YAML::Node &config, const std::string &nestedKey, bool defaultValue) {
-    YAML::Node node = findNode(config, nestedKey);
+    YAML::Node node; // = findNode(config, nestedKey);
     if (!node.IsDefined() || node.IsNull()) {
         return defaultValue;
     }
@@ -84,7 +67,7 @@ bool DatasetExportConfig::parseBoolKey(const YAML::Node &config, const std::stri
 }
 
 int DatasetExportConfig::parseIntKey(const YAML::Node &config, const std::string &nestedKey, int defaultValue) {
-    YAML::Node node = findNode(config, nestedKey);
+    YAML::Node node; // = findNode(config, nestedKey);
     if (!node.IsDefined() || node.IsNull()) {
         return defaultValue;
     }
@@ -96,7 +79,7 @@ int DatasetExportConfig::parseIntKey(const YAML::Node &config, const std::string
 }
 
 float DatasetExportConfig::parseFloatKey(const YAML::Node &config, const std::string &nestedKey, float defaultValue) {
-    YAML::Node node = findNode(config, nestedKey);
+    YAML::Node node; // = findNode(config, nestedKey);
     if (!node.IsDefined() || node.IsNull()) {
         return defaultValue;
     }
@@ -171,11 +154,11 @@ DatasetExportConfig::DatasetExportConfig(const std::string &yamlFilePath) {
     runs_ = parseRuns(config);
     exportTransforms_ = parseBoolKey(config, "global.export_transforms", exportTransforms_);
 
-    cascadeCfg_.loadFromFile(findNode(config, "devices.cascade_radar"));
-    lidarCfg_.loadFromFile(findNode(config, "devices.lidar"));
-    baseCfg_.loadFromFile(findNode(config, "devices.base"));
-    imuCfg_.loadFromFile(findNode(config, "devices.imu"));
-    singleChipCfg_.loadFromFile(findNode(config, "devices.single_chip_radar"));
+    // cascadeCfg_.loadFromFile(findNode(config, "devices.cascade_radar"));
+    // lidarCfg_.loadFromFile(findNode(config, "devices.lidar"));
+    // baseCfg_.loadFromFile(findNode(config, "devices.base"));
+    // imuCfg_.loadFromFile(findNode(config, "devices.imu"));
+    // singleChipCfg_.loadFromFile(findNode(config, "devices.single_chip_radar"));
 
     std::vector<BaseExportConfig*> deviceConfigs = {&cascadeCfg_, &lidarCfg_, &baseCfg_, &imuCfg_, &singleChipCfg_};
     for (auto* deviceCfg : deviceConfigs) {

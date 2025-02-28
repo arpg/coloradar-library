@@ -47,7 +47,6 @@ namespace std {
     inline double acos(double x) { return ::acos(static_cast<double>(x)); }
     inline double asin(double x) { return ::asin(static_cast<double>(x)); }
 }
-#endif
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -67,5 +66,8 @@ inline int syscall_wrapper(long number, ...) {
 
 #define _GLIBCXX_USE_CXX11_ABI 1
 #define _GLIBCXX_ASSERTIONS 1
+
+#endif
+
 
 #endif

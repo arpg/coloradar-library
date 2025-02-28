@@ -2,8 +2,15 @@
 
 ## 1. Pre-built Images
 
+Login to the Github container Registry:
 ```bash
-docker pghcr.io/arpg/coloradar-lib:{<X.Y>}{-<ros_distro>}
+docker login ghcr.io
+```
+
+Pull an image:
+
+```bash
+docker pull ghcr.io/arpg/coloradar-lib:{<X.Y>}{-<ros_distro>}
 ```
 
 **Example:**
@@ -15,7 +22,6 @@ docker pull ghcr.io/arpg/coloradar-lib:12.6-jazzy
 
 | ros_version | OS                 | Python | Cuda             |
 |-------------|--------------------|--------|------------------|
-| noetic      | Ubuntu 20.04 Focal | 3.8    | 12.6, 12.8, none |
 | humble      | Ubuntu 22.04 Jammy | 3.10   | 12.6, 12.8, none |
 | jazzy       | Ubuntu 24.04 Noble | 3.12   | 12.6, 12.8, none |
 | none        | Ubuntu 24.04 Noble | 3.12   | 12.6, 12.8, none |
