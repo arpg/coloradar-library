@@ -53,7 +53,7 @@ public:
         return *this;
     }
 
-    const void loadExportConfig(const BaseExportConfig* config) const { if (config) *exportConfig_ = *config; }
+    void loadExportConfig(const BaseExportConfig* config) const { if (config) *exportConfig_ = *config; }
     const virtual BaseExportConfig* exportConfig() const { return exportConfig_.get(); }
 
     virtual ~BaseDevice() = default;
@@ -157,6 +157,7 @@ protected:
     float occupancyThresholdPercent_;
     bool allowResample_;
     bool forceResample_;
+    bool saveSamples_;
     std::unique_ptr<BaseDevice> centerSensor_;
     FovConfig mapSampleFov_;
 
@@ -183,6 +184,7 @@ public:
         float occupancyThresholdPercent = 0.0f,
         bool allowResample = true,
         bool forceResample = false,
+        bool saveSamples = false,
         std::unique_ptr<BaseDevice> centerSensor = std::make_unique<BaseDevice>(),
         FovConfig mapSampleFov = FovConfig()
 
@@ -200,6 +202,7 @@ public:
         occupancyThresholdPercent_(occupancyThresholdPercent),
         allowResample_(allowResample),
         forceResample_(forceResample),
+        saveSamples_(saveSamples),
         centerSensor_(std::move(centerSensor)),
         mapSampleFov_(mapSampleFov) {
         validate();
@@ -220,6 +223,7 @@ public:
       occupancyThresholdPercent_(other.occupancyThresholdPercent_),
       allowResample_(other.allowResample_),
       forceResample_(other.forceResample_),
+      saveSamples_(other.saveSamples_),
       centerSensor_(other.centerSensor_ ? std::make_unique<BaseDevice>(*other.centerSensor_) : nullptr),
       mapSampleFov_(other.mapSampleFov_) {}
 
@@ -240,6 +244,7 @@ public:
             occupancyThresholdPercent_ = other.occupancyThresholdPercent_;
             allowResample_ = other.allowResample_;
             forceResample_ = other.forceResample_;
+            saveSamples_ = other.saveSamples_;
             centerSensor_ = other.centerSensor_ ? std::make_unique<BaseDevice>(*other.centerSensor_) : nullptr;
             mapSampleFov_ = other.mapSampleFov_;
         }
@@ -259,6 +264,7 @@ public:
     const float& occupancyThresholdPercent() const { return occupancyThresholdPercent_; }
     const bool& allowResample() const { return allowResample_; }
     const bool& forceResample() const { return forceResample_; }
+    const bool& saveSamples() const { return saveSamples_; }
     const BaseDevice* centerSensor() const { return centerSensor_.get(); }
     const FovConfig& mapSampleFov() const { return mapSampleFov_; }
 

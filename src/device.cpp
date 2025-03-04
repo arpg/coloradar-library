@@ -109,12 +109,21 @@ void RadarExportConfig::loadFromFile(const YAML::Node& deviceNode) {
     collapseElevationMaxZ_ = coloradar::internal::parseFloatYamlKey(deviceNode["collapse_elevation_max_z_meters"], collapseElevationMaxZ_);
     removeDopplerDim_ = coloradar::internal::parseBoolYamlKey(deviceNode["remove_doppler_dim"], removeDopplerDim_);
 
-    fov_.azimuthIdx = coloradar::internal::parseIntYamlKey(deviceNode["fov_azimuth_idx"], fov_.azimuthIdx);
-    fov_.elevationIdx = coloradar::internal::parseIntYamlKey(deviceNode["fov_elevation_idx"], fov_.elevationIdx);
-    fov_.horizontalDegreesTotal = coloradar::internal::parseFloatYamlKey(deviceNode["horizontal_fov_degrees_total"], fov_.horizontalDegreesTotal);
-    fov_.verticalDegreesTotal = coloradar::internal::parseFloatYamlKey(deviceNode["vertical_fov_degrees_total"], fov_.verticalDegreesTotal);
+    int azimuthIdx = coloradar::internal::parseIntYamlKey(deviceNode["fov_azimuth_idx"], fov_.azimuthIdx);
+    int elevationIdx = coloradar::internal::parseIntYamlKey(deviceNode["fov_elevation_idx"], fov_.elevationIdx);
+    int horizontalDegreesTotal = coloradar::internal::parseFloatYamlKey(deviceNode["horizontal_fov_degrees_total"], fov_.horizontalDegreesTotal);
+    int verticalDegreesTotal = coloradar::internal::parseFloatYamlKey(deviceNode["vertical_fov_degrees_total"], fov_.verticalDegreesTotal);
     fov_.rangeMeters = coloradar::internal::parseFloatYamlKey(deviceNode["range_meters"], fov_.rangeMeters);
-    
+    if (azimuthIdx >= 0 || elevationIdx >= 0                         // non-default idx values
+       || (horizontalDegreesTotal == fov_.horizontalDegreesTotal     // default horizontal degree value
+           && verticalDegreesTotal == fov_.verticalDegreesTotal)) {  // default vertical degree value
+        fov_.useDegreeConstraints = false;
+    }
+    fov_.azimuthIdx = azimuthIdx;
+    fov_.elevationIdx = elevationIdx;
+    fov_.horizontalDegreesTotal = horizontalDegreesTotal;
+    fov_.verticalDegreesTotal = verticalDegreesTotal;
+
     exportDatacubes_ = coloradar::internal::parseBoolYamlKey(deviceNode["export_datacubes"], exportDatacubes_);
     exportHeatmaps_ = coloradar::internal::parseBoolYamlKey(deviceNode["export_heatmaps"], exportHeatmaps_);
     exportClouds_ = coloradar::internal::parseBoolYamlKey(deviceNode["export_clouds"], exportClouds_);
@@ -142,6 +151,7 @@ void LidarExportConfig::loadFromFile(const YAML::Node& deviceNode) {
     occupancyThresholdPercent_ = coloradar::internal::parseFloatYamlKey(deviceNode["occupancy_threshold_percent"], occupancyThresholdPercent_);
     allowResample_ = coloradar::internal::parseBoolYamlKey(deviceNode["allow_resample"], allowResample_);
     forceResample_ = coloradar::internal::parseBoolYamlKey(deviceNode["force_resample"], forceResample_);
+    saveSamples_ = coloradar::internal::parseBoolYamlKey(deviceNode["save_samples"], saveSamples_);
     mapSampleFov_.horizontalDegreesTotal = coloradar::internal::parseFloatYamlKey(deviceNode["map_sample_fov.horizontal_fov_degrees_total"], mapSampleFov_.horizontalDegreesTotal);
     mapSampleFov_.verticalDegreesTotal = coloradar::internal::parseFloatYamlKey(deviceNode["map_sample_fov.vertical_fov_degrees_total"], mapSampleFov_.verticalDegreesTotal);
     mapSampleFov_.rangeMeters = coloradar::internal::parseFloatYamlKey(deviceNode["map_sample_fov.range_meters"], mapSampleFov_.rangeMeters);

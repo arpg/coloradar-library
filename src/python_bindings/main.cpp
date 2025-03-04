@@ -115,6 +115,7 @@ py::array_t<float> radarCloudToNumpy(const pcl::PointCloud<coloradar::RadarPoint
     return result;
 }
 
+
 py::array_t<float> pointcloudToNumpy(const pcl::PointCloud<pcl::PointXYZI>& cloud) {
     py::array_t<float>::ShapeContainer shape({static_cast<long int>(cloud.points.size()), 4});
     py::array_t<float> result(shape);
@@ -128,6 +129,31 @@ py::array_t<float> pointcloudToNumpy(const pcl::PointCloud<pcl::PointXYZI>& clou
     }
     return result;
 }
+
+pcl::PointCloud<pcl::PointXYZI> numpyToPointcloud(const py::array_t<float>& array) {
+    if (isNumpyArrayEmpty(array)) {
+        throw std::runtime_error("Input NumPy array is empty or invalid.");
+    }
+    if (array.ndim() != 2 || array.shape(1) != 4) {
+        throw std::runtime_error("Input NumPy array must have shape (N, 4) where N is the number of points.");
+    }
+    auto array_data = array.unchecked<2>();
+    pcl::PointCloud<pcl::PointXYZI> cloud;
+    cloud.points.reserve(array.shape(0));
+    for (ssize_t i = 0; i < array.shape(0); ++i) {
+        pcl::PointXYZI point;
+        point.x = array_data(i, 0);
+        point.y = array_data(i, 1);
+        point.z = array_data(i, 2);
+        point.intensity = array_data(i, 3);
+        cloud.points.push_back(point);
+    }
+    cloud.width = static_cast<uint32_t>(cloud.points.size());
+    cloud.height = 1;
+    cloud.is_dense = false;
+    return cloud;
+}
+
 
 template<typename T>
 py::array_t<T> vectorToNumpy(const std::vector<T>& vec) {
@@ -233,15 +259,24 @@ PYBIND11_MODULE(coloradar_dataset_lib, m) {
         }, py::arg("map_resolution") = 0.5, py::arg("lidar_total_horizontal_fov") = 360, py::arg("lidar_total_vertical_fov") = 180, py::arg("lidar_max_range") = 100, py::arg("base_to_lidar_transform") = poseToNumpy(Eigen::Affine3f::Identity()))
         .def("get_lidar_octomap", [](coloradar::ColoradarPlusRun& self) { auto octree = self.readLidarOctomap(); return pointcloudToNumpy(octree); })
 
-        .def("get_map_frame", [](coloradar::ColoradarPlusRun& self, int frameIdx) { return pointcloudToNumpy(self.readMapFrame(frameIdx)); }, py::arg("frame_idx"))
+        .def("get_map_sample", [](coloradar::ColoradarPlusRun& self, int frameIdx) { return pointcloudToNumpy(self.readMapSample(frameIdx)); }, py::arg("frame_idx"))
+        .def("sample_map_frame", [](coloradar::ColoradarPlusRun& self,
+                                    float horizontalFov, float verticalFov, float range,
+                                    const py::array_t<float>& mapFramePoseArray,
+                                    const py::array_t<float>& mapCloudArray) {
+            Eigen::Affine3f mapFramePose = numpyToPose(mapFramePoseArray);
+            pcl::PointCloud<pcl::PointXYZI> mapCloud = numpyToPointcloud(mapCloudArray);
+            auto sampledFrame = self.sampleMapFrame(horizontalFov, verticalFov, range, mapFramePose, mapCloud);
+            return pointcloudToNumpy(sampledFrame);
+        }, py::arg("horizontal_fov") = 360, py::arg("vertical_fov") = 180, py::arg("range") = 100, py::arg("map_frame_pose"), py::arg("map_cloud"))
         .def("sample_map_frames", [](coloradar::ColoradarPlusRun& self,
                                      float horizontalFov, float verticalFov, float range,
-                                     const py::array_t<float>& povPosesArray) {
-            auto frames = self.sampleMapFrames(horizontalFov, verticalFov, range, numpyToPoses(povPosesArray));
+                                     const py::array_t<float>& mapFramePosesArray) {
+            auto frames = self.sampleMapFrames(horizontalFov, verticalFov, range, numpyToPoses(mapFramePosesArray));
             std::vector<py::array_t<float>> numpyFrames;
             for (auto& frame : frames) { numpyFrames.push_back(pointcloudToNumpy(frame)); }
             return numpyFrames;
-        }, py::arg("horizontal_fov") = 360, py::arg("vertical_fov") = 180, py::arg("range") = 100, py::arg("pov_poses"))
+        }, py::arg("horizontal_fov") = 360, py::arg("vertical_fov") = 180, py::arg("range") = 100, py::arg("map_frame_poses"))
 
         .def("create_map_samples", [](coloradar::ColoradarPlusRun& self,
                                      float horizontalFov, float verticalFov, float range,

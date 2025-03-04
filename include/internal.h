@@ -10,6 +10,12 @@ namespace coloradar::internal {
 
     void checkPathExists(const std::filesystem::path& path);
     void createDirectoryIfNotExists(const std::filesystem::path& dirPath);
+    std::vector<std::filesystem::path> readArrayDirectory(
+        const std::filesystem::path& directoryPath,
+        const std::string& filePrefix = "",
+        const std::string& fileExtension = "",
+        const int& arraySize = -1
+    );
 
     template<coloradar::Pcl4dPointType PointT> PointT makePoint(const float& x, const float& y, const float& z, const float& i);
     template<coloradar::PointType PointT> PointT makePoint(const float& x, const float& y, const float& z, const float& i);

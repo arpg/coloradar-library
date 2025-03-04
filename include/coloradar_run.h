@@ -85,10 +85,12 @@ public:
         Eigen::Affine3f baseToLidarTransform = Eigen::Affine3f::Identity()
     );
 
-    pcl::PointCloud<pcl::PointXYZI> readMapFrame(const int& frameIdx);
-    pcl::PointCloud<pcl::PointXYZI> sampleMapFrame(const float& horizontalFov, const float& verticalFov, const float& range, const Eigen::Affine3f& povPose, const pcl::PointCloud<pcl::PointXYZI>& mapCloud);
-    std::vector<pcl::PointCloud<pcl::PointXYZI>> sampleMapFrames(const float& horizontalFov, const float& verticalFov, const float& range, const std::vector<Eigen::Affine3f>& povPoses);
-    void saveMapFrames(const std::vector<pcl::PointCloud<pcl::PointXYZI>>& frames);
+    pcl::PointCloud<pcl::PointXYZI> readMapSample(const int& sampleIdx);
+    std::vector<pcl::PointCloud<pcl::PointXYZI>> readMapSamples(const int& numSamples = -1);
+    pcl::PointCloud<pcl::PointXYZI> sampleMapFrame(const float& horizontalFov, const float& verticalFov, const float& range, const Eigen::Affine3f& mapFramePose, const pcl::PointCloud<pcl::PointXYZI>& mapCloud);
+    std::vector<pcl::PointCloud<pcl::PointXYZI>> sampleMapFrames(const float& horizontalFov, const float& verticalFov, const float& range, const std::vector<Eigen::Affine3f>& mapFramePoses);
+    void saveMapSample(const pcl::PointCloud<pcl::PointXYZI>& sample, const int& sampleIdx);
+    void saveMapSamples(const std::vector<pcl::PointCloud<pcl::PointXYZI>>& frames);
     void createMapSamples(
         const float& horizontalFov,
         const float& verticalFov,

@@ -77,7 +77,9 @@ devices:
     # False to fail if samples don't exist on disk
     allow_resample: True
     # True to always rewrite existing samples based on the latest map configuration
-    force_resample: True
+    force_resample: False
+    # True to save the samples on disk. Will overwrite any existing samples
+    save_samples: False
     # sampling perspective options: base, lidar, cascade
     center_sensor: cascade_radar
     map_sample_fov:

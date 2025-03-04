@@ -8,7 +8,6 @@ namespace coloradar {
 
 
 void DatasetExportConfig::validateConfigYaml(const YAML::Node &config) {
-    std::cout << std::endl;
     for (auto nodeName : {"global", "devices"}) {
         if (!config[nodeName]) {
             throw std::runtime_error("Missing node: " + std::string(nodeName));
@@ -29,7 +28,6 @@ std::filesystem::path DatasetExportConfig::parseDestination(const YAML::Node &de
 std::vector<std::string> DatasetExportConfig::parseRuns(const YAML::Node &runsValue) {
     std::vector<std::string> runs;
     if (!runsValue) {
-        std::cout << "Runs node not found" << std::endl;
         return runs;
     }
     if (runsValue.IsScalar()) {
@@ -43,7 +41,6 @@ std::vector<std::string> DatasetExportConfig::parseRuns(const YAML::Node &runsVa
     } else {
         throw std::runtime_error("Invalid format for 'runs' key.");
     }
-    std::cout << "Found runs: " << runs[0] << ", " << runs[1] << std::endl;
     return validateRuns(runs);
 }
 
@@ -106,7 +103,6 @@ DatasetExportConfig::DatasetExportConfig(const std::string &yamlFilePath) {
     lidarCfg_.loadFromFile(config["devices"]["lidar"]);
     baseCfg_.loadFromFile(config["devices"]["base"]);
     imuCfg_.loadFromFile(config["devices"]["imu"]);
-    std::cout << "Validating IMU export config: " << "exportPoses(): " << imuCfg_.exportPoses() << ", exportTimestamps(): " << imuCfg_.exportTimestamps() << ", exportData(): " << imuCfg_.exportData() << std::endl;
     singleChipCfg_.loadFromFile(config["devices"]["single_chip_radar"]);
 
     std::vector<BaseExportConfig*> deviceConfigs = {&cascadeCfg_, &lidarCfg_, &baseCfg_, &imuCfg_, &singleChipCfg_};
