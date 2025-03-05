@@ -703,7 +703,6 @@ pcl::PointCloud<coloradar::RadarPoint> coloradar::heatmapToPointcloud(
         cosElevations[el] = std::cos(angle);
         sinElevations[el] = std::sin(angle);
     }
-
     auto heatmapIt = heatmap.begin();
     for (int elIdx = 0; elIdx < config->numElevationBins; ++elIdx) {
         for (int azIdx = 0; azIdx < config->numAzimuthBins; ++azIdx) {
@@ -732,5 +731,5 @@ pcl::PointCloud<coloradar::RadarPoint> coloradar::heatmapToPointcloud(
             filteredCloud.push_back(pt);
         }
     }
-    return cloud;
+    return filteredCloud;
 }
