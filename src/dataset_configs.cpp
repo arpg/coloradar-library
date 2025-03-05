@@ -107,8 +107,7 @@ DatasetExportConfig::DatasetExportConfig(const std::string &yamlFilePath) {
 
     std::vector<BaseExportConfig*> deviceConfigs = {&cascadeCfg_, &lidarCfg_, &baseCfg_, &imuCfg_, &singleChipCfg_};
     for (auto* deviceCfg : deviceConfigs) {
-        if (lidarCfg_.centerSensor() &&
-            typeid(*lidarCfg_.centerSensor()->exportConfig()) == typeid(*deviceCfg)) {
+        if (lidarCfg_.centerSensor() && typeid(*lidarCfg_.centerSensor()->exportConfig()) == typeid(*deviceCfg)) {
             lidarCfg_.centerSensor()->loadExportConfig(deviceCfg);
         }
     }

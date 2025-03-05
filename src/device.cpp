@@ -2,11 +2,11 @@
 
 
 bool coloradar::validateDeviceName(const std::string &deviceName) {
-    if (deviceName != coloradar::CascadeDevice::name && 
-        deviceName != coloradar::SingleChipDevice::name && 
-        deviceName != coloradar::LidarDevice::name && 
-        deviceName != coloradar::ImuDevice::name && 
-        deviceName != coloradar::BaseDevice::name) {
+    if (deviceName != (new coloradar::CascadeDevice())->name() &&
+        deviceName != (new coloradar::SingleChipDevice())->name() &&
+        deviceName != (new coloradar::LidarDevice())->name() &&
+        deviceName != (new coloradar::ImuDevice())->name() &&
+        deviceName != (new coloradar::BaseDevice())->name()) {
         return false;
     }
     return true;
@@ -34,20 +34,20 @@ void RadarExportConfig::validate() {
     BaseExportConfig::validate();
     if (collapseElevation_) {
         if (collapseElevationMaxZ_ < collapseElevationMinZ_) {
-            throw std::runtime_error("Error in configuring " + deviceName_ + ": 'collapse_elevation_max_z_meters' must be greater or equal to 'collapse_elevation_min_z_meters'.");
+            throw std::runtime_error("'collapse_elevation_max_z_meters' must be greater or equal to 'collapse_elevation_min_z_meters'.");
         }
     }
     if (fov_.useDegreeConstraints) {
         if (fov_.horizontalDegreesTotal < 0 || fov_.horizontalDegreesTotal > 360) {
-            throw std::runtime_error("Error in configuring " + deviceName_ + ": 'horizontal_fov_degrees_total' must be a float between 0 and 360.");
+            throw std::runtime_error("'horizontal_fov_degrees_total' must be a float between 0 and 360.");
         }
         if (fov_.verticalDegreesTotal < 0 || fov_.verticalDegreesTotal > 180) {
-            throw std::runtime_error("Error in configuring " + deviceName_ + ": 'vertical_fov_degrees_total' must be a float between 0 and 180.");
+            throw std::runtime_error("'vertical_fov_degrees_total' must be a float between 0 and 180.");
         }
     }
     if (exportClouds_) {
         if (intensityThresholdPercent_ < 0 || intensityThresholdPercent_ > 100) {
-            throw std::runtime_error("Error in configuring " + deviceName_ + ": 'intensity_threshold_percent' must be a float between 0 and 100.");
+            throw std::runtime_error("'intensity_threshold_percent' must be a float between 0 and 100.");
         }
     }
 }
@@ -57,40 +57,40 @@ void LidarExportConfig::validate() {
     BaseExportConfig::validate();
     if (collapseElevation_) {
         if (collapseElevationMaxZ_ < collapseElevationMinZ_) {
-            throw std::runtime_error("Error in configuring " + deviceName_ + ": 'collapse_elevation_max_z_meters' must be greater or equal to 'collapse_elevation_min_z_meters'.");
+            throw std::runtime_error("'collapse_elevation_max_z_meters' must be greater or equal to 'collapse_elevation_min_z_meters'.");
         }
     }
     if (exportClouds_) {
         if (!cloudFov_.useDegreeConstraints) {
-            throw std::runtime_error("Error in configuring " + deviceName_ + ".cloud_fov: cannot use idx fov constraints for this device.");
+            throw std::runtime_error("cloud_fov: cannot use idx fov constraints for this device.");
         }
         if (cloudFov_.horizontalDegreesTotal < 0 || cloudFov_.horizontalDegreesTotal > 360) {
-            throw std::runtime_error("Error in configuring " + deviceName_ + ".cloud_fov: 'horizontal_fov_degrees_total' must be a float between 0 and 360.");
+            throw std::runtime_error("cloud_fov: 'horizontal_fov_degrees_total' must be a float between 0 and 360.");
         }
         if (cloudFov_.verticalDegreesTotal < 0 || cloudFov_.verticalDegreesTotal > 180) {
-            throw std::runtime_error("Error in configuring " + deviceName_ + ".cloud_fov: 'vertical_fov_degrees_total' must be a float between 0 and 180.");
+            throw std::runtime_error("cloud_fov: 'vertical_fov_degrees_total' must be a float between 0 and 180.");
         }
     }
     if (exportMap_ || exportMapSamples_) {
         if (occupancyThresholdPercent_ < 0 || occupancyThresholdPercent_ > 100) {
-            throw std::runtime_error("Error in configuring " + deviceName_ + ": 'map_occupancy_threshold_percent' must be a float between 0 and 100.");
+            throw std::runtime_error("'map_occupancy_threshold_percent' must be a float between 0 and 100.");
         }
     }
     if (exportMapSamples_) {
         if (!centerSensor_) {
-            throw std::runtime_error("Error in configuring " + deviceName_ + ": center sensor cannot be set empty.");
+            throw std::runtime_error("center sensor cannot be set empty.");
         }
         if (forceResample_ && !allowResample_) {
-            throw std::runtime_error("Error in configuring " + deviceName_ + ": cannot have 'force_resample' set to True when 'allow_resample' is set to False.");
+            throw std::runtime_error("cannot have 'force_resample' set to True when 'allow_resample' is set to False.");
         }
         if (!mapSampleFov_.useDegreeConstraints) {
-            throw std::runtime_error("Error in configuring " + deviceName_ + ".map_sample_fov: cannot use idx fov constraints for this device.");
+            throw std::runtime_error(".map_sample_fov: cannot use idx fov constraints for this device.");
         }
         if (mapSampleFov_.horizontalDegreesTotal < 0 || mapSampleFov_.horizontalDegreesTotal > 360) {
-            throw std::runtime_error("Error in configuring " + deviceName_ + ".map_sample_fov: 'horizontal_fov_degrees_total' must be a float between 0 and 360.");
+            throw std::runtime_error(".map_sample_fov: 'horizontal_fov_degrees_total' must be a float between 0 and 360.");
         }
         if (mapSampleFov_.verticalDegreesTotal < 0 || mapSampleFov_.verticalDegreesTotal > 180) {
-            throw std::runtime_error("Error in configuring " + deviceName_ + ".map_sample_fov: 'vertical_fov_degrees_total' must be a float between 0 and 180.");
+            throw std::runtime_error(".map_sample_fov: 'vertical_fov_degrees_total' must be a float between 0 and 180.");
         }
     }
 }
@@ -140,9 +140,11 @@ void LidarExportConfig::loadFromFile(const YAML::Node& deviceNode) {
 
     exportClouds_ = coloradar::internal::parseBoolYamlKey(deviceNode["export_clouds"], exportClouds_);
     removeIntensityDim_ = coloradar::internal::parseBoolYamlKey(deviceNode["remove_intensity_dim"], removeIntensityDim_);
-    cloudFov_.horizontalDegreesTotal = coloradar::internal::parseFloatYamlKey(deviceNode["cloud_fov.horizontal_fov_degrees_total"], cloudFov_.horizontalDegreesTotal);
-    cloudFov_.verticalDegreesTotal = coloradar::internal::parseFloatYamlKey(deviceNode["cloud_fov.vertical_fov_degrees_total"], cloudFov_.verticalDegreesTotal);
-    cloudFov_.rangeMeters = coloradar::internal::parseFloatYamlKey(deviceNode["cloud_fov.range_meters"], cloudFov_.rangeMeters);
+
+    auto cloudFovNode = deviceNode["cloud_fov"];
+    cloudFov_.horizontalDegreesTotal = coloradar::internal::parseFloatYamlKey(cloudFovNode["horizontal_degrees_total"], cloudFov_.horizontalDegreesTotal);
+    cloudFov_.verticalDegreesTotal = coloradar::internal::parseFloatYamlKey(cloudFovNode["vertical_degrees_total"], cloudFov_.verticalDegreesTotal);
+    cloudFov_.rangeMeters = coloradar::internal::parseFloatYamlKey(cloudFovNode["range_meters"], cloudFov_.rangeMeters);
 
     exportMap_ = coloradar::internal::parseBoolYamlKey(deviceNode["export_map"], exportMap_);
     exportMapSamples_ = coloradar::internal::parseBoolYamlKey(deviceNode["export_map_samples"], exportMapSamples_);
@@ -152,20 +154,22 @@ void LidarExportConfig::loadFromFile(const YAML::Node& deviceNode) {
     allowResample_ = coloradar::internal::parseBoolYamlKey(deviceNode["allow_resample"], allowResample_);
     forceResample_ = coloradar::internal::parseBoolYamlKey(deviceNode["force_resample"], forceResample_);
     saveSamples_ = coloradar::internal::parseBoolYamlKey(deviceNode["save_samples"], saveSamples_);
-    mapSampleFov_.horizontalDegreesTotal = coloradar::internal::parseFloatYamlKey(deviceNode["map_sample_fov.horizontal_fov_degrees_total"], mapSampleFov_.horizontalDegreesTotal);
-    mapSampleFov_.verticalDegreesTotal = coloradar::internal::parseFloatYamlKey(deviceNode["map_sample_fov.vertical_fov_degrees_total"], mapSampleFov_.verticalDegreesTotal);
-    mapSampleFov_.rangeMeters = coloradar::internal::parseFloatYamlKey(deviceNode["map_sample_fov.range_meters"], mapSampleFov_.rangeMeters);
 
-    std::string centerSensorName = parseDeviceName(deviceNode["center_sensor"], centerSensor_->name);
-    if (centerSensorName == BaseDevice::name) {
+    auto mapFovNode = deviceNode["map_sample_fov"];
+    mapSampleFov_.horizontalDegreesTotal = coloradar::internal::parseFloatYamlKey(mapFovNode["horizontal_degrees_total"], mapSampleFov_.horizontalDegreesTotal);
+    mapSampleFov_.verticalDegreesTotal = coloradar::internal::parseFloatYamlKey(mapFovNode["vertical_degrees_total"], mapSampleFov_.verticalDegreesTotal);
+    mapSampleFov_.rangeMeters = coloradar::internal::parseFloatYamlKey(mapFovNode["range_meters"], mapSampleFov_.rangeMeters);
+
+    std::string centerSensorName = parseDeviceName(deviceNode["center_sensor"], centerSensor_->name());
+    if (centerSensorName == (new BaseDevice())->name()) {
         centerSensor_ = std::make_unique<BaseDevice>();
-    } else if (centerSensorName == LidarDevice::name) {
+    } else if (centerSensorName == (new LidarDevice())->name()) {
         centerSensor_ = std::make_unique<LidarDevice>();
-    } else if (centerSensorName == CascadeDevice::name) {
+    } else if (centerSensorName == (new CascadeDevice())->name()) {
         centerSensor_ = std::make_unique<CascadeDevice>();
-    } else if (centerSensorName == SingleChipDevice::name) {
+    } else if (centerSensorName == (new SingleChipDevice())->name()) {
         centerSensor_ = std::make_unique<SingleChipDevice>();
-    } else if (centerSensorName == ImuDevice::name) {
+    } else if (centerSensorName == (new ImuDevice())->name()) {
         centerSensor_ = std::make_unique<ImuDevice>();
     } else {
         throw std::runtime_error("Error: Unknown center sensor '" + centerSensorName + "'");
@@ -175,7 +179,6 @@ void LidarExportConfig::loadFromFile(const YAML::Node& deviceNode) {
 void ImuExportConfig::loadFromFile(const YAML::Node& deviceNode) {
     BaseExportConfig::loadFromFile(deviceNode);
     exportData_ = coloradar::internal::parseBoolYamlKey(deviceNode["export_data"], exportData_);
-    std::cout << "Loaded IMU export config: " << "exportPoses(): " << exportPoses() << ", exportTimestamps(): " << exportTimestamps() << ", exportData(): " << exportData() << std::endl;
 }
 
 }

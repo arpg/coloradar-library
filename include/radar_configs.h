@@ -112,7 +112,7 @@ protected:
     void init(const std::filesystem::path& calibDir) override;
 };
 
-pcl::PointCloud<RadarPoint> heatmapToPointcloud(const std::vector<float>& heatmap, RadarConfig* config, const float& intensityThresholdPercent = 0.0);
+pcl::PointCloud<RadarPoint> heatmapToPointcloud(const std::vector<float>& heatmap, RadarConfig* config, const float intensityThresholdPercent = 0.0);
 
 }
 

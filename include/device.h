@@ -10,21 +10,14 @@ bool validateDeviceName(const std::string &deviceName);
 
 // BASE CLASSES
 
-#include <memory>
-#include <string>
-
 class BaseExportConfig {
 protected:
-    std::string deviceName_;
     bool exportPoses_;
     bool exportTimestamps_;
 
     virtual void validate() {}
 public:
-    BaseExportConfig(std::string deviceName = "base", bool exportPoses = false, bool exportTimestamps = false)
-        : deviceName_(deviceName), exportPoses_(exportPoses), exportTimestamps_(exportTimestamps) {
-        validate();
-    }
+    BaseExportConfig(bool exportPoses = false, bool exportTimestamps = false) : exportPoses_(exportPoses), exportTimestamps_(exportTimestamps) { validate(); }
     BaseExportConfig(const BaseExportConfig& other) = default;
     BaseExportConfig& operator=(const BaseExportConfig& other) = default;
 
@@ -38,7 +31,7 @@ class BaseDevice {
 protected:
     std::unique_ptr<BaseExportConfig> exportConfig_;
 public:
-    static inline const std::string name = "base";
+    virtual std::string name() const { return "base"; }
 
     BaseDevice(std::unique_ptr<BaseExportConfig> exportConfig = std::make_unique<BaseExportConfig>())
         : exportConfig_(std::move(exportConfig)) {}
@@ -94,7 +87,6 @@ protected:
 
 public:
     RadarExportConfig(
-        std::string deviceName = "radar",
         bool exportPoses = false,
         bool exportTimestamps = false,
 
@@ -110,7 +102,7 @@ public:
         float intensityThresholdPercent = 0.0f,
         bool cloudsInGlobalFrame = false
 
-    ) : BaseExportConfig(deviceName, exportPoses, exportTimestamps),
+    ) : BaseExportConfig(exportPoses, exportTimestamps),
         collapseElevation_(collapseElevation),
         collapseElevationMinZ_(collapseElevationMinZ),
         collapseElevationMaxZ_(collapseElevationMaxZ),
@@ -165,7 +157,6 @@ protected:
 
 public:
     LidarExportConfig(
-        std::string deviceName = "lidar",
         bool exportPoses = false,
         bool exportTimestamps = false,
 
@@ -188,7 +179,7 @@ public:
         std::unique_ptr<BaseDevice> centerSensor = std::make_unique<BaseDevice>(),
         FovConfig mapSampleFov = FovConfig()
 
-    ) : BaseExportConfig(deviceName, exportPoses, exportTimestamps),
+    ) : BaseExportConfig(exportPoses, exportTimestamps),
         collapseElevation_(collapseElevation),
         collapseElevationMinZ_(collapseElevationMinZ),
         collapseElevationMaxZ_(collapseElevationMaxZ),
@@ -276,8 +267,7 @@ protected:
     bool exportData_;
 
 public:
-    ImuExportConfig(std::string deviceName = "imu", bool exportPoses = false, bool exportTimestamps = false, bool exportData = false)
-        : BaseExportConfig(deviceName, exportPoses, exportTimestamps), exportData_(exportData) {}
+    ImuExportConfig(bool exportPoses = false, bool exportTimestamps = false, bool exportData = false) : BaseExportConfig(exportPoses, exportTimestamps), exportData_(exportData) {}
 
     const bool& exportData() const { return exportData_; }
 
@@ -292,15 +282,10 @@ protected:
     std::unique_ptr<RadarExportConfig> exportConfig_;
 
 public:
-    static inline const std::string name = "radar";
+    std::string name() const override { return "radar"; }
 
-    RadarDevice(std::unique_ptr<RadarExportConfig> exportConfig = std::make_unique<RadarExportConfig>())
-        : exportConfig_(std::move(exportConfig)) {}
-
-    RadarDevice(const RadarDevice& other)
-        : BaseDevice(other),
-            exportConfig_(other.exportConfig_ ? std::make_unique<RadarExportConfig>(*other.exportConfig_) : nullptr) {}
-
+    RadarDevice(std::unique_ptr<RadarExportConfig> exportConfig = std::make_unique<RadarExportConfig>()) : exportConfig_(std::move(exportConfig)) {}
+    RadarDevice(const RadarDevice& other) : BaseDevice(other), exportConfig_(other.exportConfig_ ? std::make_unique<RadarExportConfig>(*other.exportConfig_) : nullptr) {}
     RadarDevice& operator=(const RadarDevice& other) {
         if (this != &other) {
             BaseDevice::operator=(other);
@@ -318,15 +303,10 @@ protected:
     std::unique_ptr<LidarExportConfig> exportConfig_;
 
 public:
-    static inline const std::string name = "lidar";
+    std::string name() const override { return "lidar"; }
 
-    LidarDevice(std::unique_ptr<LidarExportConfig> exportConfig = std::make_unique<LidarExportConfig>())
-        : exportConfig_(std::move(exportConfig)) {}
-
-    LidarDevice(const LidarDevice& other)
-        : BaseDevice(other),
-            exportConfig_(other.exportConfig_ ? std::make_unique<LidarExportConfig>(*other.exportConfig_) : nullptr) {}
-
+    LidarDevice(std::unique_ptr<LidarExportConfig> exportConfig = std::make_unique<LidarExportConfig>()): exportConfig_(std::move(exportConfig)) {}
+    LidarDevice(const LidarDevice& other) : BaseDevice(other), exportConfig_(other.exportConfig_ ? std::make_unique<LidarExportConfig>(*other.exportConfig_) : nullptr) {}
     LidarDevice& operator=(const LidarDevice& other) {
         if (this != &other) {
             BaseDevice::operator=(other);
@@ -343,14 +323,14 @@ public:
 
 class SingleChipDevice : public RadarDevice {
 public:
-    static inline const std::string name = "single_chip_radar";
+    std::string name() const override { return "single_chip_radar"; }
     SingleChipDevice(std::unique_ptr<RadarExportConfig> exportConfig = std::make_unique<RadarExportConfig>()) : RadarDevice(std::move(exportConfig)) {}
 };
 
 
 class CascadeDevice : public RadarDevice {
 public:
-    static inline const std::string name = "cascade_radar";
+    std::string name() const override { return "cascade_radar"; }
     CascadeDevice(std::unique_ptr<RadarExportConfig> exportConfig = std::make_unique<RadarExportConfig>()) : RadarDevice(std::move(exportConfig)) {}
 };
 
@@ -359,7 +339,7 @@ class ImuDevice : public BaseDevice {
 protected:
     std::unique_ptr<ImuExportConfig> exportConfig_;
 public:
-    static inline const std::string name = "imu";
+    std::string name() const override { return "imu"; }
     ImuDevice(std::unique_ptr<ImuExportConfig> exportConfig = std::make_unique<ImuExportConfig>()): exportConfig_(std::move(exportConfig)) {}
 
     const ImuExportConfig* exportConfig() const override { return exportConfig_.get(); }

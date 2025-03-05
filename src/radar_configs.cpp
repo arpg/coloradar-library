@@ -316,9 +316,6 @@ void coloradar::RadarConfig::initPhaseFrequencyParams(const std::filesystem::pat
 
 
 void coloradar::RadarConfig::initInternalParams() {
-    std::cout << "Initializing internal radar params." << std::endl;
-    std::cout << "numAzimuthBeams: " << numAzimuthBeams << ", numElevationBeams: " << numElevationBeams << std::endl;
-
     azimuthApertureLen = 0;
     elevationApertureLen = 0;
     numVirtualElements = 0;
@@ -328,8 +325,6 @@ void coloradar::RadarConfig::initInternalParams() {
     azimuthAngles.resize(numAzimuthBeams);
     elevationAngles.resize(numElevationBeams);
     numAngles = numAzimuthBeams * numElevationBeams;
-
-    std::cout << "Initializing internal arrays." << std::endl;
 
     for (int tx_idx = 0; tx_idx < numTxAntennas; tx_idx++)
     {
@@ -384,7 +379,6 @@ void coloradar::RadarConfig::initInternalParams() {
         elevationAngles[i] = asin(phase_dif / (2. * M_PI * d));
         phase_dif += el_d_phase;
     }
-    std::cout << "Finished initializing internal radar params." << std::endl;
 }
 
 coloradar::SingleChipConfig::SingleChipConfig(const std::filesystem::path& calibDir, const int& nAzimuthBeams, const int& nElevationBeams) : coloradar::RadarConfig(nAzimuthBeams, nElevationBeams) {
@@ -685,97 +679,58 @@ std::vector<float> coloradar::RadarConfig::swapHeatmapDimensions(const std::vect
 }
 
 
-template <>
-struct std::hash<std::tuple<float, float, float>> {
-    std::size_t operator()(const std::tuple<float, float, float>& key) const {
-        auto roundToPrecision = [](float value, float precision) {
-            return std::round(value / precision) * precision;
-        };
-        std::size_t h1 = std::hash<float>{}(roundToPrecision(std::get<0>(key), 0.01f));
-        std::size_t h2 = std::hash<float>{}(roundToPrecision(std::get<1>(key), 0.01f));
-        std::size_t h3 = std::hash<float>{}(roundToPrecision(std::get<2>(key), 0.01f));
-        return h1 ^ (h2 << 1) ^ (h3 << 2);
-    }
-};
-inline std::tuple<float, float, float> makeKey(float x, float y, float z) {
-    return std::make_tuple(x, y, z);
-}
-
 pcl::PointCloud<coloradar::RadarPoint> coloradar::heatmapToPointcloud(
     const std::vector<float>& heatmap,
     coloradar::RadarConfig* config,
-    const float& intensityThresholdPercent)
+    const float intensityThresholdPercent)
 {
     if (intensityThresholdPercent < 0 || intensityThresholdPercent >= 100) {
         throw std::runtime_error("Invalid intensityThresholdPercent: expected value in [0; 100), got " + std::to_string(intensityThresholdPercent));
     }
     float maxIntensity = 0.0f;
     pcl::PointCloud<coloradar::RadarPoint> cloud;
+    cloud.reserve(config->numElevationBins * config->numAzimuthBins * config->nRangeBins());
 
-    std::vector<float> cosAzimuths(config->numAzimuthBeams);
-    std::vector<float> sinAzimuths(config->numAzimuthBeams);
-    std::vector<float> cosElevations(config->numElevationBeams);
-    std::vector<float> sinElevations(config->numElevationBeams);
-    for (int azIdx = 0; azIdx < config->numAzimuthBeams; ++azIdx) {
-        cosAzimuths[azIdx] = std::cos(config->azimuthAngles[azIdx]);
-        sinAzimuths[azIdx] = std::sin(config->azimuthAngles[azIdx]);
+    std::vector<float> cosAzimuths(config->numAzimuthBins), sinAzimuths(config->numAzimuthBins);
+    for (int az = 0; az < config->numAzimuthBins; ++az) {
+        float angle = config->azimuthBins[az];
+        cosAzimuths[az] = std::cos(angle);
+        sinAzimuths[az] = std::sin(angle);
     }
-    for (int elIdx = 0; elIdx < config->numElevationBeams; ++elIdx) {
-        cosElevations[elIdx] = std::cos(config->elevationAngles[elIdx]);
-        sinElevations[elIdx] = std::sin(config->elevationAngles[elIdx]);
+    std::vector<float> cosElevations(config->numElevationBins), sinElevations(config->numElevationBins);
+    for (int el = 0; el < config->numElevationBins; ++el) {
+        float angle = config->elevationBins[el];
+        cosElevations[el] = std::cos(angle);
+        sinElevations[el] = std::sin(angle);
     }
 
-    std::unordered_map<std::tuple<float, float, float>, RadarPoint, std::hash<std::tuple<float, float, float>>> pointMap;
-
-    // Iterate through all azimuth, range, and elevation bins
-    for (int azIdx = 0; azIdx < config->numAzimuthBeams; ++azIdx) {
-        for (int rangeIdx = 10; rangeIdx < config->numPosRangeBins; ++rangeIdx) {
-            float range = rangeIdx * config->rangeBinWidth;
-
-            for (int elIdx = 0; elIdx < config->numElevationBeams; ++elIdx) {
-                // Compute the index in the heatmap
-                int outIdx = 2 * (elIdx + config->numElevationBeams * (rangeIdx + config->numPosRangeBins * azIdx));
-                float intensity = heatmap[outIdx];
-                float doppler = heatmap[outIdx + 1];
-
+    auto heatmapIt = heatmap.begin();
+    for (int elIdx = 0; elIdx < config->numElevationBins; ++elIdx) {
+        for (int azIdx = 0; azIdx < config->numAzimuthBins; ++azIdx) {
+            for (int rangeIdx = 0; rangeIdx < config->nRangeBins(); ++rangeIdx) {
+                float intensity = *heatmapIt; ++heatmapIt;
+                float doppler   = *heatmapIt; ++heatmapIt;
                 if (intensity > maxIntensity) {
                     maxIntensity = intensity;
                 }
-
-                // Compute Cartesian coordinates
-                float x = range * cosElevations[elIdx] * sinAzimuths[azIdx];
-                float y = range * cosElevations[elIdx] * cosAzimuths[azIdx];
-                float z = range * sinElevations[elIdx];
-
-                // Create the radar point
+                float range = rangeIdx * config->rangeBinWidth;
                 RadarPoint point;
-                point.x = x;
-                point.y = y;
-                point.z = z;
+                point.x = range * cosElevations[elIdx] * sinAzimuths[azIdx];
+                point.y = range * cosElevations[elIdx] * cosAzimuths[azIdx];
+                point.z = range * sinElevations[elIdx];
                 point.intensity = intensity;
                 point.doppler = doppler;
-
-                // Use hash map to keep the most intense point per coordinate
-                auto key = makeKey(point.x, point.y, point.z);
-                auto it = pointMap.find(key);
-                if (it != pointMap.end()) {
-                    if (it->second.intensity < point.intensity) {
-                        it->second = point;
-                    }
-                } else {
-                    pointMap[key] = point;
-                }
+                cloud.push_back(point);
             }
         }
     }
-
-    // Apply intensity threshold
-    float intensityThreshold = maxIntensity * intensityThresholdPercent / 100;
-    for (const auto& kv : pointMap) {
-        if (kv.second.intensity >= intensityThreshold) {
-            cloud.push_back(kv.second);
+    float threshold = maxIntensity * intensityThresholdPercent / 100.0f;
+    pcl::PointCloud<coloradar::RadarPoint> filteredCloud;
+    filteredCloud.reserve(cloud.size());
+    for (const auto& pt : cloud) {
+        if (pt.intensity >= threshold) {
+            filteredCloud.push_back(pt);
         }
     }
-
     return cloud;
 }

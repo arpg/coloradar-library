@@ -61,8 +61,8 @@ devices:
     export_clouds: False
     remove_intensity_dim: True
     cloud_fov:
-      horizontal_fov_degrees_total: 360
-      vertical_fov_degrees_total: 180
+      horizontal_degrees_total: 360
+      vertical_degrees_total: 180
       range_meters: 10
 
     # - global octomap and ego-centric map samples
@@ -83,8 +83,8 @@ devices:
     # sampling perspective options: base, lidar, cascade
     center_sensor: cascade_radar
     map_sample_fov:
-      horizontal_fov_degrees_total: 360
-      vertical_fov_degrees_total: 180
+      horizontal_degrees_total: 360
+      vertical_degrees_total: 180
       range_meters: 10
 
 

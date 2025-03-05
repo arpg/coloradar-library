@@ -233,6 +233,7 @@ pcl::PointCloud<pcl::PointXYZI> coloradar::ColoradarPlusRun::sampleMapFrame(
     float maxRange = range == 0 ? std::numeric_limits<float>::max() : range;
     pcl::PointCloud<pcl::PointXYZI> sample;
     pcl::transformPointCloud(mapCloud, sample, mapFramePose);
+    // std::cout << "Filtering sample with " << horizontalFov << " horizontal degrees, " << verticalFov << " vertical degrees, " << maxRange << " meters range." << std::endl;
     filterFov(sample, horizontalFov, verticalFov, maxRange);
     return sample;
 }

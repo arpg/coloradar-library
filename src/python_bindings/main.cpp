@@ -166,6 +166,26 @@ py::array_t<T> vectorToNumpy(const std::vector<T>& vec) {
     return result;
 }
 
+pcl::PointCloud<coloradar::RadarPoint> heatmapToPointcloudBinding(
+    const py::array_t<float>& heatmap_array,
+    coloradar::RadarConfig& config,
+    float intensityThresholdPercent)
+{
+    auto buf = heatmap_array.request();
+    if (buf.ndim != 1) {
+         throw std::runtime_error("Heatmap array must be a flat 1D array.");
+    }
+    size_t expected_size = static_cast<size_t>(config.numElevationBins *
+                                               config.numAzimuthBins *
+                                               config.nRangeBins() * 2);
+    if (buf.size != expected_size) {
+         throw std::runtime_error("Heatmap size (" + std::to_string(buf.size) + ") does not match expected (" + std::to_string(expected_size) + ").");
+    }
+    const float* data = static_cast<const float*>(buf.ptr);
+    std::vector<float> heatmap(data, data + buf.size);
+    return heatmapToPointcloud(heatmap, &config, intensityThresholdPercent);
+}
+
 
 PYBIND11_MODULE(coloradar_dataset_lib, m) {
     py::class_<pcl::PointXYZI>(m, "PointXYZI")
@@ -221,6 +241,8 @@ PYBIND11_MODULE(coloradar_dataset_lib, m) {
         .def_readonly("azimuth_angles", &coloradar::RadarConfig::azimuthAngles)
         .def_readonly("elevation_angles", &coloradar::RadarConfig::elevationAngles)
         .def_readonly("doppler_bin_width", &coloradar::RadarConfig::dopplerBinWidth)
+        .def("n_range_bins", &coloradar::RadarConfig::nRangeBins)
+        .def("max_range", &coloradar::RadarConfig::maxRange)
         .def("to_json", &coloradar::RadarConfig::toJson);
 
     // SingleChipConfig
@@ -230,6 +252,17 @@ PYBIND11_MODULE(coloradar_dataset_lib, m) {
     // CascadeConfig
     py::class_<coloradar::CascadeConfig, coloradar::RadarConfig, std::shared_ptr<coloradar::CascadeConfig>>(m, "CascadeConfig")
         .def(py::init<const std::filesystem::path&, const int&, const int&>(), py::arg("calib_dir"), py::arg("num_azimuth_beams") = 128, py::arg("num_elevation_beams") = 32);
+
+    // Utils
+    m.def("heatmap_to_pointcloud",
+        [](const py::array_t<float>& heatmap, coloradar::RadarConfig& config, float intensityThresholdPercent = 0.0f) {
+            auto cloud = heatmapToPointcloudBinding(heatmap, config, intensityThresholdPercent);
+            return radarCloudToNumpy(cloud);
+        },
+        py::arg("heatmap"),
+        py::arg("config"),
+        py::arg("intensity_threshold_percent") = 0.0f
+    );
 
     // ColoradarPlusRun
     py::class_<coloradar::ColoradarPlusRun>(m, "ColoradarPlusRun")
