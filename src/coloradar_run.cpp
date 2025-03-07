@@ -280,16 +280,24 @@ void coloradar::ColoradarPlusRun::createMapSamples(
     const std::vector<double>& sensorTimestamps,
     const Eigen::Affine3f& baseToSensorTransform
 ) {
+    for (const auto& entry : std::filesystem::directory_iterator(lidarMapsDirPath_)) {
+        if (entry.is_regular_file() && entry.path().filename() != "map.pcd") {
+            std::filesystem::remove(entry.path());
+        }
+    }
     std::vector<Eigen::Affine3f> basePoses = getPoses<Eigen::Affine3f>();
     if (!sensorTimestamps.empty()) {
         basePoses = interpolatePoses(basePoses, poseTimestamps_, sensorTimestamps);
     }
-    std::vector<Eigen::Affine3f> mapToSensorT(basePoses.size());
+    pcl::PointCloud<pcl::PointXYZI> mapCloud = readLidarOctomap();
+    auto startT = std::chrono::high_resolution_clock::now();
     for (size_t i = 0; i < basePoses.size(); ++i) {
-        mapToSensorT[i] = basePoses[i] * baseToSensorTransform;
+        Eigen::Affine3f mapToSensorT = basePoses[i] * baseToSensorTransform;
+        pcl::PointCloud<pcl::PointXYZI> sample = sampleMapFrame(horizontalFov, verticalFov, range, mapToSensorT, mapCloud);
+        saveMapSample(sample, i);
     }
-    std::vector<pcl::PointCloud<pcl::PointXYZI>> samples = sampleMapFrames(horizontalFov, verticalFov, range, mapToSensorT);
-    saveMapSamples(samples);
+    double elapsedTime = std::chrono::duration<double>(std::chrono::high_resolution_clock::now() - startT).count();
+    std::cout << std::fixed << std::setprecision(2)  << name << ": sampled " << basePoses.size() << " map frames in " << elapsedTime << " seconds." << std::endl;
 }
 
 pcl::PointCloud<pcl::PointXYZI> coloradar::ColoradarPlusRun::readMapSample(const int& sampleIdx) {

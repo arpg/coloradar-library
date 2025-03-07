@@ -166,6 +166,16 @@ py::array_t<T> vectorToNumpy(const std::vector<T>& vec) {
     return result;
 }
 
+template <typename T>
+std::vector<T> numpyToVector(const py::array_t<T>& array) {
+    auto buffer = array.template unchecked<1>();
+    std::vector<T> vec(buffer.shape(0));
+    for (size_t i = 0; i < buffer.shape(0); ++i) {
+        vec[i] = buffer(i);
+    }
+    return vec;
+}
+
 pcl::PointCloud<coloradar::RadarPoint> heatmapToPointcloudBinding(
     const py::array_t<float>& heatmap_array,
     coloradar::RadarConfig& config,
@@ -345,11 +355,11 @@ PYBIND11_MODULE(coloradar_dataset_lib, m) {
 
         .def("create_map_samples", [](coloradar::ColoradarPlusRun& self,
                                      float horizontalFov, float verticalFov, float range,
-                                     const std::vector<double>& sensorTimestamps,
+                                     const py::array_t<double>& sensorTimestamps,
                                      const py::array_t<float>& baseToSensorTransformArray) {
-            self.createMapSamples(horizontalFov, verticalFov, range, sensorTimestamps, numpyToPose(baseToSensorTransformArray));
+            self.createMapSamples(horizontalFov, verticalFov, range, numpyToVector(sensorTimestamps), numpyToPose(baseToSensorTransformArray));
         }, py::arg("horizontal_fov") = 360, py::arg("vertical_fov") = 180, py::arg("range") = 100,
-           py::arg("sensor_timestamps") = std::vector<double>(),
+           py::arg("sensor_timestamps") = py::array_t<double>(),
            py::arg("base_to_sensor_transform") = poseToNumpy(Eigen::Affine3f::Identity()))
 
         .def("get_poses", [](coloradar::ColoradarPlusRun& self) {

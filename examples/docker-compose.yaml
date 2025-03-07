@@ -3,13 +3,39 @@ services:
     image: ghcr.io/arpg/coloradar-lib:12.6
     environment:
       - PYTHONUNBUFFERED=1
+      - DOCKER_DATASET_VOLUME_PATH=/data/coloradar
+
+  get_export_config_template:
+    extends:
+      service: base
     volumes:
-      - ~/coloradar:/data/coloradar
+      - .:/export
+    command: cp /src/coloradar_lib/export-config-template.yaml /export/export-config.yaml
 
   build_maps:
     extends:
       service: base
     working_dir: /app
     volumes:
+      - ~/coloradar:/data/coloradar
       - ./build_maps.py:/app/build_maps.py
     command: python3 build_maps.py
+
+  sample_maps:
+    extends:
+      service: base
+    working_dir: /app
+    volumes:
+      - ~/coloradar:/data/coloradar
+      - ./sample_maps.py:/app/sample_maps.py
+    command: python3 sample_maps.py
+
+  export_dataset:
+    extends:
+      service: base
+    working_dir: /app
+    volumes:
+      - ~/coloradar:/data/coloradar
+      - ./export_dataset.py:/app/export_dataset.py
+      - ./export-config.yaml:/app/export-config.yaml
+    command: python3 export_dataset.py
