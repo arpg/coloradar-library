@@ -85,7 +85,6 @@ if(APPLE)
 endif()
 
 
-
 # Python
 if(DEFINED ENV{VIRTUAL_ENV})
     set(Python3_ROOT_DIR "$ENV{VIRTUAL_ENV}")
@@ -94,15 +93,13 @@ if(DEFINED ENV{VIRTUAL_ENV})
 endif()
 find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
 message(STATUS "Final Python used: ${Python3_EXECUTABLE} (${Python3_VERSION})")
-# find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
-# if(DEFINED ENV{VIRTUAL_ENV})
-#     set(VENV_PYTHON "$ENV{VIRTUAL_ENV}/bin/python3")
-#     if(EXISTS ${VENV_PYTHON})
-#         message(STATUS "Virtual environment detected: $ENV{VIRTUAL_ENV}")
-#         set(Python_EXECUTABLE ${VENV_PYTHON} CACHE FILEPATH "Python interpreter from active virtual environment" FORCE)
-#     endif()
-# endif()
-# message(STATUS "Using Python: ${Python_EXECUTABLE} (${Python_VERSION})")
+
+include(GNUInstallDirs)
+set(Python3_SITEARCH ${Python3_SITEARCH} CACHE PATH "Python site-packages directory")
+execute_process(
+    COMMAND ${Python3_EXECUTABLE} -c "import sysconfig; print(sysconfig.get_paths()['purelib'])"
+    OUTPUT_VARIABLE Python3_SITEARCH OUTPUT_STRIP_TRAILING_WHITESPACE
+)
 
 
 find_package(Boost 1.78 REQUIRED COMPONENTS system filesystem thread)
@@ -164,30 +161,30 @@ add_library(coloradar_lib SHARED
     src/dataset.cpp
 )
 target_link_libraries(coloradar_lib Threads::Threads ${YAML_CPP_LIBRARIES} ${PCL_LIBRARIES} ${OCTOMAP_LIBRARIES} ${HDF5_LIBRARIES} ${JSONCPP_LIBRARIES})
+install(TARGETS coloradar_lib LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
 if(pybind11_FOUND)
     message(STATUS "Pybind11 found, compiling Python bindings.")
     pybind11_add_module(coloradar_dataset_lib src/python_bindings/main.cpp)
     target_link_libraries(coloradar_dataset_lib PRIVATE coloradar_lib)
-else()
-    message(WARNING "Pybind11 not found, skipping Python bindings compilation.")
+    install(TARGETS coloradar_dataset_lib LIBRARY DESTINATION ${Python3_SITEARCH})
 endif()
-
 
 if(CUDA_FOUND AND NOT ("$ENV{CUDA_ENV}" STREQUAL "False" OR "$ENV{CUDA_ENV}" STREQUAL "false"))
     message(STATUS "CUDA found, compiling CUDA code.")
     set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -std=c++20")
-
     cuda_add_library(coloradar_cuda SHARED
         src/cuda/kernels.cu
         src/cuda/radar_processing.cu
     )
     target_link_libraries(coloradar_cuda coloradar_lib ${CUDA_LIBS})
     include_directories(${CUDA_INCLUDE_DIRS})
+    install(TARGETS coloradar_cuda LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
     if(pybind11_FOUND)
         pybind11_add_module(coloradar_cuda_lib src/python_bindings/cuda.cpp)
         target_link_libraries(coloradar_cuda_lib PRIVATE coloradar_cuda)
+        install(TARGETS coloradar_cuda_lib LIBRARY DESTINATION ${Python3_SITEARCH})
     endif()
 else()
     message(STATUS "($ENV{CUDA_ENV}) CUDA not found, skipping CUDA compilation.")

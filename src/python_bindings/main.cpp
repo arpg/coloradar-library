@@ -298,6 +298,7 @@ PYBIND11_MODULE(coloradar_dataset_lib, m) {
     // ColoradarPlusRun
     py::class_<coloradar::ColoradarPlusRun>(m, "ColoradarPlusRun")
         .def(py::init<const std::filesystem::path&, coloradar::RadarConfig*>())
+        .def_readonly("name", &coloradar::ColoradarPlusRun::name)
         .def("pose_timestamps", [](coloradar::ColoradarPlusRun& self) { return vectorToNumpy(self.poseTimestamps()); })
         .def("imu_timestamps", [](coloradar::ColoradarPlusRun& self) { return vectorToNumpy(self.imuTimestamps()); })
         .def("lidar_timestamps", [](coloradar::ColoradarPlusRun& self) { return vectorToNumpy(self.lidarTimestamps()); })

@@ -150,7 +150,9 @@ COPY CMakeLists.txt .
 RUN mkdir build
 RUN cmake -B build
 RUN make -C build
+RUN make install -C build
 RUN ./build/coloradar_tests
+RUN echo "/usr/local/lib" | tee -a /etc/ld.so.conf.d/coloradar.conf && ldconfig
 
 RUN if [ "$(lsb_release -rs | cut -d. -f1)" -ge 24 ]; then \
         pip3 install --break-system-packages numpy; \
