@@ -1,12 +1,15 @@
 services:
   base:
     image: ghcr.io/arpg/coloradar-lib:12.6
+    environment:
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - ~/coloradar:/data/coloradar
 
   build_maps:
     extends:
       service: base
     working_dir: /app
     volumes:
-      - ~/coloradar:/data/coloradar
       - ./build_maps.py:/app/build_maps.py
     command: python3 build_maps.py
