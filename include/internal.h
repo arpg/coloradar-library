@@ -3,7 +3,6 @@
 
 
 #include "types.h"
-#include <Eigen/Dense>
 
 
 namespace coloradar::internal {

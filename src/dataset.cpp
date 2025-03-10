@@ -7,6 +7,8 @@ coloradar::ColoradarPlusDataset::ColoradarPlusDataset(const std::filesystem::pat
 }
 
 void coloradar::ColoradarPlusDataset::init(const std::filesystem::path& pathToDataset) {
+    pcl::console::setVerbosityLevel(pcl::console::L_ALWAYS);
+
     datasetDirPath_ = pathToDataset;
     coloradar::internal::checkPathExists(datasetDirPath_);
     calibDirPath_ = datasetDirPath_ / "calib";
@@ -226,7 +228,7 @@ std::vector<std::string> ColoradarPlusDataset::exportBaseDevice(const BaseExport
     // Constants
     const std::string posesContentName = "base_poses",
                       timestampsContentName = "base_timestamps";
-
+    std::cout << "Exporting base data" << std::endl;
     std::vector<std::string> content;
     if (config.exportTimestamps()) content.push_back(timestampsContentName);
     if (config.exportPoses()) content.push_back(posesContentName);
@@ -253,7 +255,7 @@ std::vector<std::string> ColoradarPlusDataset::exportImu(const ImuExportConfig &
     // Constants
     const std::string posesContentName = "imu_poses",
                       timestampsContentName = "imu_timestamps";
-
+    std::cout << "Exporting IMU data" << std::endl;
     std::vector<std::string> content;
     if (config.exportTimestamps()) content.push_back(timestampsContentName);
     if (config.exportPoses()) content.push_back(posesContentName);
@@ -289,7 +291,7 @@ std::vector<std::string> ColoradarPlusDataset::exportCascade(const RadarExportCo
                       cloudContentName = "cascade_clouds",
                       posesContentName = "cascade_poses",
                       timestampsContentName = "cascade_timestamps";
-
+    std::cout << "Exporting Cascade data" << std::endl;
     std::vector<std::string> content;
     if (config.exportTimestamps()) content.push_back(timestampsContentName);
     if (config.exportPoses()) content.push_back(posesContentName);
@@ -415,7 +417,7 @@ std::vector<std::string> ColoradarPlusDataset::exportLidar(const LidarExportConf
                       mapSampleContentName = "lidar_map_samples",
                       posesContentName = "lidar_poses",
                       timestampsContentName = "lidar_timestamps";
-
+    std::cout << "Exporting Lidar data" << std::endl;
     std::vector<std::string> content;
     if (config.exportTimestamps()) content.push_back(timestampsContentName);
     if (config.exportPoses()) content.push_back(posesContentName);

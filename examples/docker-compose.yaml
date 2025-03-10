@@ -36,6 +36,5 @@ services:
     working_dir: /app
     volumes:
       - ~/coloradar:/data/coloradar
-      - ./export_dataset.py:/app/export_dataset.py
-      - ./export-config.yaml:/app/export-config.yaml
-    command: python3 export_dataset.py
+      - .:/export
+    command: python3 /export/export_dataset.py

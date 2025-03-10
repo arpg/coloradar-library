@@ -32,6 +32,10 @@
 #include <json.h>
 #include <yaml-cpp/yaml.h>
 #include <Eigen/Core>
+#include <Eigen/Dense>
+#include <pcl/point_cloud.h>
+#include <pcl/point_types.h>
+#include <octomap/octomap.h>
 
 
 #if defined(__GNUC__) && __GNUC__ == 11 && !defined(__clang__)

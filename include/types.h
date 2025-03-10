@@ -3,10 +3,6 @@
 
 #include "definitions.h"
 
-#include <pcl/point_cloud.h>
-#include <pcl/point_types.h>
-#include <octomap/octomap.h>
-
 
 namespace coloradar {
 

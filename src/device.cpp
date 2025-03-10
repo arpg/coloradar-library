@@ -142,9 +142,11 @@ void LidarExportConfig::loadFromFile(const YAML::Node& deviceNode) {
     removeIntensityDim_ = coloradar::internal::parseBoolYamlKey(deviceNode["remove_intensity_dim"], removeIntensityDim_);
 
     auto cloudFovNode = deviceNode["cloud_fov"];
-    cloudFov_.horizontalDegreesTotal = coloradar::internal::parseFloatYamlKey(cloudFovNode["horizontal_degrees_total"], cloudFov_.horizontalDegreesTotal);
-    cloudFov_.verticalDegreesTotal = coloradar::internal::parseFloatYamlKey(cloudFovNode["vertical_degrees_total"], cloudFov_.verticalDegreesTotal);
-    cloudFov_.rangeMeters = coloradar::internal::parseFloatYamlKey(cloudFovNode["range_meters"], cloudFov_.rangeMeters);
+    if (cloudFovNode) {
+        cloudFov_.horizontalDegreesTotal = coloradar::internal::parseFloatYamlKey(cloudFovNode["horizontal_degrees_total"], cloudFov_.horizontalDegreesTotal);
+        cloudFov_.verticalDegreesTotal = coloradar::internal::parseFloatYamlKey(cloudFovNode["vertical_degrees_total"], cloudFov_.verticalDegreesTotal);
+        cloudFov_.rangeMeters = coloradar::internal::parseFloatYamlKey(cloudFovNode["range_meters"], cloudFov_.rangeMeters);
+    }
 
     exportMap_ = coloradar::internal::parseBoolYamlKey(deviceNode["export_map"], exportMap_);
     exportMapSamples_ = coloradar::internal::parseBoolYamlKey(deviceNode["export_map_samples"], exportMapSamples_);
