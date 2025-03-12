@@ -27,7 +27,7 @@ protected:
     std::unique_ptr<ImuDevice> imu_;
     std::unique_ptr<CascadeDevice> cascade_;
     std::unique_ptr<LidarDevice> lidar_;
-    // std::vector<std::unique_ptr<BaseDevice>> devices;
+    std::vector<std::unique_ptr<BaseDevice>> devices_;
 
     std::vector<std::string> exportBaseDevice(const BaseExportConfig &config, std::vector<ColoradarPlusRun*> runs, const H5::H5File &datasetFile);
     std::vector<std::string> exportImu(const ImuExportConfig &config, std::vector<ColoradarPlusRun*> runs, const H5::H5File &datasetFile);
@@ -53,10 +53,8 @@ public:
     const Eigen::Affine3f& cascadeTransform() const;
     const RadarConfig* cascadeConfig() const;
 
-    std::filesystem::path exportToFile(const DatasetExportConfig &exportConfig);
+    std::filesystem::path exportToFile(DatasetExportConfig& exportConfig);
     std::filesystem::path exportToFile(const std::string &yamlConfigPath);
-//    std::filesystem::path exportToFile(const DatasetExportConfig &exportConfig, std::vector<ColoradarPlusRun*> runs = {});
-//    std::filesystem::path exportToFile(const std::string &yamlConfigPath, std::vector<ColoradarPlusRun*> runs = {});
 };
 
 class ColoradarDataset : public ColoradarPlusDataset {

@@ -11,6 +11,7 @@ protected:
     std::filesystem::path destinationFilePath_ = "dataset.h5";
     std::vector<std::string> runs_ = {};
     bool exportTransforms_ = false;
+    std::span<const std::unique_ptr<BaseDevice>> devices_;
 
     RadarExportConfig        cascadeCfg_;
     LidarExportConfig        lidarCfg_;
@@ -42,13 +43,15 @@ public:
     const std::filesystem::path &destinationFilePath() const;
     const std::vector<std::string> &runs() const;
     bool exportTransforms() const;
-    // const std::set<std::string> devices() const;
+    std::span<const std::unique_ptr<BaseDevice>> devices() const { return devices_; }
 
-   const RadarExportConfig        &cascade() const { return cascadeCfg_; }
-   const LidarExportConfig        &lidar() const { return lidarCfg_; }
-   const BaseExportConfig         &base() const { return baseCfg_; }
-   const ImuExportConfig          &imu() const { return imuCfg_; }
-   // const RadarExportConfig        &singleChip() const { return ; }
+    void initDataset(std::vector<std::string> runNames = {}, std::span<const std::unique_ptr<BaseDevice>> devices = {});
+
+    const RadarExportConfig        &cascade() const { return cascadeCfg_; }
+    const LidarExportConfig        &lidar() const { return lidarCfg_; }
+    const BaseExportConfig         &base() const { return baseCfg_; }
+    const ImuExportConfig          &imu() const { return imuCfg_; }
+    // const RadarExportConfig        &singleChip() const { return ; }
 };
 
 }

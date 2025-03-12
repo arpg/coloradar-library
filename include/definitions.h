@@ -26,6 +26,7 @@
 #include <iostream>
 #include <memory>
 #include <regex>
+#include <span>
 #include <sstream>
 #include <stdexcept>
 

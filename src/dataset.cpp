@@ -26,6 +26,10 @@ void coloradar::ColoradarPlusDataset::init(const std::filesystem::path& pathToDa
     lidar_ = std::make_unique<LidarDevice>();
     cascade_ = std::make_unique<CascadeDevice>();
     cascadeConfig_ = new coloradar::CascadeConfig(calibDirPath_);
+//    devices_.push_back(base_device_);
+//    devices_.push_back(imu_);
+//    devices_.push_back(lidar_);
+//    devices_.push_back(cascade_);
 }
 
 Eigen::Affine3f coloradar::ColoradarPlusDataset::loadTransform(const std::filesystem::path& filePath) {
@@ -225,14 +229,17 @@ void saveVectorToHDF5(const std::string& name, const H5::H5File& file, const std
 }
 
 std::vector<std::string> ColoradarPlusDataset::exportBaseDevice(const BaseExportConfig &config, std::vector<ColoradarPlusRun*> runs, const H5::H5File &datasetFile) {
+    std::vector<std::string> content;
+    if (!config.exportTimestamps() && !config.exportPoses()) return content;
+    std::cout << "Exporting base data..." << std::endl;
+
     // Constants
     const std::string posesContentName = "base_poses",
                       timestampsContentName = "base_timestamps";
-    std::cout << "Exporting base data" << std::endl;
-    std::vector<std::string> content;
     if (config.exportTimestamps()) content.push_back(timestampsContentName);
     if (config.exportPoses()) content.push_back(posesContentName);
 
+    std::cout << "Finished runs: ";
     for (auto* run : runs) {
         std::vector<double> timestamps = run->poseTimestamps();
         hsize_t numFrames = timestamps.size();
@@ -247,19 +254,24 @@ std::vector<std::string> ColoradarPlusDataset::exportBaseDevice(const BaseExport
         if (config.exportPoses()) {
             savePosesToHDF5(posesContentName + "_" + run->name, datasetFile, basePoses);
         }
+        std::cout << run->name << " ";
     }
+    std::cout << std::endl;
     return content;
 }
 
 std::vector<std::string> ColoradarPlusDataset::exportImu(const ImuExportConfig &config, std::vector<ColoradarPlusRun*> runs, const H5::H5File &datasetFile) {
+    std::vector<std::string> content;
+    if (!config.exportTimestamps() && !config.exportPoses()) return content;
+    std::cout << "Exporting IMU data..." << std::endl;
+
     // Constants
     const std::string posesContentName = "imu_poses",
                       timestampsContentName = "imu_timestamps";
-    std::cout << "Exporting IMU data" << std::endl;
-    std::vector<std::string> content;
     if (config.exportTimestamps()) content.push_back(timestampsContentName);
     if (config.exportPoses()) content.push_back(posesContentName);
 
+    std::cout << "Finished runs: ";
     for (auto* run : runs) {
         std::vector<double> timestamps = run->imuTimestamps();
         hsize_t numFrames = timestamps.size();
@@ -280,19 +292,23 @@ std::vector<std::string> ColoradarPlusDataset::exportImu(const ImuExportConfig &
         }
 
         // data: TBD
+        std::cout << run->name << " ";
     }
+    std::cout << std::endl;
     return content;
 }
 
 std::vector<std::string> ColoradarPlusDataset::exportCascade(const RadarExportConfig &config, std::vector<ColoradarPlusRun*> runs, const H5::H5File &datasetFile) {
+    std::vector<std::string> content;
+    if (!config.exportTimestamps() && !config.exportPoses() && !config.exportDatacubes() && !config.exportHeatmaps() && !config.exportClouds()) return content;
+    std::cout << "Exporting cascade data..." << std::endl;
+
     // Constants
     const std::string datacubeContentName = "cascade_datacubes",
                       heatmapContentName = "cascade_heatmaps",
                       cloudContentName = "cascade_clouds",
                       posesContentName = "cascade_poses",
                       timestampsContentName = "cascade_timestamps";
-    std::cout << "Exporting Cascade data" << std::endl;
-    std::vector<std::string> content;
     if (config.exportTimestamps()) content.push_back(timestampsContentName);
     if (config.exportPoses()) content.push_back(posesContentName);
     if (config.exportClouds()) content.push_back(cloudContentName);
@@ -323,6 +339,7 @@ std::vector<std::string> ColoradarPlusDataset::exportCascade(const RadarExportCo
         verticalFov = cascadeConfig_->elevationIdxToFovDegrees(elevationMaxBin);
     }
 
+    std::cout << "Finished runs: ";
     for (auto* run : runs) {
         std::vector<double> timestamps = run->cascadeTimestamps();
         hsize_t numFrames = timestamps.size();
@@ -406,25 +423,30 @@ std::vector<std::string> ColoradarPlusDataset::exportCascade(const RadarExportCo
             }
             saveCloudsToHDF5(cloudContentName + "_" + run->name, datasetFile, cloudsFlat, numFrames, cloudSizes, numDims);
         }
+        std::cout << run->name << " ";
     }
+    std::cout << std::endl;
     return content;
 }
 
 std::vector<std::string> ColoradarPlusDataset::exportLidar(const LidarExportConfig &config, std::vector<ColoradarPlusRun*> runs, const H5::H5File &datasetFile) {
+    std::vector<std::string> content;
+    if (!config.exportTimestamps() && !config.exportPoses() && !config.exportMap() && !config.exportMapSamples() && !config.exportClouds()) return content;
+    std::cout << "Exporting lidar data..." << std::endl;
+
     // Constants
     const std::string cloudContentName = "lidar_clouds",
                       mapContentName = "lidar_map",
                       mapSampleContentName = "lidar_map_samples",
                       posesContentName = "lidar_poses",
                       timestampsContentName = "lidar_timestamps";
-    std::cout << "Exporting Lidar data" << std::endl;
-    std::vector<std::string> content;
     if (config.exportTimestamps()) content.push_back(timestampsContentName);
     if (config.exportPoses()) content.push_back(posesContentName);
     if (config.exportClouds()) content.push_back(cloudContentName);
     if (config.exportMap()) content.push_back(mapContentName);
     if (config.exportMapSamples()) content.push_back(mapSampleContentName);
 
+    std::cout << "Finished runs: ";
     for (auto* run : runs) {
         std::vector<double> truePoseTimestamps = run->poseTimestamps();
         std::vector<double> timestamps = run->lidarTimestamps();
@@ -547,11 +569,13 @@ std::vector<std::string> ColoradarPlusDataset::exportLidar(const LidarExportConf
                 saveCloudsToHDF5(mapSampleContentName + "_" + run->name, datasetFile, samplesFlat, numSamples, sampleSizes, numDims);
             }
         }
+        std::cout << run->name << " ";
     }
+    std::cout << std::endl;
     return content;
 }
 
-std::filesystem::path ColoradarPlusDataset::exportToFile(const DatasetExportConfig &exportConfig) {
+std::filesystem::path ColoradarPlusDataset::exportToFile(DatasetExportConfig& exportConfig) {
     Json::Value finalConfig;
     finalConfig["runs"] = Json::arrayValue;
     finalConfig["radar_config"] = cascadeConfig_->toJson();
@@ -560,31 +584,35 @@ std::filesystem::path ColoradarPlusDataset::exportToFile(const DatasetExportConf
     std::vector<ColoradarPlusRun*> runObjects;
     if (exportConfig.runs().empty()) {
         runObjects = getRuns();
+        exportConfig.initDataset(listRuns());
+        for (auto runName : exportConfig.runs()) {
+            finalConfig["runs"].append(runName);
+        }
     } else {
         for (auto runName : exportConfig.runs()) {
             runObjects.push_back(getRun(runName));
             finalConfig["runs"].append(runName);
         }
     }
-    std::cout << "Exporting " << runObjects.size() << " runs." << std::endl;
+    std::cout << "Exporting " << finalConfig["runs"].size() << " runs." << std::endl;
     H5::H5File datasetFile(exportConfig.destinationFilePath(), H5F_ACC_TRUNC);
 
-    for (const auto &contentList : {
-        exportBaseDevice(exportConfig.base(), runObjects, datasetFile),
-        exportImu(exportConfig.imu(), runObjects, datasetFile),
-        exportCascade(exportConfig.cascade(), runObjects, datasetFile),
-        exportLidar(exportConfig.lidar(), runObjects, datasetFile)
-    }) {
+    auto baseContent = exportBaseDevice(exportConfig.base(), runObjects, datasetFile);
+    auto imuContent = exportImu(exportConfig.imu(), runObjects, datasetFile);
+    auto cascadeContent = exportCascade(exportConfig.cascade(), runObjects, datasetFile);
+    auto lidarContent = exportLidar(exportConfig.lidar(), runObjects, datasetFile);
+    for (const auto &contentList : {baseContent, imuContent, cascadeContent, lidarContent}) {
+        if (contentList.empty()) continue;
         for (const auto &content : contentList) {
             finalConfig["data_content"].append(content);
         }
     }
-
     std::string configString = Json::writeString(Json::StreamWriterBuilder(), finalConfig);
     H5::StrType strType(H5::PredType::C_S1, H5T_VARIABLE);
     H5::DataSpace dataspace(H5S_SCALAR);
     H5::DataSet configDataset = datasetFile.createDataSet("config", strType, dataspace);
     configDataset.write(configString, strType);
+    datasetFile.close();
     return exportConfig.destinationFilePath();
 }
 

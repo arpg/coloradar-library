@@ -126,4 +126,13 @@ bool DatasetExportConfig::exportTransforms() const {
     return exportTransforms_;
 }
 
+void DatasetExportConfig::initDataset(std::vector<std::string> runNames, std::span<const std::unique_ptr<BaseDevice>> devices) {
+    if (!runNames.empty()) {
+        runs_ = validateRuns(runNames);
+    }
+    if (!devices.empty()) {
+        devices_ = devices;
+    }
+}
+
 }
