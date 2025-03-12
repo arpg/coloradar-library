@@ -181,10 +181,12 @@ void saveCloudsToHDF5(const std::string& name, const H5::H5File& file, const std
 }
 
 void saveHeatmapsToHDF5(const std::string& name, const H5::H5File& file, const std::vector<float>& flatHeatmaps, const hsize_t& numFrames, const RadarConfig* config) {
-    std::vector<hsize_t> dims = {numFrames, static_cast<hsize_t>(config->numAzimuthBins), static_cast<hsize_t>(config->nRangeBins())};
+    std::vector<hsize_t> dims = {numFrames};
     if (config->numElevationBins > 1) {
         dims.push_back(static_cast<hsize_t>(config->numElevationBins));
     }
+    dims.push_back(static_cast<hsize_t>(config->numAzimuthBins));
+    dims.push_back(static_cast<hsize_t>(config->nRangeBins()));
     if (config->hasDoppler) {
         dims.push_back(2);
     }
