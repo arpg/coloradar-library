@@ -552,7 +552,7 @@ int coloradar::RadarConfig::horizontalFovToAzimuthIdx(const float& horizontalFov
     float horizontalHalfFovRad = horizontalFov / 2 * M_PI / 180.0f;
     auto it = std::lower_bound(azimuthBins.begin(), azimuthBins.end(), -horizontalHalfFovRad);
     int binIdx = std::distance(azimuthBins.begin(), --it);
-    return numAzimuthBins - binIdx - 1;
+    return numAzimuthBins / 2 - binIdx - 1;
 }
 int coloradar::RadarConfig::verticalFovToElevationIdx(const float& verticalFov) {
     if (verticalFov <= 0 || verticalFov > 180) {
@@ -561,7 +561,7 @@ int coloradar::RadarConfig::verticalFovToElevationIdx(const float& verticalFov) 
     float verticalHalfFovRad = verticalFov / 2 * M_PI / 180.0f;
     auto it = std::lower_bound(elevationBins.begin(), elevationBins.end(), -verticalHalfFovRad);
     int binIdx = std::distance(elevationBins.begin(), --it);
-    return numElevationBins - binIdx - 1;
+    return numElevationBins / 2 - binIdx - 1;
 }
 int coloradar::RadarConfig::rangeToRangeIdx(const float& range) {
     if (range <= 0) {
