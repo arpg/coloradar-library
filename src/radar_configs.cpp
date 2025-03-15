@@ -511,6 +511,85 @@ Json::Value coloradar::RadarConfig::toJson() const {
     return jsonConfig;
 }
 
+void coloradar::RadarConfig::fromJson(const std::string& jsonString) {
+    Json::CharReaderBuilder reader;
+    Json::Value jsonConfig;
+    std::istringstream s(jsonString);
+    std::string errs;
+
+    if (!Json::parseFromStream(reader, s, &jsonConfig, &errs)) {
+        throw std::runtime_error("Failed to parse JSON: " + errs);
+    }
+
+    // Heatmap parameters
+    numElevationBins = jsonConfig["heatmap"]["numElevationBins"].asInt();
+    numAzimuthBins = jsonConfig["heatmap"]["numAzimuthBins"].asInt();
+    rangeBinWidth = jsonConfig["heatmap"]["rangeBinWidth"].asFloat();
+    azimuthBins.clear();
+    for (const auto& bin : jsonConfig["heatmap"]["azimuthBins"]) azimuthBins.push_back(bin.asFloat());
+    elevationBins.clear();
+    for (const auto& bin : jsonConfig["heatmap"]["elevationBins"]) elevationBins.push_back(bin.asFloat());
+
+    // Antenna parameters
+    designFrequency = jsonConfig["antenna"]["designFrequency"].asFloat();
+    numTxAntennas = jsonConfig["antenna"]["numTxAntennas"].asInt();
+    numRxAntennas = jsonConfig["antenna"]["numRxAntennas"].asInt();
+    txCenters.clear();
+    for (const auto& point : jsonConfig["antenna"]["txCenters"]) {
+        txCenters.emplace_back(pcl::PointXY{point["x"].asFloat(), point["y"].asFloat()});
+    }
+    rxCenters.clear();
+    for (const auto& point : jsonConfig["antenna"]["rxCenters"]) {
+        rxCenters.emplace_back(pcl::PointXY{point["x"].asFloat(), point["y"].asFloat()});
+    }
+
+    // Waveform parameters
+    numAdcSamplesPerChirp = jsonConfig["waveform"]["numAdcSamplesPerChirp"].asInt();
+    numChirpsPerFrame = jsonConfig["waveform"]["numChirpsPerFrame"].asInt();
+    adcSampleFrequency = jsonConfig["waveform"]["adcSampleFrequency"].asFloat();
+    startFrequency = jsonConfig["waveform"]["startFrequency"].asFloat();
+    idleTime = jsonConfig["waveform"]["idleTime"].asFloat();
+    adcStartTime = jsonConfig["waveform"]["adcStartTime"].asFloat();
+    rampEndTime = jsonConfig["waveform"]["rampEndTime"].asFloat();
+    frequencySlope = jsonConfig["waveform"]["frequencySlope"].asFloat();
+
+    // Calibration parameters
+    numDopplerBins = jsonConfig["calibration"]["numDopplerBins"].asInt();
+    couplingCalibMatrix.clear();
+    for (const auto& element : jsonConfig["calibration"]["couplingCalibMatrix"]) {
+        couplingCalibMatrix.emplace_back(std::complex<float>(element["real"].asFloat(), element["imag"].asFloat()));
+    }
+
+    // Phase frequency parameters
+    calibAdcSampleFrequency = jsonConfig["phaseFrequency"]["calibAdcSampleFrequency"].asFloat();
+    calibFrequencySlope = jsonConfig["phaseFrequency"]["calibFrequencySlope"].asFloat();
+    frequencyCalibMatrix.clear();
+    for (const auto& element : jsonConfig["phaseFrequency"]["frequencyCalibMatrix"]) {
+        frequencyCalibMatrix.emplace_back(std::complex<float>(element["real"].asFloat(), element["imag"].asFloat()));
+    }
+    phaseCalibMatrix.clear();
+    for (const auto& element : jsonConfig["phaseFrequency"]["phaseCalibMatrix"]) {
+        phaseCalibMatrix.emplace_back(std::complex<float>(element["real"].asFloat(), element["imag"].asFloat()));
+    }
+
+    // Internal parameters
+    numAzimuthBeams = jsonConfig["internal"]["numAzimuthBeams"].asInt();
+    numElevationBeams = jsonConfig["internal"]["numElevationBeams"].asInt();
+    azimuthApertureLen = jsonConfig["internal"]["azimuthApertureLen"].asFloat();
+    elevationApertureLen = jsonConfig["internal"]["elevationApertureLen"].asFloat();
+    numAngles = jsonConfig["internal"]["numAngles"].asInt();
+    numVirtualElements = jsonConfig["internal"]["numVirtualElements"].asInt();
+    virtualArrayMap.clear();
+    for (const auto& val : jsonConfig["internal"]["virtualArrayMap"]) virtualArrayMap.push_back(val.asInt());
+    azimuthAngles.clear();
+    for (const auto& angle : jsonConfig["internal"]["azimuthAngles"]) azimuthAngles.push_back(angle.asFloat());
+    elevationAngles.clear();
+    for (const auto& angle : jsonConfig["internal"]["elevationAngles"]) elevationAngles.push_back(angle.asFloat());
+    hasDoppler = jsonConfig["internal"]["hasDoppler"].asBool();
+    dopplerBinWidth = jsonConfig["internal"]["dopplerBinWidth"].asFloat();
+}
+
+
 void coloradar::RadarConfig::setNumRangeBins(const int& num) { numPosRangeBins = num; }
 const int& coloradar::RadarConfig::nRangeBins() const { return numPosRangeBins; }
 float coloradar::RadarConfig::maxRange() const { return std::ceil(nRangeBins() * rangeBinWidth * 100.0f) / 100.0f; }

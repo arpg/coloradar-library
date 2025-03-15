@@ -251,6 +251,7 @@ PYBIND11_MODULE(coloradar_dataset_lib, m) {
         .def("n_range_bins", &coloradar::RadarConfig::nRangeBins)
         .def("max_range", &coloradar::RadarConfig::maxRange)
         .def("to_json", &coloradar::RadarConfig::toJson)
+        .def("from_json", &coloradar::RadarConfig::fromJson)
         .def("clip_azimuth_max_bin", &coloradar::RadarConfig::clipAzimuthMaxBin, py::arg("az_max_bin"))
         .def("clip_elevation_max_bin", &coloradar::RadarConfig::clipElevationMaxBin, py::arg("el_max_bin"))
         .def("clip_range_max_bin", &coloradar::RadarConfig::clipRangeMaxBin, py::arg("range_max_bin"))
