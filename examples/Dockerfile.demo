@@ -1,0 +1,20 @@
+FROM ghcr.io/arpg/coloradar-lib:jazzy
+
+COPY requirements.txt .
+RUN pip install --break-system-packages -r requirements.txt && rm requirements.txt
+
+WORKDIR /app
+
+# Configure Jupyter Notebook
+RUN jupyter notebook --generate-config && \
+    echo "c.NotebookApp.allow_origin='*'" >> /root/.jupyter/jupyter_notebook_config.py && \
+    echo "c.NotebookApp.ip='0.0.0.0'" >> /root/.jupyter/jupyter_notebook_config.py && \
+    echo "c.NotebookApp.allow_root=True" >> /root/.jupyter/jupyter_notebook_config.py && \
+    echo "c.NotebookApp.open_browser=False" >> /root/.jupyter/jupyter_notebook_config.py && \
+    echo "c.NotebookApp.port=8888" >> /root/.jupyter/jupyter_notebook_config.py && \
+    echo "c.NotebookApp.token=''" >> /root/.jupyter/jupyter_notebook_config.py && \
+    echo "c.NotebookApp.password=''" >> /root/.jupyter/jupyter_notebook_config.py
+
+EXPOSE 8888
+
+CMD ["jupyter", "notebook", "--ip", "0.0.0.0", "--port", "8888", "--no-browser", "--allow-root", "--NotebookApp.token=''", "--NotebookApp.password=''"] 

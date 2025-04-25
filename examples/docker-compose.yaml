@@ -1,6 +1,6 @@
 services:
   base:
-    image: ghcr.io/arpg/coloradar-lib:12.6
+    image: ghcr.io/arpg/coloradar-lib:jazzy
     environment:
       - PYTHONUNBUFFERED=1
       - DOCKER_DATASET_VOLUME_PATH=/data/coloradar
@@ -17,7 +17,7 @@ services:
       service: base
     working_dir: /app
     volumes:
-      - ~/coloradar:/data/coloradar
+      - ~/data/coloradar:/data/coloradar
       - ./build_maps.py:/app/build_maps.py
     command: python3 build_maps.py
 
@@ -38,3 +38,13 @@ services:
       - ~/coloradar:/data/coloradar
       - .:/export
     command: python3 /export/export_dataset.py
+
+  jupyter:
+    build:
+      context: .
+      dockerfile: Dockerfile.demo
+    volumes:
+      - ~/data/coloradar:/data/coloradar
+      - .:/app
+    ports:
+      - "8888:8888"

@@ -646,7 +646,7 @@ int coloradar::RadarConfig::rangeToRangeIdx(const float& range) {
     if (range <= 0) {
         throw std::runtime_error("Invalid max range value: expected R > 0, got " + std::to_string(range));
     }
-    return static_cast<int>(std::ceil(range / rangeBinWidth));
+    return static_cast<int>(std::ceil(range / rangeBinWidth) - 1);
 }
 
 

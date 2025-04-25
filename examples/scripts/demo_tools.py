@@ -1,6 +1,5 @@
 import matplotlib.cm as cm
 import matplotlib.pyplot as plt
-import open3d as o3d
 import numpy as np
 from scipy.spatial.transform import Rotation
 
@@ -82,7 +81,7 @@ def display_elevation_fov_options(radar_config):
     draw_fov(radar_config.elevation_bins)
 
 def draw_fov(bins):
-    fig, ax = plt.subplots(subplot_kw={'projection': 'polar'}, figsize=(35, 21))
+    fig, ax = plt.subplots(subplot_kw={'projection': 'polar'}, figsize=(35, 25))
     num_sections = len(bins) // 2
     if num_sections < 16:
         color_map = [cm.get_cmap('inferno', num_sections)(i) for i in range(num_sections)]
