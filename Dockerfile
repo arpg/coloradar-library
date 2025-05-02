@@ -161,7 +161,6 @@ RUN if [ "$(lsb_release -rs | cut -d. -f1)" -ge 24 ]; then \
     fi
 RUN python3 tests/test_bindings.py
 
-COPY scripts scripts
 COPY export-config-template.yaml .
 
 
