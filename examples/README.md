@@ -27,7 +27,38 @@ Builds maps from the dataset. This service mounts your local data directory to `
 ```bash
 docker compose run sample_maps
 ```
-Samples maps from the dataset. Similar to build_maps, this service uses your local data directory.
+Samples maps from the dataset. Similar to build_maps, this service uses your local data directory. The sampling FOV is hardcoded in the script `scripts/sample_maps`.
+
+The following runs have been processed:
+- 2_22_2021_longboard_run0 (1034 frames)
+- 2_22_2021_longboard_run7 (1309 frames)
+- 12_21_2020_ec_hallways_run3 (1252 frames)
+- 12_21_2020_ec_hallways_run4 (447 frames)
+- 2_22_2021_longboard_run6 (1141 frames)
+- 2_22_2021_longboard_run1 (882 frames)
+- 12_21_2020_ec_hallways_run2 (1421 frames)
+- 2_23_2021_edgar_classroom_run2 (982 frames)
+- 2_23_2021_edgar_classroom_run5 (829 frames)
+- 2_23_2021_edgar_classroom_run4 (816 frames)
+- 2_23_2021_edgar_classroom_run3 (1380 frames)
+- 2_28_2021_outdoors_run5 (619 frames)
+- 12_21_2020_arpg_lab_run0 (589 frames)
+- 2_28_2021_outdoors_run2 (653 frames)
+- 12_21_2020_arpg_lab_run1 (590 frames)
+- 2_28_2021_outdoors_run3 (663 frames)
+- 2_28_2021_outdoors_run4 (544 frames)
+- 2_24_2021_aspen_run1 (456 frames)
+- 2_24_2021_aspen_run6 (579 frames)
+- 2_23_2021_edgar_army_run2 (720 frames)
+- 2_24_2021_aspen_run8 (516 frames)
+- 2_23_2021_edgar_army_run5 (567 frames)
+- 2_24_2021_aspen_run9 (414 frames)
+- 2_23_2021_edgar_army_run4 (1514 frames)
+- 2_23_2021_edgar_army_run3 (1226 frames)
+- 2_24_2021_aspen_run7 (536 frames)
+- 2_24_2021_aspen_run0 (434 frames)
+- 12_21_2020_ec_hallways_run0 (520 frames)
+- 2_22_2021_longboard_run4 (987 frames)
 
 ### 4. Export Dataset
 ```bash

@@ -1,5 +1,6 @@
 services:
   base:
+    # Change base image accordingly to your setup
     image: ghcr.io/arpg/coloradar-lib:jazzy
     environment:
       - PYTHONUNBUFFERED=1
@@ -9,6 +10,7 @@ services:
     extends:
       service: base
     volumes:
+      # No adjustment necessary
       - .:/export
     command: cp /src/coloradar_lib/export-config-template.yaml /export/export-config.yaml
 
@@ -17,8 +19,10 @@ services:
       service: base
     working_dir: /app
     volumes:
+      # <local dataset directory>:/<container dataset directory>
       - ~/data/coloradar:/data/coloradar
-      - ./build_maps.py:/app/build_maps.py
+      # No adjustment necessary
+      - ./scripts/build_maps.py:/app/build_maps.py
     command: python3 build_maps.py
 
   sample_maps:
@@ -26,8 +30,10 @@ services:
       service: base
     working_dir: /app
     volumes:
-      - ~/coloradar:/data/coloradar
-      - ./sample_maps.py:/app/sample_maps.py
+      # <local dataset directory>:/<container dataset directory>
+      - ~/data/coloradar:/data/coloradar
+      # No adjustment necessary
+      - ./scripts/sample_maps.py:/app/sample_maps.py
     command: python3 sample_maps.py
 
   export_dataset:
@@ -35,16 +41,20 @@ services:
       service: base
     working_dir: /app
     volumes:
-      - ~/coloradar:/data/coloradar
+      # <local dataset directory>:/<container dataset directory>
+      - ~/data/coloradar:/data/coloradar
+      # <local export directory>:/<container export directory>
       - .:/export
-    command: python3 /export/export_dataset.py
+    command: python3 /export/scripts/export_dataset.py
 
   jupyter:
     build:
       context: .
       dockerfile: Dockerfile.demo
     volumes:
+      # <local dataset directory>:/<container dataset directory>
       - ~/data/coloradar:/data/coloradar
+      # <local working directory>:/<container working directory>
       - .:/app
     ports:
       - "8888:8888"

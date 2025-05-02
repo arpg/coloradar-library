@@ -190,7 +190,6 @@ void saveHeatmapsToHDF5(const std::string& name, const H5::H5File& file, const s
     if (config->hasDoppler) {
         dims.push_back(2);
     }
-    std::cout << "heatmap dims 0 1: " << dims[0] << " " << dims[1] << std::endl;
     H5::DataSpace dataspace(dims.size(), dims.data());
     H5::PredType datatype = H5::PredType::NATIVE_FLOAT;
     H5::DataSet dataset = file.createDataSet(name, datatype, dataspace);
