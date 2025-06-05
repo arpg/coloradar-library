@@ -2,6 +2,7 @@ FROM ghcr.io/arpg/coloradar-lib:jazzy
 
 COPY requirements.txt .
 RUN pip install --break-system-packages -r requirements.txt && rm requirements.txt
+RUN python3 -m ipykernel install
 
 WORKDIR /app
 

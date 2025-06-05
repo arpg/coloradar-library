@@ -63,6 +63,8 @@ python3 build.py --ros <ros_distro> --cuda <cuda_version>
   python3 build.py --ros none --cuda none
   ```
 
+*Note*: the CUDA-ROS base images are pulled from [my dockerhub](https://hub.docker.com/repository/docker/annazabnus/ros-cuda).
+
 ---
 
 ## 3. Local Build

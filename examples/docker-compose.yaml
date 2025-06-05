@@ -1,7 +1,7 @@
 services:
   base:
     # Change base image accordingly to your setup
-    image: ghcr.io/arpg/coloradar-lib:jazzy
+    image: ghcr.io/arpg/coloradar-lib:12.6-jazzy
     environment:
       - PYTHONUNBUFFERED=1
       - DOCKER_DATASET_VOLUME_PATH=/data/coloradar
@@ -53,7 +53,7 @@ services:
       dockerfile: Dockerfile.demo
     volumes:
       # <local dataset directory>:/<container dataset directory>
-      - ~/data/coloradar:/data/coloradar
+      - ~/coloradar:/data/coloradar
       # <local working directory>:/<container working directory>
       - .:/app
     ports:
