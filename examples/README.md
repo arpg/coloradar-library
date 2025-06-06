@@ -34,13 +34,7 @@ nvidia-smi
 
 #### 1.3. Set the corresponding container tag in `examples/docker-compose.yaml`:
 ```docker
-services:
-  base:
-    # Change base image accordingly to your setup
-    image: ghcr.io/arpg/coloradar-lib:{your_cuda_version}-{desired_ros_version}
-    environment:
-      - PYTHONUNBUFFERED=1
-      - DOCKER_DATASET_VOLUME_PATH=/data/coloradar
+x-base-image: &base_image ghcr.io/arpg/coloradar-lib:12.6-jazzy
 ```
 
 #### 1.4. Set the volumes to point to the dataset.
@@ -117,7 +111,7 @@ The `fov.ipynb` notebook is designed to help you select the appropriate radar co
 
 
 ### 3.2. Example Functions
-
+TBD
 
 ## 4. Notes and Troubleshooting
 
@@ -129,5 +123,6 @@ The `fov.ipynb` notebook is designed to help you select the appropriate radar co
 
 - If the first import cell in a notebook fails with this:
 ```bash
-
+ModuleNotFoundError: No module named 'coloradar_cuda_lib'
 ```
+set a CUDA-compatible base image (see **1.3**) OR remove everything that uses the `cu.RadarProcessor` object. Currently, only the datacube-to-heatmap transformation requires that object.

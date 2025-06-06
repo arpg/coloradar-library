@@ -1,7 +1,10 @@
+# Change base image accordingly to your setup
+x-base-image: &base_image ghcr.io/arpg/coloradar-lib:12.6-jazzy
+
+
 services:
   base:
-    # Change base image accordingly to your setup
-    image: ghcr.io/arpg/coloradar-lib:12.6-jazzy
+    image: *base_image
     environment:
       - PYTHONUNBUFFERED=1
       - DOCKER_DATASET_VOLUME_PATH=/data/coloradar
@@ -51,6 +54,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.demo
+      args:
+        BASE_IMAGE: *base_image
     volumes:
       # <local dataset directory>:/<container dataset directory>
       - ~/coloradar:/data/coloradar
@@ -58,3 +63,11 @@ services:
       - .:/app
     ports:
       - "8888:8888"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+

@@ -170,16 +170,17 @@ def plot_rotations(gt, other, gt_ts, other_ts, title, label):
     plt.show()
 
 
-def show_heatmap_slice(hm0):
-    num_elev = hm0.shape[0]
-    mid_elev = num_elev // 2
-    slice_2d = hm0[mid_elev, :, :]
+def show_heatmap_slice(hm0, slice_idx=None):
+    if slice_idx is None:
+        num_elev = hm0.shape[0]
+        slice_idx = num_elev // 2
+    slice_2d = hm0[slice_idx, :, :]
     plt.figure(figsize=(8, 6))
     plt.imshow(slice_2d, cmap='inferno', aspect='auto', origin='lower')
     plt.colorbar(label='Intensity')
     plt.xlabel('Range Bins')
     plt.ylabel('Azimuth Bins')
-    plt.title(f'Heatmap Slice at Elevation Bin {mid_elev}')
+    plt.title(f'Heatmap Slice at Elevation Bin {slice_idx}')
     plt.show()
 
 
