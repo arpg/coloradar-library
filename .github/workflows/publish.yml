@@ -13,6 +13,7 @@ jobs:
       matrix:
         ros: ["none", "jazzy"]
         cuda: ["none", "12.6", "12.8"]
+      fail-fast: false
 
     steps:
       - name: Checkout Repository

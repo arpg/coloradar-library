@@ -37,7 +37,18 @@ RUN set -eu; \
     UBUNTU_CODENAME=$(grep '^VERSION_CODENAME=' /etc/os-release | cut -d= -f2 || echo "noble"); \
     echo "Detected architecture: $ARCH, OS Ubuntu $UBUNTU_CODENAME."; \
     echo "ARCH=$ARCH" >> $BUILD_VARIABLES; \
-    echo "UBUNTU_CODENAME=$UBUNTU_CODENAME" >> $BUILD_VARIABLES
+    echo "UBUNTU_CODENAME=$UBUNTU_CODENAME" >> $BUILD_VARIABLES; \
+    \
+    # Package sources
+    if [ "$ARCH" = "arm64" ]; then \
+        UBUNTU_MIRROR="http://ports.ubuntu.com/ubuntu-ports"; \
+        SECURITY_MIRROR="http://ports.ubuntu.com/ubuntu-ports"; \
+    else \
+        UBUNTU_MIRROR="http://archive.ubuntu.com/ubuntu"; \
+        SECURITY_MIRROR="http://security.ubuntu.com/ubuntu"; \
+    fi; \
+    echo "UBUNTU_MIRROR=$UBUNTU_MIRROR" >> $BUILD_VARIABLES; \
+    echo "SECURITY_MIRROR=$SECURITY_MIRROR" >> $BUILD_VARIABLES
 
 
 # Validate base image
@@ -53,10 +64,14 @@ RUN set -eu; \
 RUN set -eu; \
     . $BUILD_VARIABLES; \
     if [ "$UBUNTU_CODENAME" = "noble" ]; then \
-        echo "deb http://archive.ubuntu.com/ubuntu noble main restricted universe multiverse" > /etc/apt/sources.list; \
-        echo "deb http://archive.ubuntu.com/ubuntu noble-updates main restricted universe multiverse" >> /etc/apt/sources.list; \
-        echo "deb http://security.ubuntu.com/ubuntu noble-security main restricted universe multiverse" >> /etc/apt/sources.list; \
-    fi; \
+        for line in \
+            "deb $UBUNTU_MIRROR ${UBUNTU_CODENAME} main restricted universe multiverse" \
+            "deb $UBUNTU_MIRROR ${UBUNTU_CODENAME}-updates main restricted universe multiverse" \
+            "deb $UBUNTU_MIRROR ${UBUNTU_CODENAME}-backports main restricted universe multiverse" \
+            "deb $SECURITY_MIRROR ${UBUNTU_CODENAME}-security main restricted universe multiverse"; do \
+            grep -qxF "$line" /etc/apt/sources.list || echo "$line" >> /etc/apt/sources.list; \
+        done; \
+    fi;\
     sh -c "apt update $APT_FLAGS $OUTPUT_REDIRECT"; \
     sh -c "apt upgrade -y $APT_FLAGS $OUTPUT_REDIRECT"; \
     sh -c "apt install --no-install-recommends -y $APT_FLAGS \
