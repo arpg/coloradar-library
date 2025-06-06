@@ -2,10 +2,12 @@ ARG BASE_IMAGE
 FROM ${BASE_IMAGE} AS base
 
 ENV DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC
+ARG VERBOSE=true
 ARG CUDA_ENV
 ENV CUDA_ENV=${CUDA_ENV}
 SHELL ["/bin/bash", "-c"]
 WORKDIR /tmp
+ENV BUILD_VARIABLES="/tmp/build-variables"
 
 # Lib versions
 ARG DOCKER_VTK_VERSION=""
@@ -15,54 +17,73 @@ ARG DOCKER_PCL_VERSION=""
 ARG DOCKER_PYBIND_VERSION=""
 
 
-# Base image check
-RUN set -eux; \
+# Set build variables
+RUN set -eu; \
+    # Log verbosity
+    if [ "$VERBOSE" = "true" ]; then \
+        APT_FLAGS=""; \
+        OUTPUT_REDIRECT=""; \
+        echo "Using verbose mode."; \
+    else \
+        APT_FLAGS="-qq"; \
+        OUTPUT_REDIRECT='" > /dev/null"'; \
+        echo "Using quiet mode."; \
+    fi; \
+    echo "APT_FLAGS=$APT_FLAGS" > $BUILD_VARIABLES; \
+    echo "OUTPUT_REDIRECT=$OUTPUT_REDIRECT" >> $BUILD_VARIABLES; \
+    \
+    # System architecture
+    ARCH=$(dpkg --print-architecture | tr '[:upper:]' '[:lower:]'); \
+    UBUNTU_CODENAME=$(grep '^VERSION_CODENAME=' /etc/os-release | cut -d= -f2 || echo "noble"); \
+    echo "Detected architecture: $ARCH, OS Ubuntu $UBUNTU_CODENAME."; \
+    echo "ARCH=$ARCH" >> $BUILD_VARIABLES; \
+    echo "UBUNTU_CODENAME=$UBUNTU_CODENAME" >> $BUILD_VARIABLES
+
+
+# Validate base image
+RUN set -eu; \
     OS_NAME=$(grep '^ID=' /etc/os-release | cut -d= -f2 | tr -d '"'); \
     if [ "$OS_NAME" != "ubuntu" ]; then \
-        echo "Error: Expected an Ubuntu base image, found: $OS_NAME"; \
+        echo "Error: expected an Ubuntu base image, found: $OS_NAME"; \
         exit 1; \
     fi
 
 
-# OS dependencies
-RUN ARCH=$(dpkg --print-architecture); \
-    if [ "$ARCH" = "arm64" ]; then \
-        UBUNTU_MIRROR="http://ports.ubuntu.com/ubuntu-ports"; \
-        SECURITY_MIRROR="http://ports.ubuntu.com/ubuntu-ports"; \
-    else \
-        UBUNTU_MIRROR="http://archive.ubuntu.com/ubuntu"; \
-        SECURITY_MIRROR="http://security.ubuntu.com/ubuntu"; \
+# Install Ubuntu libraries
+RUN set -eu; \
+    . $BUILD_VARIABLES; \
+    if [ "$UBUNTU_CODENAME" = "noble" ]; then \
+        echo "deb http://archive.ubuntu.com/ubuntu noble main restricted universe multiverse" > /etc/apt/sources.list; \
+        echo "deb http://archive.ubuntu.com/ubuntu noble-updates main restricted universe multiverse" >> /etc/apt/sources.list; \
+        echo "deb http://security.ubuntu.com/ubuntu noble-security main restricted universe multiverse" >> /etc/apt/sources.list; \
     fi; \
-    UBUNTU_CODENAME=$(grep '^VERSION_CODENAME=' /etc/os-release | cut -d= -f2 || echo "noble"); \
-    echo "Using Ubuntu codename: $UBUNTU_CODENAME, Mirror: $UBUNTU_MIRROR, Security Mirror: $SECURITY_MIRROR"; \
-    echo "deb $UBUNTU_MIRROR ${UBUNTU_CODENAME} main restricted universe multiverse" > /etc/apt/sources.list; \
-    echo "deb $UBUNTU_MIRROR ${UBUNTU_CODENAME}-updates main restricted universe multiverse" >> /etc/apt/sources.list; \
-    echo "deb $UBUNTU_MIRROR ${UBUNTU_CODENAME}-backports main restricted universe multiverse" >> /etc/apt/sources.list; \
-    echo "deb $SECURITY_MIRROR ${UBUNTU_CODENAME}-security main restricted universe multiverse" >> /etc/apt/sources.list; \
-    apt update && apt upgrade -y
-
-RUN apt update && apt install --no-install-recommends -y \
-    tzdata \
-    software-properties-common \
-    wget \
-    curl \
-    build-essential \
-    cmake \
-    manpages-dev \
-    libeigen3-dev \
-    libflann-dev \
-    liboctomap-dev \
-    libgtest-dev \
-    libopencv-dev \
-    libopenmpi-dev \
-    openmpi-bin \
-    libjsoncpp-dev \
-    libyaml-cpp-dev \
-    libdbus-1-dev \
-    gobject-introspection \
-    libgirepository1.0-dev \
-    qtbase5-dev qt5-qmake qtbase5-dev-tools libqt5opengl5-dev \
-    python3-pip
+    sh -c "apt update $APT_FLAGS $OUTPUT_REDIRECT"; \
+    sh -c "apt upgrade -y $APT_FLAGS $OUTPUT_REDIRECT"; \
+    sh -c "apt install --no-install-recommends -y $APT_FLAGS \
+        wget \
+        lsb-release \
+        gnupg \
+        software-properties-common \
+        build-essential \
+        cmake \
+        tzdata \
+        curl \
+        manpages-dev \
+        libeigen3-dev \
+        libflann-dev \
+        liboctomap-dev \
+        libgtest-dev \
+        libopencv-dev \
+        libopenmpi-dev \
+        openmpi-bin \
+        libjsoncpp-dev \
+        libyaml-cpp-dev \
+        libdbus-1-dev \
+        gobject-introspection \
+        libgirepository1.0-dev \
+        qtbase5-dev qt5-qmake qtbase5-dev-tools libqt5opengl5-dev \
+        python3-pip \
+        $OUTPUT_REDIRECT"
 
 
 # VTK
