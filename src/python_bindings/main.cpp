@@ -406,4 +406,9 @@ PYBIND11_MODULE(coloradar_dataset_lib, m) {
         .def("get_run", &coloradar::ColoradarDataset::getRun, py::return_value_policy::reference)
         .def("single_chip_transform", [](coloradar::ColoradarDataset& self) { return poseToNumpy(self.singleChipTransform()); })
         .def("single_chip_config", &coloradar::ColoradarDataset::singleChipConfig, py::return_value_policy::reference);
+
+    // DatasetVisualizer
+    py::class_<coloradar::DatasetVisualizer>(m, "DatasetVisualizer")
+        .def(py::init<>())
+        .def("visualize", &coloradar::DatasetVisualizer::visualize, py::arg("run"), py::arg("radar_config"), py::arg("use_prebuilt_map") = false);
 }

@@ -8,7 +8,7 @@
 
 
 template<coloradar::PoseType PoseT>
-std::vector<PoseT> coloradar::ColoradarPlusRun::getPoses() {
+std::vector<PoseT> coloradar::ColoradarPlusRun::getPoses() const {
     std::filesystem::path posesFilePath = posesDirPath_ / "groundtruth_poses.txt";
     coloradar::internal::checkPathExists(posesFilePath);
 
@@ -23,7 +23,6 @@ std::vector<PoseT> coloradar::ColoradarPlusRun::getPoses() {
         typename coloradar::PoseTraits<PoseT>::TranslationType translation(x, y, z);
         typename coloradar::PoseTraits<PoseT>::RotationType rotation(rotW, rotX, rotY, rotZ);
         PoseT pose = coloradar::internal::makePose<PoseT>(translation, rotation);
-        // std::cout << pose.translation().x() << " " << pose.translation().y() << " " << pose.translation().z();
         poses.push_back(pose);
     }
     return poses;
@@ -73,17 +72,17 @@ std::vector<PoseT> coloradar::ColoradarPlusRun::interpolatePoses(const std::vect
 
 
 template<coloradar::PclCloudType CloudT>
-CloudT coloradar::ColoradarPlusRun::getLidarPointCloud(const std::filesystem::path& binPath) {
+std::shared_ptr<CloudT> coloradar::ColoradarPlusRun::getLidarPointCloud(const std::filesystem::path& binPath) {
     return coloradar::internal::readLidarPointCloud<typename CloudT::PointType, CloudT>(binPath);
 }
 
 template<coloradar::OctomapCloudType CloudT>
-CloudT coloradar::ColoradarPlusRun::getLidarPointCloud(const std::filesystem::path& binPath) {
+std::shared_ptr<CloudT> coloradar::ColoradarPlusRun::getLidarPointCloud(const std::filesystem::path& binPath) {
     return coloradar::internal::readLidarPointCloud<octomap::point3d, CloudT>(binPath);
 }
 
 template<coloradar::CloudType CloudT>
-CloudT coloradar::ColoradarPlusRun::getLidarPointCloud(const int& cloudIdx) {
+std::shared_ptr<CloudT> coloradar::ColoradarPlusRun::getLidarPointCloud(const int& cloudIdx) {
     std::filesystem::path pclBinFilePath = lidarCloudsDirPath_ / ("lidar_pointcloud_" + std::to_string(cloudIdx) + ".bin");
     return getLidarPointCloud<CloudT>(pclBinFilePath);
 }

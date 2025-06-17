@@ -105,30 +105,31 @@ std::vector<float> flattenHeatmap(const std::vector<float>& heatmap, const int& 
 
 namespace coloradar {
 
-std::vector<float> flattenLidarCloud(const pcl::PointCloud<pcl::PointXYZI>& cloud, bool collapseElevation, bool removeIntensity) {
-    size_t numPoints = cloud.size();
+std::vector<float> flattenLidarCloud(const std::shared_ptr<pcl::PointCloud<pcl::PointXYZI>>& cloud, bool collapseElevation, bool removeIntensity) {
+    size_t numPoints = cloud->size();
     std::vector<float> data;
-    if (numPoints <= 0) return data;
+    if (numPoints == 0) return data;
 
     size_t numDims = collapseElevation ? 3 : 4;
     if (removeIntensity) numDims--;
 
     data.resize(numPoints * numDims);
     for (size_t i = 0; i < numPoints; ++i) {
-        data[i * numDims + 0] = cloud[i].x;
-        data[i * numDims + 1] = cloud[i].y;
+        data[i * numDims + 0] = (*cloud)[i].x;
+        data[i * numDims + 1] = (*cloud)[i].y;
         if (collapseElevation) {
-            if (!removeIntensity) data[i * numDims + 2] = cloud[i].intensity;
+            if (!removeIntensity) data[i * numDims + 2] = (*cloud)[i].intensity;
         } else {
-            data[i * numDims + 2] = cloud[i].z;
-            if (!removeIntensity) data[i * numDims + 3] = cloud[i].intensity;
+            data[i * numDims + 2] = (*cloud)[i].z;
+            if (!removeIntensity) data[i * numDims + 3] = (*cloud)[i].intensity;
         }
     }
     return data;
 }
 
-std::vector<float> flattenRadarCloud(const pcl::PointCloud<coloradar::RadarPoint>& cloud, const RadarConfig* config) {
-    size_t numPoints = cloud.size();
+
+std::vector<float> flattenRadarCloud(const std::shared_ptr<pcl::PointCloud<coloradar::RadarPoint>>& cloud, const RadarConfig* config) {
+    size_t numPoints = cloud->size();
     std::vector<float> data;
     if (numPoints == 0) return data;
 
@@ -138,19 +139,20 @@ std::vector<float> flattenRadarCloud(const pcl::PointCloud<coloradar::RadarPoint
 
     data.resize(numPoints * numDims);
     for (size_t i = 0; i < numPoints; ++i) {
-        data[i * numDims + 0] = cloud[i].x;
-        data[i * numDims + 1] = cloud[i].y;
+        data[i * numDims + 0] = (*cloud)[i].x;
+        data[i * numDims + 1] = (*cloud)[i].y;
         if (hasZ) {
-            data[i * numDims + 2] = cloud[i].z;
-            data[i * numDims + 3] = cloud[i].intensity;
-            if (config->hasDoppler) data[i * numDims + 4] = cloud[i].doppler;
+            data[i * numDims + 2] = (*cloud)[i].z;
+            data[i * numDims + 3] = (*cloud)[i].intensity;
+            if (config->hasDoppler) data[i * numDims + 4] = (*cloud)[i].doppler;
         } else {
-            data[i * numDims + 2] = cloud[i].intensity;
-            if (config->hasDoppler) data[i * numDims + 3] = cloud[i].doppler;
+            data[i * numDims + 2] = (*cloud)[i].intensity;
+            if (config->hasDoppler) data[i * numDims + 3] = (*cloud)[i].doppler;
         }
     }
     return data;
 }
+
 
 void saveCloudToHDF5(const std::string& name, const H5::H5File& file, const std::vector<float>& flatCloud, const hsize_t& numDims) {
     hsize_t numPoints = flatCloud.size() / numDims;
@@ -402,23 +404,23 @@ std::vector<std::string> ColoradarPlusDataset::exportCascade(const RadarExportCo
                 buildClouds = true;
             }
             std::vector<float> cloudsFlat;
-            std::vector<hsize_t> cloudSizes;
+            std::vector<hsize_t> cloudSizes(numFrames);
             for (size_t i = 0; i < numFrames; ++i) {
-                pcl::PointCloud<RadarPoint> cloud;
+                std::shared_ptr<pcl::PointCloud<RadarPoint>> cloud;
                 if (buildClouds) {
-                    cloud = heatmapToPointcloud(run->getCascadeHeatmap(i), cascadeConfig_, config.intensityThresholdPercent());
+                    cloud = std::make_shared<pcl::PointCloud<RadarPoint>>(heatmapToPointcloud(run->getCascadeHeatmap(i), cascadeConfig_, config.intensityThresholdPercent()));
                 }
                 else {
                     cloud = run->getCascadePointcloud(i, config.intensityThresholdPercent());
                 }
                 filterFov(cloud, horizontalFov, verticalFov, range);
                 if (config.cloudsInGlobalFrame()) {
-                    pcl::transformPointCloud(cloud, cloud, sensorPoses[i]);
+                    pcl::transformPointCloud(*cloud, *cloud, sensorPoses[i]);
                 }
                 if (config.collapseElevation()) {
                     collapseElevation(cloud, config.collapseElevationMinZ(), config.collapseElevationMaxZ());
                 }
-                cloudSizes[i] = cloud.size();
+                cloudSizes[i] = cloud->size();
                 std::vector<float> cloudFlat = flattenRadarCloud(cloud, cascadeConfig_);
                 cloudsFlat.insert(cloudsFlat.end(), cloudFlat.begin(), cloudFlat.end());
             }
@@ -429,6 +431,7 @@ std::vector<std::string> ColoradarPlusDataset::exportCascade(const RadarExportCo
     std::cout << std::endl;
     return content;
 }
+
 
 std::vector<std::string> ColoradarPlusDataset::exportLidar(const LidarExportConfig &config, std::vector<ColoradarPlusRun*> runs, const H5::H5File &datasetFile) {
     std::vector<std::string> content;
@@ -477,7 +480,7 @@ std::vector<std::string> ColoradarPlusDataset::exportLidar(const LidarExportConf
             std::vector<float> cloudsFlat;
             std::vector<hsize_t> cloudSizes;
             for (size_t i = 0; i < numFrames; ++i) {
-                auto cloud = run->getLidarPointCloud<pcl::PointCloud<pcl::PointXYZI>>(i);
+                std::shared_ptr<pcl::PointCloud<pcl::PointXYZI>> cloud = run->getLidarPointCloud<pcl::PointCloud<pcl::PointXYZI>>(i);
                 filterFov(
                     cloud,
                     config.cloudFov().horizontalDegreesTotal,
@@ -487,7 +490,7 @@ std::vector<std::string> ColoradarPlusDataset::exportLidar(const LidarExportConf
                 if (config.collapseElevation()) {
                     collapseElevation(cloud, config.collapseElevationMinZ(), config.collapseElevationMaxZ());
                 }
-                cloudSizes[i] = cloud.size();
+                cloudSizes[i] = cloud->size();
                 std::vector<float> cloudFlat = flattenLidarCloud(cloud, config.collapseElevation(), config.removeIntensityDim());
                 cloudsFlat.insert(cloudsFlat.end(), cloudFlat.begin(), cloudFlat.end());
             }
@@ -496,7 +499,7 @@ std::vector<std::string> ColoradarPlusDataset::exportLidar(const LidarExportConf
         
         // map and samples
         if (config.exportMap() || config.exportMapSamples()) {
-            pcl::PointCloud<pcl::PointXYZI> map = run->readLidarOctomap();
+            std::shared_ptr<pcl::PointCloud<pcl::PointXYZI>> map = run->readLidarOctomap();
             hsize_t numDims = config.collapseElevation() ? 3 : 4;  // x, y, (z), occupancy
             if (config.removeOccupancyDim()) numDims -= 1;
 
@@ -548,22 +551,22 @@ std::vector<std::string> ColoradarPlusDataset::exportLidar(const LidarExportConf
                 std::vector<float> samplesFlat;
                 std::vector<hsize_t> sampleSizes(numSamples);
                 for (size_t i = 0; i < numSamples; ++i) {
-                    pcl::PointCloud<pcl::PointXYZI> sample;
+                    std::shared_ptr<pcl::PointCloud<pcl::PointXYZI>> sample;
                     if (resample) {
-                        sample = run->sampleMapFrame(
+                        sample = std::make_shared<pcl::PointCloud<pcl::PointXYZI>>(run->sampleMapFrame(
                             config.mapSampleFov().horizontalDegreesTotal,
                             config.mapSampleFov().verticalDegreesTotal,
                             config.mapSampleFov().rangeMeters,
                             centerPoses[i],
-                            map
-                        );
+                            *map
+                        ));
                         if (config.saveSamples()) {
                             run->saveMapSample(sample, i);
                         }
                     } else {
                         sample = run->readMapSample(i);
                     }
-                    sampleSizes[i] = sample.size();
+                    sampleSizes[i] = sample->size();
                     auto sampleFlat = flattenLidarCloud(sample, config.collapseElevation(), config.removeOccupancyDim());
                     samplesFlat.insert(samplesFlat.end(), sampleFlat.begin(), sampleFlat.end());
                 }
@@ -575,6 +578,7 @@ std::vector<std::string> ColoradarPlusDataset::exportLidar(const LidarExportConf
     std::cout << std::endl;
     return content;
 }
+
 
 std::filesystem::path ColoradarPlusDataset::exportToFile(DatasetExportConfig& exportConfig) {
     Json::Value finalConfig;

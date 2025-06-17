@@ -39,9 +39,9 @@ namespace coloradar::internal {
     template<coloradar::OctoPoseType PoseT> Eigen::Affine3f toEigenPose(const PoseT& pose);
     template<coloradar::OctoPoseType PoseT> PoseT fromEigenPose(const Eigen::Affine3f& pose);
 
-    template<coloradar::PointType PointT, coloradar::CloudType CloudT> CloudT readLidarPointCloud(const std::filesystem::path& binPath);
+    template<coloradar::PointType PointT, coloradar::CloudType CloudT> std::shared_ptr<CloudT> readLidarPointCloud(const std::filesystem::path& binPath);
 
-    template<typename PointT, typename CloudT> void filterFov(CloudT& cloud, const float& horizontalFov, const float& verticalFov, const float& range);
+    template<typename PointT, typename CloudT> void filterFov(std::shared_ptr<CloudT>& cloud, const float& horizontalFov, const float& verticalFov, const float& range);
 
     Eigen::Vector3f sphericalToCartesian(const double& az, const double& el, const double& range);
 

@@ -14,14 +14,14 @@ struct RadarPoint {
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };
 
-template <Pcl4dPointType PointT, template <PclCloudType> class CloudT> void octreeToPcl(const octomap::OcTree& tree, CloudT<PointT>& cloud);
-template <PclPointType PointT, template <PclCloudType> class CloudT> void filterFov(CloudT<PointT>& cloud, const float& horizontalFov, const float& verticalFov, const float& range);
-template <Pcl4dPointType PointT, template <typename> class CloudT> void collapseElevation(CloudT<PointT>& cloud, const float& elevationMinMeters, const float& elevationMaxMeters);
-template <PclPointType PointT, template <typename> class CloudT> void collapseElevation(CloudT<PointT>& cloud);
-template <Pcl4dPointType PointT, template <typename> class CloudT> void filterOccupancy(CloudT<PointT>& cloud, const float& probabilityThreshold = 0.0, const bool& saveProbabilities = false);
+template <Pcl4dPointType PointT, template <PclCloudType> class CloudT> void octreeToPcl(const octomap::OcTree& tree, std::shared_ptr<CloudT<PointT>>& cloud);
+template <PclPointType PointT, template <PclCloudType> class CloudT> void filterFov(std::shared_ptr<CloudT<PointT>>& cloud, const float& horizontalFov, const float& verticalFov, const float& range);
+template <Pcl4dPointType PointT, template <typename> class CloudT> void collapseElevation(std::shared_ptr<CloudT<PointT>>& cloud, const float& elevationMinMeters, const float& elevationMaxMeters);
+template <PclPointType PointT, template <typename> class CloudT> void collapseElevation(std::shared_ptr<CloudT<PointT>>& cloud);
+template <Pcl4dPointType PointT, template <typename> class CloudT> void filterOccupancy(std::shared_ptr<CloudT<PointT>>& cloud, const float& probabilityThreshold = 0.0, const bool& saveProbabilities = false);
 
 
-class OctoPointcloud : public octomap::Pointcloud {
+class OctoPointcloud : public octomap::Pointcloud, public std::enable_shared_from_this<OctoPointcloud> {
 public:
     OctoPointcloud() = default;
     OctoPointcloud(const OctoPointcloud& other) : octomap::Pointcloud(other) {}

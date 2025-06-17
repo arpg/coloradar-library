@@ -36,6 +36,8 @@
 #include <Eigen/Dense>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
+#include <pcl/common/transforms.h>
+#include <pcl/io/pcd_io.h>
 #include <octomap/octomap.h>
 
 

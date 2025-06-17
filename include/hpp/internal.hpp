@@ -80,7 +80,7 @@ template<coloradar::OctoPoseType PoseT> PoseT coloradar::internal::fromEigenPose
 
 
 template<coloradar::PointType PointT, coloradar::CloudType CloudT>
-CloudT coloradar::internal::readLidarPointCloud(const std::filesystem::path& binPath) {
+std::shared_ptr<CloudT> coloradar::internal::readLidarPointCloud(const std::filesystem::path& binPath) {
     coloradar::internal::checkPathExists(binPath);
     std::ifstream infile(binPath, std::ios::binary);
     if (!infile) {
@@ -90,8 +90,8 @@ CloudT coloradar::internal::readLidarPointCloud(const std::filesystem::path& bin
     size_t numPoints = infile.tellg() / (4 * sizeof(float));
     infile.seekg(0, std::ios::beg);
 
-    CloudT cloud;
-    cloud.reserve(numPoints);
+    auto cloud = std::make_shared<CloudT>();
+    cloud->reserve(numPoints);
 
     for (size_t j = 0; j < numPoints; ++j) {
         float x, y, z, i;
@@ -99,9 +99,9 @@ CloudT coloradar::internal::readLidarPointCloud(const std::filesystem::path& bin
         infile.read(reinterpret_cast<char*>(&y), sizeof(float));
         infile.read(reinterpret_cast<char*>(&z), sizeof(float));
         infile.read(reinterpret_cast<char*>(&i), sizeof(float));
-        cloud.push_back(coloradar::internal::makePoint<PointT>(x, y, z, i));
+        cloud->push_back(coloradar::internal::makePoint<PointT>(x, y, z, i));
     }
-    if (cloud.size() < 1) {
+    if (cloud->size() < 1) {
         throw std::runtime_error("Failed to read or empty point cloud: " + binPath.string());
     }
     return cloud;
@@ -109,7 +109,7 @@ CloudT coloradar::internal::readLidarPointCloud(const std::filesystem::path& bin
 
 
 template<typename PointT, typename CloudT>
-void coloradar::internal::filterFov(CloudT& cloud, const float& horizontalFov, const float& verticalFov, const float& range) {
+void coloradar::internal::filterFov(std::shared_ptr<CloudT>& cloud, const float& horizontalFov, const float& verticalFov, const float& range) {
     if (horizontalFov <= 0 || horizontalFov > 360) {
         throw std::runtime_error("Invalid horizontal FOV value: expected 0 < FOV <= 360, got " + std::to_string(horizontalFov));
     }
@@ -123,8 +123,8 @@ void coloradar::internal::filterFov(CloudT& cloud, const float& horizontalFov, c
     float verticalHalfFovRad = verticalFov / 2 * M_PI / 180.0f;
     FovCheck<PointT> checkAzimuth = horizontalFov <= 180 ? checkAzimuthFrontOnly<PointT> : checkAzimuthFrontBack<PointT>;
 
-    CloudT unfilteredCloud(cloud);
-    cloud.clear();
+    CloudT unfilteredCloud(*cloud);
+    cloud->clear();
 
     for (size_t i = 0; i < unfilteredCloud.size(); ++i) {
         const PointT& point = unfilteredCloud[i];
@@ -134,10 +134,21 @@ void coloradar::internal::filterFov(CloudT& cloud, const float& horizontalFov, c
         }
         float elevationSin = std::sin(verticalHalfFovRad);
         if (checkAzimuth(point, horizontalHalfFovRad) && (getZ(point) <= distance * elevationSin) && (getZ(point) >= -distance * elevationSin)) {
-            cloud.push_back(point);
+            cloud->push_back(point);
         }
     }
 }
+
+// template<typename PointT, typename CloudT>
+// void coloradar::internal::filterFov(boost::shared_ptr<CloudT>& cloud, const float& horizontalFov, const float& verticalFov, const float& range) {
+//     filterFov<PointT, CloudT>(cloud, horizontalFov, verticalFov, range);
+// }
+// template<typename PtrT>
+// void coloradar::internal::filterFov(PtrT& cloud, const float& horizontalFov, const float& verticalFov, const float& range) {
+//     using CloudT = typename PtrT::element_type;
+//     using PointT = typename CloudT::PointType;
+//     filterFov<PointT, CloudT>(cloud, horizontalFov, verticalFov, range);
+// }
 
 
 #endif

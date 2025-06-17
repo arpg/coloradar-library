@@ -106,7 +106,7 @@ find_package(Boost 1.78 REQUIRED COMPONENTS system filesystem thread)
 find_package(Threads REQUIRED)
 find_package(MPI REQUIRED)
 find_package(VTK REQUIRED)
-find_package(PCL 1.12 REQUIRED)
+find_package(PCL 1.12 REQUIRED COMPONENTS visualization)
 find_package(octomap REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package(CUDA)
@@ -159,6 +159,8 @@ add_library(coloradar_lib SHARED
     src/dataset_configs.cpp
     src/coloradar_run.cpp
     src/dataset.cpp
+
+    src/visualizer.cpp
 )
 target_link_libraries(coloradar_lib Threads::Threads ${YAML_CPP_LIBRARIES} ${PCL_LIBRARIES} ${OCTOMAP_LIBRARIES} ${HDF5_LIBRARIES} ${JSONCPP_LIBRARIES})
 install(TARGETS coloradar_lib LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
