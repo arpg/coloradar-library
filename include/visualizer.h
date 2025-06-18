@@ -41,6 +41,8 @@ protected:
     void initPoses();
     void step(const int increment = 1);
     void keyboardCallback(const pcl::visualization::KeyboardEvent &event);
+    pcl::PointCloud<RadarPoint>::Ptr readCascadeCloud(const int scanIdx);
+    pcl::PointCloud<pcl::PointXYZI>::Ptr readLidarCloud(const int scanIdx);
     void renderLidarMap();
     void renderRadarCloud(const pcl::PointCloud<RadarPoint>::Ptr& cloud);
 

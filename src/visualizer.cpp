@@ -57,11 +57,9 @@ void DatasetVisualizer::visualize(const ColoradarPlusRun* run, const bool usePre
     mapIsPrebuilt = usePrebuiltMap;
     if (usePrebuiltMap) {
         lidarMapCloud = run->readLidarOctomap();
-    } else {
-        throw std::runtime_error("Accumulated map not implemented.");
     }
+    step(1);
 
-    renderLidarMap();
     viewer->setBackgroundColor(1, 1, 1);
     viewer->addCoordinateSystem(2.0);
     viewer->initCameraParameters();
@@ -106,18 +104,35 @@ void DatasetVisualizer::step(const int increment) {
     currentStep = targetStep;
     
     if (!mapIsPrebuilt) {
+        auto lidarCloud = readLidarCloud(currentStep);
+        *lidarMapCloud += *lidarCloud;
         renderLidarMap();
     }
 
-    int lastCascadeTimestampIdx = findClosestTimestampIndex(run->lidarTimestamps()[targetStep], run->cascadeTimestamps(), false, true);
-    auto cascadeCloud = cascadeRadarConfig->heatmapToPointcloud(run->getCascadeHeatmap(lastCascadeTimestampIdx), cascadeRadarIntensityThreshold);  // cascade frame
-    auto cascadePose = cascadePoses[targetStep];                                                                                                   // base frame, cascade timestamp
-    auto cascadeToMapT = cascadePose * baseToCascadeTransform.inverse();
-    pcl::transformPointCloud(*cascadeCloud, *cascadeCloud, cascadeToMapT);                                                                         // map frame    
+    int lastCascadeTimestampIdx = findClosestTimestampIndex(run->lidarTimestamps()[currentStep], run->cascadeTimestamps(), false, true);
+    auto cascadeCloud = readCascadeCloud(lastCascadeTimestampIdx);
     std::cout << "cascadeCloud size: " << cascadeCloud->size() << std::endl;
     renderRadarCloud(cascadeCloud);
     
     imageActor->GetMapper()->SetInputData(vtkImage);
+}
+
+
+pcl::PointCloud<RadarPoint>::Ptr DatasetVisualizer::readCascadeCloud(const int scanIdx) {
+    auto cascadeCloud = cascadeRadarConfig->heatmapToPointcloud(run->getCascadeHeatmap(scanIdx), cascadeRadarIntensityThreshold);  // cascade frame
+    auto cascadePose = cascadePoses[currentStep];                                                                                  // base frame, cascade timestamp
+    auto cascadeToMapT = cascadePose * baseToCascadeTransform.inverse();
+    pcl::transformPointCloud(*cascadeCloud, *cascadeCloud, cascadeToMapT);                                                         // map frame
+    return cascadeCloud;
+}
+
+
+pcl::PointCloud<pcl::PointXYZI>::Ptr DatasetVisualizer::readLidarCloud(const int scanIdx) {
+    auto lidarCloud = run->getLidarPointCloud<pcl::PointCloud<pcl::PointXYZI>>(scanIdx);  // lidar frame
+    auto lidarPose = lidarPoses[currentStep];                                             // base frame, lidar timestamp
+    auto lidarToMapT = lidarPose * baseToLidarTransform.inverse();
+    pcl::transformPointCloud(*lidarCloud, *lidarCloud, lidarToMapT);                      // map frame
+    return lidarCloud;
 }
 
 

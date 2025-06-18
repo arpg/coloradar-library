@@ -25,17 +25,17 @@ std::vector<PoseT> coloradar::ColoradarPlusRun::getPoses() const {
 
 
 template<coloradar::PclCloudType CloudT>
-std::shared_ptr<CloudT> coloradar::ColoradarPlusRun::getLidarPointCloud(const std::filesystem::path& binPath) {
+std::shared_ptr<CloudT> coloradar::ColoradarPlusRun::getLidarPointCloud(const std::filesystem::path& binPath) const {
     return coloradar::internal::readLidarPointCloud<typename CloudT::PointType, CloudT>(binPath);
 }
 
 template<coloradar::OctomapCloudType CloudT>
-std::shared_ptr<CloudT> coloradar::ColoradarPlusRun::getLidarPointCloud(const std::filesystem::path& binPath) {
+std::shared_ptr<CloudT> coloradar::ColoradarPlusRun::getLidarPointCloud(const std::filesystem::path& binPath) const {
     return coloradar::internal::readLidarPointCloud<octomap::point3d, CloudT>(binPath);
 }
 
 template<coloradar::CloudType CloudT>
-std::shared_ptr<CloudT> coloradar::ColoradarPlusRun::getLidarPointCloud(const int& cloudIdx) {
+std::shared_ptr<CloudT> coloradar::ColoradarPlusRun::getLidarPointCloud(const int cloudIdx) const {
     std::filesystem::path pclBinFilePath = lidarCloudsDirPath_ / ("lidar_pointcloud_" + std::to_string(cloudIdx) + ".bin");
     return getLidarPointCloud<CloudT>(pclBinFilePath);
 }

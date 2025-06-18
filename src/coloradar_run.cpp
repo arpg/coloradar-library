@@ -171,7 +171,7 @@ octomap::OcTree coloradar::ColoradarPlusRun::buildLidarOctomap(
     octomap::OcTree tree(mapResolution);
 
     for (size_t i = 0; i < lidarTimestamps_.size(); ++i) {
-        std::shared_ptr<OctoPointcloud> cloud = getLidarPointCloud<coloradar::OctoPointcloud>(i);
+        std::shared_ptr<OctoPointcloud> cloud = getLidarPointCloud<OctoPointcloud>(i);
         cloud->filterFov(lidarTotalHorizontalFov, lidarTotalVerticalFov, maxRange);
         auto frameTransform = poses[i] * baseToLidarT;
         cloud->transform(frameTransform);
