@@ -43,6 +43,7 @@ protected:
     void keyboardCallback(const pcl::visualization::KeyboardEvent &event);
     pcl::PointCloud<RadarPoint>::Ptr readCascadeCloud(const int scanIdx);
     pcl::PointCloud<pcl::PointXYZI>::Ptr readLidarCloud(const int scanIdx);
+    pcl::PointCloud<pcl::PointXYZI>::Ptr downsampleLidarCloud(const pcl::PointCloud<pcl::PointXYZI>::Ptr& inputCloud, const float leafSize = 0.1) const;
     void renderLidarMap();
     void renderRadarCloud(const pcl::PointCloud<RadarPoint>::Ptr& cloud);
 

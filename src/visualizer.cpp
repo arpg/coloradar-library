@@ -136,6 +136,16 @@ pcl::PointCloud<pcl::PointXYZI>::Ptr DatasetVisualizer::readLidarCloud(const int
 }
 
 
+pcl::PointCloud<pcl::PointXYZI>::Ptr DatasetVisualizer::downsampleLidarCloud(const pcl::PointCloud<pcl::PointXYZI>::Ptr& inputCloud, const float leafSize) const {
+    auto downsampledCloud = std::make_shared<pcl::PointCloud<pcl::PointXYZI>>();
+    pcl::VoxelGrid<pcl::PointXYZI> voxelGrid;
+    voxelGrid.setInputCloud(inputCloud);
+    voxelGrid.setLeafSize(leafSize, leafSize, leafSize);
+    voxelGrid.filter(*downsampledCloud);
+    return downsampledCloud;
+}
+
+
 void DatasetVisualizer::renderLidarMap() {
     viewer->removePointCloud(lidarMapCloudName);
     pcl::visualization::PointCloudColorHandlerGenericField<pcl::PointXYZI> mapColorHandler(lidarMapCloud, "z");
