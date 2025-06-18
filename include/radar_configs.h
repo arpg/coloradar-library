@@ -8,6 +8,10 @@ namespace coloradar {
 
 class RadarConfig {
 protected:
+    // static variables
+    pcl::PointCloud<RadarPoint>::Ptr pointcloudTemplate;
+
+    // methods
     virtual void init(const std::filesystem::path& calibDir) = 0;
     void initAntennaParams(const std::filesystem::path& antennaCfgFile);
     void initHeatmapParams(const std::filesystem::path& heatmapCfgFile);
@@ -15,8 +19,8 @@ protected:
     void initCouplingParams(const std::filesystem::path& couplingCfgFile);
     void initPhaseFrequencyParams(const std::filesystem::path& phaseFrequencyCfgFile);
     void initInternalParams();
-
-    void setNumRangeBins(const int& num);
+    void precomputePointcloudTemplate();
+    void setNumRangeBins(const int& num);  // abstracted as a method because distinction between numRangeBins and numPosRangeBins may be unclear
 
 public:
     static constexpr double c = 299792458; // speed of light in m/s
@@ -76,7 +80,7 @@ public:
     Json::Value toJson() const;
     void fromJson(const std::string& jsonString);
 
-    const int& nRangeBins() const;
+    const int& nRangeBins() const;  // abstracted as a method because distinction between numRangeBins and numPosRangeBins may be unclear
     float maxRange() const;
     int clipAzimuthMaxBin(const int& azMaxBin);
     int clipElevationMaxBin(const int& elMaxBin);
@@ -94,7 +98,9 @@ public:
     std::vector<float> collapseHeatmapElevation(const std::vector<float>& image, const float& elevationMinMeters = -100.0, const float& elevationMaxMeters = 100.0, bool updateConfig = true);
     std::vector<float> removeDoppler(const std::vector<float>& image, bool updateConfig = true);
     std::vector<float> swapHeatmapDimensions(const std::vector<float>& heatmap);
+    pcl::PointCloud<RadarPoint>::Ptr heatmapToPointcloud(const std::vector<float>& heatmap, const double intensityThreshold = 0.0) const;
 };
+
 
 class SingleChipConfig : public RadarConfig {
 public:
@@ -105,6 +111,7 @@ protected:
     void init(const std::filesystem::path& calibDir) override;
 };
 
+
 class CascadeConfig : public RadarConfig {
 public:
     CascadeConfig() = default;
@@ -113,8 +120,6 @@ public:
 protected:
     void init(const std::filesystem::path& calibDir) override;
 };
-
-pcl::PointCloud<RadarPoint> heatmapToPointcloud(const std::vector<float>& heatmap, RadarConfig* config, const float intensityThresholdPercent = 0.0);
 
 }
 

@@ -134,7 +134,7 @@ protected:
 
 TEST_F(CompileTest, BasicFunctions) {
     octomap::OcTree tree(treeResolution);
-    pcl::PointCloud<pcl::PointXYZI> cloud;
+    pcl::PointCloud<pcl::PointXYZI>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZI>);
     coloradar::octreeToPcl(tree, cloud);
     coloradar::filterFov(cloud, 360, 180, 10);
 

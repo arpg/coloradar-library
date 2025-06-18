@@ -1,46 +1,43 @@
+#define PCL_NO_PRECOMPILE
 #include "visualizer.h"
 
 
-// void keyboardEventOccurred(const pcl::visualization::KeyboardEvent &event, void *data) {
-//     std::cout.precision(20);
-//     if (event.keyDown()) {
-//         if (event.getKeySym() == "Up") {
-//             dataset->currentFileIndex += dataset->FileIncrement;
-//             updateDisplay(*dataset);  // Pass dereferenced Dataset
-//         } else if (event.getKeySym() == "Down") {
-//             if (dataset->currentFileIndex > 0) {
-//                 dataset->currentFileIndex -= dataset->FileIncrement;
-//                 updateDisplay(*dataset);  // Pass dereferenced Dataset
-//             }
-//         } else if (event.getKeySym() == "s") {
-//             viewer->saveCameraParameters(camera_config_path);
-//             std::cout << "Camera parameters saved." << std::endl;
-//         } else if (event.getKeySym() == "l") {
-//             viewer->loadCameraParameters(camera_config_path);
-//             std::cout << "Camera parameters loaded." << std::endl;
-//         }
-//     }
-// }
+template class pcl::visualization::PointCloudGeometryHandlerXYZ<coloradar::RadarPoint>;
 
 
 namespace coloradar {
 
 
-DatasetVisualizer::DatasetVisualizer()
- : viewer(new pcl::visualization::PCLVisualizer("3D Viewer")),
-   vtkImage(vtkSmartPointer<vtkImageData>::New()),
-   imageActor(vtkSmartPointer<vtkImageActor>::New()) 
+DatasetVisualizer::DatasetVisualizer(
+    const RadarConfig* cascadeRadarConfig,
+    const Eigen::Affine3f baseToLidarTransform,
+    const Eigen::Affine3f baseToCascadeTransform,
+    const int frameIncrement, 
+    const double cascadeRadarIntensityThreshold,
+    const std::string& cameraConfigPath
+) :  
+    cascadeRadarConfig(cascadeRadarConfig),
+    baseToLidarTransform(baseToLidarTransform),
+    baseToCascadeTransform(baseToCascadeTransform),
+    frameIncrement(frameIncrement),
+    cascadeRadarIntensityThreshold(cascadeRadarIntensityThreshold),
+    cameraConfigPath(cameraConfigPath), 
+    viewer(new pcl::visualization::PCLVisualizer("3D Viewer")),
+    vtkImage(vtkSmartPointer<vtkImageData>::New()),
+    imageActor(vtkSmartPointer<vtkImageActor>::New())
 {
     reset();
 }
 
 
 void DatasetVisualizer::reset() {
-    stepCounter = -1;
+    run = nullptr;
+    mapIsPrebuilt = false;
+    lidarMapCloud.reset(new pcl::PointCloud<pcl::PointXYZI>());
+    lidarPoses.clear();
+    cascadePoses.clear();
     numSteps = 0;
-    numPoseFrames = 0;
-    numRadarFrames = 0;
-    numLidarFrames = 0;
+    currentStep = -1;
 
     viewer->removeAllPointClouds();
     viewer->removeAllCoordinateSystems();
@@ -49,64 +46,94 @@ void DatasetVisualizer::reset() {
 
     vtkImage->Initialize();
     imageActor->GetMapper()->SetInputData(vtkImage);
-
-    lidarMapCloud->clear();
 }
 
 
-void DatasetVisualizer::visualize(const ColoradarPlusRun* run, const RadarConfig* radarConfig, const bool usePrebuiltMap) {
+void DatasetVisualizer::visualize(const ColoradarPlusRun* run, const bool usePrebuiltMap) {
     reset();
-    auto poses = run->getPoses<Eigen::Affine3f>();
-    numPoseFrames = poses.size();
-    numRadarFrames = run->cascadeTimestamps().size();
-    numLidarFrames = run->lidarTimestamps().size();
-    numSteps = numPoseFrames;
+    this->run = run;
+    initPoses();
+    numSteps = lidarPoses.size();
+    mapIsPrebuilt = usePrebuiltMap;
     if (usePrebuiltMap) {
         lidarMapCloud = run->readLidarOctomap();
     } else {
         throw std::runtime_error("Accumulated map not implemented.");
     }
 
+    renderLidarMap();
     viewer->setBackgroundColor(1, 1, 1);
     viewer->addCoordinateSystem(2.0);
     viewer->initCameraParameters();
-    // viewer->registerKeyboardCallback(keyboardEventOccurred, static_cast<void*>(&dataset));
+    viewer->registerKeyboardCallback(std::bind(&DatasetVisualizer::keyboardCallback, this, std::placeholders::_1));
     while (!viewer->wasStopped()) {
         viewer->spin();
     }
 }
 
-void DatasetVisualizer::step(int increment) {
-    if (increment == 0) throw std::runtime_error("Step increment must be non-zero.");
-    if (stepCounter + increment >= numSteps or stepCounter + increment < 0) return;
 
-    pcl::PointCloud<pcl::PointXYZI>::Ptr radarCloud(new pcl::PointCloud<pcl::PointXYZI>());
-    pcl::PointCloud<pcl::PointXYZI>::Ptr lidarCloud(new pcl::PointCloud<pcl::PointXYZI>());
-    pcl::PointCloud<pcl::PointXYZI>::Ptr downsampledLidarCloud(new pcl::PointCloud<pcl::PointXYZI>());
+void DatasetVisualizer::initPoses() {
+    auto basePoses = run->getPoses<Eigen::Affine3f>();
+    lidarPoses = interpolatePoses(basePoses, run->poseTimestamps(), run->lidarTimestamps());
+    cascadePoses = interpolatePoses(basePoses, run->poseTimestamps(), run->cascadeTimestamps());
 }
 
-void updateDisplay(
-    pcl::PointCloud<pcl::PointXYZI>::Ptr radarCloud,
-    pcl::PointCloud<pcl::PointXYZI>::Ptr lidarCloud,
-    pcl::PointCloud<pcl::PointXYZI>::Ptr downsampledLidarCloud
-) {
-    viewer->removePointCloud("current_scan");
-    pcl::visualization::PointCloudColorHandlerGenericField<pcl::PointXYZI> intensity_distribution(lidarCloud, "z");
-    viewer->addPointCloud<pcl::PointXYZI>(lidarCloud, intensity_distribution, "current_scan");
-    viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 0.1, "current_scan");
 
-    std::string accum_cloud_name = "accumulated_ds_cloud_" + std::to_string(stepCounter);
-    pcl::visualization::PointCloudColorHandlerGenericField<pcl::PointXYZI> accumulated_ds_intensity_distribution(downsampledLidarCloud, "z");
-    viewer->addPointCloud<pcl::PointXYZI>(downsampledLidarCloud, accumulated_ds_intensity_distribution, accum_cloud_name);
-    viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 0.1, accum_cloud_name);
+void DatasetVisualizer::keyboardCallback(const pcl::visualization::KeyboardEvent &event) {
+    std::cout.precision(20);
+    if (!event.keyDown()) return;
+    std::cout << "Key pressed: " << event.getKeySym() << std::endl;
 
-    viewer->removePointCloud("current_radar_points");
-    pcl::visualization::PointCloudColorHandlerGenericField<pcl::PointXYZI> radar_intensity_cloud(radarCloud, "intensity");
-    viewer->addPointCloud<pcl::PointXYZI>(radarCloud, radar_intensity_cloud, "current_radar_points");
-    viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 3, "current_radar_points");
+    if (event.getKeySym() == "Up") {
+        this->step(frameIncrement);
+    } else if (event.getKeySym() == "Down") {
+        this->step(-frameIncrement);
+    } else if (event.getKeySym() == "s") {
+        viewer->saveCameraParameters(cameraConfigPath);
+        std::cout << "Camera parameters saved." << std::endl;
+    } else if (event.getKeySym() == "l") {
+        viewer->loadCameraParameters(cameraConfigPath);
+        std::cout << "Camera parameters loaded." << std::endl;
+    }
+}
 
+
+void DatasetVisualizer::step(const int increment) {
+    if (increment == 0) throw std::runtime_error("Step increment must be non-zero.");
+    int targetStep = std::clamp(currentStep + increment, 0, numSteps - 1);
+    std::cout << "targetStep: " << targetStep << std::endl;
+    if (targetStep == currentStep) return;
+    currentStep = targetStep;
+    
+    if (!mapIsPrebuilt) {
+        renderLidarMap();
+    }
+
+    int lastCascadeTimestampIdx = findClosestTimestampIndex(run->lidarTimestamps()[targetStep], run->cascadeTimestamps(), false, true);
+    auto cascadeCloud = cascadeRadarConfig->heatmapToPointcloud(run->getCascadeHeatmap(lastCascadeTimestampIdx), cascadeRadarIntensityThreshold);  // cascade frame
+    auto cascadePose = cascadePoses[targetStep];                                                                                                   // base frame, cascade timestamp
+    auto cascadeToMapT = cascadePose * baseToCascadeTransform.inverse();
+    pcl::transformPointCloud(*cascadeCloud, *cascadeCloud, cascadeToMapT);                                                                         // map frame    
+    std::cout << "cascadeCloud size: " << cascadeCloud->size() << std::endl;
+    renderRadarCloud(cascadeCloud);
+    
     imageActor->GetMapper()->SetInputData(vtkImage);
 }
 
+
+void DatasetVisualizer::renderLidarMap() {
+    viewer->removePointCloud(lidarMapCloudName);
+    pcl::visualization::PointCloudColorHandlerGenericField<pcl::PointXYZI> mapColorHandler(lidarMapCloud, "z");
+    viewer->addPointCloud<pcl::PointXYZI>(lidarMapCloud, mapColorHandler, lidarMapCloudName);
+    viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 0.1, lidarMapCloudName);
+}
+
+
+void DatasetVisualizer::renderRadarCloud(const pcl::PointCloud<RadarPoint>::Ptr& cloud) {
+    viewer->removePointCloud(cascadeRadarCloudName);
+    pcl::visualization::PointCloudColorHandlerGenericField<RadarPoint> radarColorHandler(cloud, "intensity");
+    viewer->addPointCloud<RadarPoint>(cloud, radarColorHandler, cascadeRadarCloudName);
+    viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 3, cascadeRadarCloudName);
+}
 
 }

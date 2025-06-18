@@ -32,12 +32,21 @@
 
 #include <json.h>
 #include <yaml-cpp/yaml.h>
+#include <H5Cpp.h>
+
 #include <Eigen/Core>
 #include <Eigen/Dense>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 #include <pcl/common/transforms.h>
 #include <pcl/io/pcd_io.h>
+#include <pcl/visualization/pcl_visualizer.h>
+#include <pcl/visualization/point_cloud_handlers.h>
+#include <pcl/visualization/point_cloud_geometry_handlers.h>
+#include <vtkSmartPointer.h>
+#include <vtkImageData.h>
+#include <vtkImageActor.h>
+#include <vtkImageMapper3D.h>
 #include <octomap/octomap.h>
 
 

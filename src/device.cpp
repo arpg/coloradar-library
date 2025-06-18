@@ -46,8 +46,8 @@ void RadarExportConfig::validate() {
         }
     }
     if (exportClouds_) {
-        if (intensityThresholdPercent_ < 0 || intensityThresholdPercent_ > 100) {
-            throw std::runtime_error("'intensity_threshold_percent' must be a float between 0 and 100.");
+        if (intensityThreshold_ < 0) {
+            throw std::runtime_error("'intensity_threshold' must be non-negative.");
         }
     }
 }
@@ -127,7 +127,7 @@ void RadarExportConfig::loadFromFile(const YAML::Node& deviceNode) {
     exportDatacubes_ = coloradar::internal::parseBoolYamlKey(deviceNode["export_datacubes"], exportDatacubes_);
     exportHeatmaps_ = coloradar::internal::parseBoolYamlKey(deviceNode["export_heatmaps"], exportHeatmaps_);
     exportClouds_ = coloradar::internal::parseBoolYamlKey(deviceNode["export_clouds"], exportClouds_);
-    intensityThresholdPercent_ = coloradar::internal::parseFloatYamlKey(deviceNode["intensity_threshold_percent"], intensityThresholdPercent_);
+    intensityThreshold_ = coloradar::internal::parseFloatYamlKey(deviceNode["intensity_threshold"], intensityThreshold_);
     cloudsInGlobalFrame_ = coloradar::internal::parseBoolYamlKey(deviceNode["clouds_in_global_frame"], cloudsInGlobalFrame_);
 }
 

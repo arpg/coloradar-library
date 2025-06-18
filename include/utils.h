@@ -6,6 +6,11 @@
 
 namespace coloradar {
 
+
+const int findClosestTimestampIndex(const double targetTimestamp, const std::vector<double>& timestamps, const bool beforeAllowed = true, const bool afterAllowed = true);
+template<PoseType PoseT> std::vector<PoseT> interpolatePoses(const std::vector<PoseT>& poses, const std::vector<double>& poseTimestamps, const std::vector<double>& targetTimestamps);
+
+
 struct RadarPoint {
     EIGEN_ALIGN16
     PCL_ADD_POINT4D;
@@ -13,6 +18,7 @@ struct RadarPoint {
     float doppler;
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };
+
 
 template <Pcl4dPointType PointT, template <PclCloudType> class CloudT> void octreeToPcl(const octomap::OcTree& tree, std::shared_ptr<CloudT<PointT>>& cloud);
 template <PclPointType PointT, template <PclCloudType> class CloudT> void filterFov(std::shared_ptr<CloudT<PointT>>& cloud, const float& horizontalFov, const float& verticalFov, const float& range);
@@ -36,7 +42,21 @@ public:
 
 }
 
-#include "utils_hpp/pcl_functions.hpp"
+
+#ifndef RADAR_POINT_REGISTERED
+#define RADAR_POINT_REGISTERED
+
+POINT_CLOUD_REGISTER_POINT_STRUCT(coloradar::RadarPoint,
+                                  (float, x, x)
+                                  (float, y, y)
+                                  (float, z, z)
+                                  (float, intensity, intensity)
+                                  (float, doppler, doppler))
+
+#endif
+
+
+#include "utils_hpp/basic.hpp"
 #include "utils_hpp/octo_pointcloud.hpp"
 
 #endif

@@ -279,7 +279,7 @@ std::vector<std::string> ColoradarPlusDataset::exportImu(const ImuExportConfig &
     for (auto* run : runs) {
         std::vector<double> timestamps = run->imuTimestamps();
         hsize_t numFrames = timestamps.size();
-        std::vector<Eigen::Affine3f> basePoses = run->interpolatePoses(run->getPoses<Eigen::Affine3f>(), run->poseTimestamps(), timestamps);
+        std::vector<Eigen::Affine3f> basePoses = interpolatePoses(run->getPoses<Eigen::Affine3f>(), run->poseTimestamps(), timestamps);
         std::vector<Eigen::Affine3f> sensorPoses(numFrames);
         for (int i = 0; i < numFrames; ++i) {
             sensorPoses[i] = basePoses[i] * imuTransform_;
@@ -347,7 +347,7 @@ std::vector<std::string> ColoradarPlusDataset::exportCascade(const RadarExportCo
     for (auto* run : runs) {
         std::vector<double> timestamps = run->cascadeTimestamps();
         hsize_t numFrames = timestamps.size();
-        std::vector<Eigen::Affine3f> basePoses = run->interpolatePoses(run->getPoses<Eigen::Affine3f>(), run->poseTimestamps(), timestamps);
+        std::vector<Eigen::Affine3f> basePoses = interpolatePoses(run->getPoses<Eigen::Affine3f>(), run->poseTimestamps(), timestamps);
         std::vector<Eigen::Affine3f> sensorPoses(numFrames);
         for (int i = 0; i < numFrames; ++i) {
             sensorPoses[i] = basePoses[i] * cascadeTransform_;
@@ -408,10 +408,10 @@ std::vector<std::string> ColoradarPlusDataset::exportCascade(const RadarExportCo
             for (size_t i = 0; i < numFrames; ++i) {
                 std::shared_ptr<pcl::PointCloud<RadarPoint>> cloud;
                 if (buildClouds) {
-                    cloud = std::make_shared<pcl::PointCloud<RadarPoint>>(heatmapToPointcloud(run->getCascadeHeatmap(i), cascadeConfig_, config.intensityThresholdPercent()));
+                    cloud = cascadeConfig_->heatmapToPointcloud(run->getCascadeHeatmap(i), config.intensityThreshold());
                 }
                 else {
-                    cloud = run->getCascadePointcloud(i, config.intensityThresholdPercent());
+                    cloud = run->getCascadePointcloud(i, config.intensityThreshold());
                 }
                 filterFov(cloud, horizontalFov, verticalFov, range);
                 if (config.cloudsInGlobalFrame()) {
@@ -456,7 +456,7 @@ std::vector<std::string> ColoradarPlusDataset::exportLidar(const LidarExportConf
         std::vector<double> timestamps = run->lidarTimestamps();
         hsize_t numFrames = timestamps.size();
         auto truePoses = run->getPoses<Eigen::Affine3f>();
-        std::vector<Eigen::Affine3f> basePoses = run->interpolatePoses(truePoses, truePoseTimestamps, timestamps);
+        std::vector<Eigen::Affine3f> basePoses = interpolatePoses(truePoses, truePoseTimestamps, timestamps);
         std::vector<Eigen::Affine3f> sensorPoses(numFrames);
         for (int i = 0; i < numFrames; ++i) {
             sensorPoses[i] = basePoses[i] * lidarTransform_;
@@ -499,7 +499,7 @@ std::vector<std::string> ColoradarPlusDataset::exportLidar(const LidarExportConf
         
         // map and samples
         if (config.exportMap() || config.exportMapSamples()) {
-            std::shared_ptr<pcl::PointCloud<pcl::PointXYZI>> map = run->readLidarOctomap();
+            pcl::PointCloud<pcl::PointXYZI>::Ptr map = run->readLidarOctomap();
             hsize_t numDims = config.collapseElevation() ? 3 : 4;  // x, y, (z), occupancy
             if (config.removeOccupancyDim()) numDims -= 1;
 
@@ -530,7 +530,7 @@ std::vector<std::string> ColoradarPlusDataset::exportLidar(const LidarExportConf
                     centerTransform = Eigen::Affine3f::Identity();
                 }
                 hsize_t numSamples = centerTimestamps.size();
-                std::vector<Eigen::Affine3f> basePosesCenterTs = run->interpolatePoses(truePoses, truePoseTimestamps, centerTimestamps);
+                std::vector<Eigen::Affine3f> basePosesCenterTs = interpolatePoses(truePoses, truePoseTimestamps, centerTimestamps);
                 std::vector<Eigen::Affine3f> centerPoses(numSamples);
                 for (int i = 0; i < numSamples; ++i) {
                     centerPoses[i] = basePosesCenterTs[i] * centerTransform;
@@ -553,13 +553,13 @@ std::vector<std::string> ColoradarPlusDataset::exportLidar(const LidarExportConf
                 for (size_t i = 0; i < numSamples; ++i) {
                     std::shared_ptr<pcl::PointCloud<pcl::PointXYZI>> sample;
                     if (resample) {
-                        sample = std::make_shared<pcl::PointCloud<pcl::PointXYZI>>(run->sampleMapFrame(
+                        sample = run->sampleMapFrame(
                             config.mapSampleFov().horizontalDegreesTotal,
                             config.mapSampleFov().verticalDegreesTotal,
                             config.mapSampleFov().rangeMeters,
                             centerPoses[i],
-                            *map
-                        ));
+                            map
+                        );
                         if (config.saveSamples()) {
                             run->saveMapSample(sample, i);
                         }

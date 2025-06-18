@@ -150,16 +150,16 @@ include_directories(${PROJECT_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS} ${YAML_C
 
 add_library(coloradar_lib SHARED
     src/internal.cpp
-    src/utils/pcl_functions.cpp
+
+    src/utils/basic.cpp
     src/utils/octo_pointcloud.cpp
 
     src/radar_configs.cpp
     src/device.cpp
-    
     src/dataset_configs.cpp
+    
     src/coloradar_run.cpp
     src/dataset.cpp
-
     src/visualizer.cpp
 )
 target_link_libraries(coloradar_lib Threads::Threads ${YAML_CPP_LIBRARIES} ${PCL_LIBRARIES} ${OCTOMAP_LIBRARIES} ${HDF5_LIBRARIES} ${JSONCPP_LIBRARIES})
