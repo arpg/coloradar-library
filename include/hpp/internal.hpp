@@ -99,7 +99,8 @@ std::shared_ptr<CloudT> coloradar::internal::readLidarPointCloud(const std::file
         infile.read(reinterpret_cast<char*>(&y), sizeof(float));
         infile.read(reinterpret_cast<char*>(&z), sizeof(float));
         infile.read(reinterpret_cast<char*>(&i), sizeof(float));
-        cloud->push_back(coloradar::internal::makePoint<PointT>(x, y, z, i));
+        PointT point = coloradar::internal::makePoint<PointT>(x, y, z, i);
+        cloud->push_back(point);
     }
     if (cloud->size() < 1) {
         throw std::runtime_error("Failed to read or empty point cloud: " + binPath.string());
@@ -138,17 +139,6 @@ void coloradar::internal::filterFov(std::shared_ptr<CloudT>& cloud, const float&
         }
     }
 }
-
-// template<typename PointT, typename CloudT>
-// void coloradar::internal::filterFov(boost::shared_ptr<CloudT>& cloud, const float& horizontalFov, const float& verticalFov, const float& range) {
-//     filterFov<PointT, CloudT>(cloud, horizontalFov, verticalFov, range);
-// }
-// template<typename PtrT>
-// void coloradar::internal::filterFov(PtrT& cloud, const float& horizontalFov, const float& verticalFov, const float& range) {
-//     using CloudT = typename PtrT::element_type;
-//     using PointT = typename CloudT::PointType;
-//     filterFov<PointT, CloudT>(cloud, horizontalFov, verticalFov, range);
-// }
 
 
 #endif

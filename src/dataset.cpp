@@ -34,7 +34,6 @@ void coloradar::ColoradarPlusDataset::init(const std::filesystem::path& pathToDa
 
 Eigen::Affine3f coloradar::ColoradarPlusDataset::loadTransform(const std::filesystem::path& filePath) {
     coloradar::internal::checkPathExists(filePath);
-    Eigen::Affine3f transform = Eigen::Affine3f::Identity();
     Eigen::Vector3f translation;
     Eigen::Quaternionf rotation;
 
@@ -49,8 +48,7 @@ Eigen::Affine3f coloradar::ColoradarPlusDataset::loadTransform(const std::filesy
     iss.clear();
     iss >> rotation.x() >> rotation.y() >> rotation.z() >> rotation.w();
 
-    transform.translate(translation);
-    transform.rotate(rotation);
+    Eigen::Affine3f transform = Eigen::Translation3f(translation) * rotation;
     return transform;
 }
 

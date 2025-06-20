@@ -73,6 +73,7 @@ void coloradar::collapseElevation(std::shared_ptr<CloudT<PointT>>& cloud, const 
     }
 }
 
+
 template <coloradar::PclPointType PointT, template <typename> class CloudT>
 void coloradar::collapseElevation(std::shared_ptr<CloudT<PointT>>& cloud) {
     const int precision = 4;
@@ -92,6 +93,7 @@ void coloradar::collapseElevation(std::shared_ptr<CloudT<PointT>>& cloud) {
         cloud->push_back(collapsedPoint);
     }
 }
+
 
 template <coloradar::Pcl4dPointType PointT, template <typename> class CloudT>
 void coloradar::filterOccupancy(std::shared_ptr<CloudT<PointT>>& cloud, const float& probabilityThreshold, const bool& saveProbabilities) {

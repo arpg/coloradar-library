@@ -14,7 +14,7 @@ DatasetVisualizer::DatasetVisualizer(
     const Eigen::Affine3f baseToCascadeTransform,
     const int frameIncrement, 
     const double cascadeRadarIntensityThreshold,
-    const std::string& cameraConfigPath
+    const std::string cameraConfigPath
 ) :  
     cascadeRadarConfig(cascadeRadarConfig),
     baseToLidarTransform(baseToLidarTransform),
@@ -57,6 +57,7 @@ void DatasetVisualizer::visualize(const ColoradarPlusRun* run, const bool usePre
     mapIsPrebuilt = usePrebuiltMap;
     if (usePrebuiltMap) {
         lidarMapCloud = run->readLidarOctomap();
+        filterOccupancy(lidarMapCloud, 0, true);
     }
     step(1);
 
@@ -105,7 +106,11 @@ void DatasetVisualizer::step(const int increment) {
     
     if (!mapIsPrebuilt) {
         auto lidarCloud = readLidarCloud(currentStep);
+        std::cout << "lidarCloud size: " << lidarCloud->size() << std::endl;
+        lidarCloud = downsampleLidarCloud(lidarCloud);
+        std::cout << "lidarCloud size after downsampling: " << lidarCloud->size() << std::endl;
         *lidarMapCloud += *lidarCloud;
+        std::cout << "lidarMapCloud size: " << lidarMapCloud->size() << std::endl;
         renderLidarMap();
     }
 
@@ -119,10 +124,13 @@ void DatasetVisualizer::step(const int increment) {
 
 
 pcl::PointCloud<RadarPoint>::Ptr DatasetVisualizer::readCascadeCloud(const int scanIdx) {
-    auto cascadeCloud = cascadeRadarConfig->heatmapToPointcloud(run->getCascadeHeatmap(scanIdx), cascadeRadarIntensityThreshold);  // cascade frame
-    auto cascadePose = cascadePoses[currentStep];                                                                                  // base frame, cascade timestamp
+    auto cascadeHeatmap = run->getCascadeHeatmap(scanIdx);                                                        // cascade frame
+    auto cascadeCloud = cascadeRadarConfig->heatmapToPointcloud(cascadeHeatmap, cascadeRadarIntensityThreshold);
+    cascadeCloud = normalizeRadarCloudIntensity(cascadeCloud);
+
+    auto cascadePose = cascadePoses[currentStep];                                                                 // base frame, cascade timestamp
     auto cascadeToMapT = cascadePose * baseToCascadeTransform.inverse();
-    pcl::transformPointCloud(*cascadeCloud, *cascadeCloud, cascadeToMapT);                                                         // map frame
+    pcl::transformPointCloud(*cascadeCloud, *cascadeCloud, cascadeToMapT);                                        // map frame
     return cascadeCloud;
 }
 
@@ -143,6 +151,28 @@ pcl::PointCloud<pcl::PointXYZI>::Ptr DatasetVisualizer::downsampleLidarCloud(con
     voxelGrid.setLeafSize(leafSize, leafSize, leafSize);
     voxelGrid.filter(*downsampledCloud);
     return downsampledCloud;
+}
+
+
+pcl::PointCloud<RadarPoint>::Ptr DatasetVisualizer::normalizeRadarCloudIntensity(const pcl::PointCloud<RadarPoint>::Ptr& inputCloud) const {
+    auto normalizedCloud = std::make_shared<pcl::PointCloud<RadarPoint>>();
+    normalizedCloud->reserve(inputCloud->size());
+
+    float minIntensity = std::numeric_limits<float>::max();
+    float maxIntensity = std::numeric_limits<float>::lowest();
+    for (const auto& point : *inputCloud) {
+        if (point.intensity < minIntensity) minIntensity = point.intensity;
+        if (point.intensity > maxIntensity) maxIntensity = point.intensity;
+    }
+    float range = maxIntensity - minIntensity;
+    if (range == 0) range = 1.0f;
+
+    for (const auto& point : *inputCloud) {
+        RadarPoint normalizedPoint = point;
+        normalizedPoint.intensity = (point.intensity - minIntensity) / range;
+        normalizedCloud->push_back(normalizedPoint);
+    }
+    return normalizedCloud;
 }
 
 

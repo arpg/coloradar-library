@@ -12,8 +12,8 @@ class DatasetVisualizer {
 protected:
     // constructor parameters
     const RadarConfig* cascadeRadarConfig;
-    const Eigen::Affine3f& baseToLidarTransform;
-    const Eigen::Affine3f& baseToCascadeTransform;
+    const Eigen::Affine3f baseToLidarTransform;
+    const Eigen::Affine3f baseToCascadeTransform;
     int frameIncrement;
     double cascadeRadarIntensityThreshold;
     std::string cameraConfigPath;
@@ -44,6 +44,7 @@ protected:
     pcl::PointCloud<RadarPoint>::Ptr readCascadeCloud(const int scanIdx);
     pcl::PointCloud<pcl::PointXYZI>::Ptr readLidarCloud(const int scanIdx);
     pcl::PointCloud<pcl::PointXYZI>::Ptr downsampleLidarCloud(const pcl::PointCloud<pcl::PointXYZI>::Ptr& inputCloud, const float leafSize = 0.1) const;
+    pcl::PointCloud<RadarPoint>::Ptr normalizeRadarCloudIntensity(const pcl::PointCloud<RadarPoint>::Ptr& inputCloud) const;
     void renderLidarMap();
     void renderRadarCloud(const pcl::PointCloud<RadarPoint>::Ptr& cloud);
 
@@ -54,11 +55,11 @@ public:
         const Eigen::Affine3f baseToCascadeTransform,
         const int frameIncrement = 1, 
         const double cascadeRadarIntensityThreshold = 0.0,
-        const std::string& cameraConfigPath = "camera_config.txt"
+        const std::string cameraConfigPath = "camera_config.txt"
     );
     virtual ~DatasetVisualizer() = default;
 
-    void visualize(const ColoradarPlusRun* run, const bool usePrebuiltMap = true);
+    void visualize(const ColoradarPlusRun* run, const bool usePrebuiltMap = false);
 };
 
 }

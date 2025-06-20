@@ -75,9 +75,7 @@ Eigen::Affine3f numpyToPose(const py::array_t<float>& array) {
     auto array_data = array.unchecked<1>();
     Eigen::Vector3f translation(array_data(0), array_data(1), array_data(2));
     Eigen::Quaternionf rotation(array_data(6), array_data(3), array_data(4), array_data(5));
-    Eigen::Affine3f pose = Eigen::Affine3f::Identity();
-    pose.translate(translation);
-    pose.rotate(rotation);
+    Eigen::Affine3f pose = Eigen::Translation3f(translation) * rotation;
     return pose;
 }
 
@@ -91,9 +89,7 @@ std::vector<Eigen::Affine3f> numpyToPoses(const py::array_t<float>& array) {
     for (ssize_t i = 0; i < array.shape(0); ++i) {
         Eigen::Vector3f translation(array_data(i, 0), array_data(i, 1), array_data(i, 2));
         Eigen::Quaternionf rotation(array_data(i, 6), array_data(i, 3), array_data(i, 4), array_data(i, 5));
-        Eigen::Affine3f pose = Eigen::Affine3f::Identity();
-        pose.translate(translation);
-        pose.rotate(rotation);
+        Eigen::Affine3f pose = Eigen::Translation3f(translation) * rotation;
         poses.push_back(pose);
     }
     return poses;
@@ -438,21 +434,22 @@ PYBIND11_MODULE(coloradar_dataset_lib, m) {
         .def(py::init([](const coloradar::RadarConfig* radarConfig,
                         const py::array_t<float>& baseToLidarArray,
                         const py::array_t<float>& baseToCascadeArray,
-                        const int frameIncrement,
-                        const double cascadeRadarIntensityThreshold,
-                        const std::string& cameraConfigPath) {
-            Eigen::Affine3f baseToLidar = numpyToPose(baseToLidarArray);
-            Eigen::Affine3f baseToCascade = numpyToPose(baseToCascadeArray);
-            return new coloradar::DatasetVisualizer(radarConfig, baseToLidar, baseToCascade, frameIncrement, cascadeRadarIntensityThreshold, cameraConfigPath);
-        }),
-        py::arg("cascade_radar_config"),
-        py::arg("base_to_lidar_transform"),
-        py::arg("base_to_cascade_transform"),
-        py::arg("frame_increment") = 1,
-        py::arg("cascade_radar_intensity_threshold") = 0.0,
-        py::arg("camera_config_path") = "camera_config.txt")
+                        int frameIncrement,
+                        double cascadeRadarIntensityThreshold,
+                        const std::string cameraConfigPath) {
+                Eigen::Affine3f baseToLidar = numpyToPose(baseToLidarArray);
+                Eigen::Affine3f baseToCascade = numpyToPose(baseToCascadeArray);
+                return std::make_unique<coloradar::DatasetVisualizer>(radarConfig, baseToLidar, baseToCascade, frameIncrement, cascadeRadarIntensityThreshold, cameraConfigPath);
+            }),
+            py::arg("cascade_radar_config"),
+            py::arg("base_to_lidar_transform"),
+            py::arg("base_to_cascade_transform"),
+            py::arg("frame_increment") = 1,
+            py::arg("cascade_radar_intensity_threshold") = 0.0,
+            py::arg("camera_config_path") = "camera_config.txt")
+           
         .def("visualize", &coloradar::DatasetVisualizer::visualize,
             py::arg("run"),
-            py::arg("use_prebuilt_map") = true);
+            py::arg("use_prebuilt_map") = false);
 
 }
