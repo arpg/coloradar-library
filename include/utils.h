@@ -7,7 +7,7 @@
 namespace coloradar {
 
 
-const int findClosestTimestampIndex(const double targetTimestamp, const std::vector<double>& timestamps, const bool beforeAllowed = true, const bool afterAllowed = true);
+const int findClosestTimestampIndex(const double targetTimestamp, const std::vector<double>& timestamps, const std::string& preference = "none");
 template<PoseType PoseT> std::vector<PoseT> interpolatePoses(const std::vector<PoseT>& poses, const std::vector<double>& poseTimestamps, const std::vector<double>& targetTimestamps);
 
 

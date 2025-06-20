@@ -26,13 +26,17 @@ protected:
     pcl::visualization::PCLVisualizer::Ptr viewer;
     vtkSmartPointer<vtkImageData> vtkImage;
     vtkSmartPointer<vtkImageActor> imageActor;
+    
 
-    // dynamic variables
+    // dynamic variables, vary per run
     const ColoradarPlusRun* run;
-    bool mapIsPrebuilt;
-    pcl::PointCloud<pcl::PointXYZI>::Ptr lidarMapCloud;
+    std::vector<Eigen::Affine3f> basePoses;
     std::vector<Eigen::Affine3f> lidarPoses;
     std::vector<Eigen::Affine3f> cascadePoses;
+    std::vector<int> baseToLidarFrameIndices;
+    std::vector<int> baseToCascadeFrameIndices;
+    bool mapIsPrebuilt;
+    pcl::PointCloud<pcl::PointXYZI>::Ptr lidarMapCloud;
     int numSteps;
     int currentStep;
 
@@ -45,6 +49,7 @@ protected:
     pcl::PointCloud<pcl::PointXYZI>::Ptr readLidarCloud(const int scanIdx);
     pcl::PointCloud<pcl::PointXYZI>::Ptr downsampleLidarCloud(const pcl::PointCloud<pcl::PointXYZI>::Ptr& inputCloud, const float leafSize = 0.1) const;
     pcl::PointCloud<RadarPoint>::Ptr normalizeRadarCloudIntensity(const pcl::PointCloud<RadarPoint>::Ptr& inputCloud) const;
+    pcl::PointCloud<RadarPoint>::Ptr extractTopNIntensity(const pcl::PointCloud<RadarPoint>::Ptr& inputCloud, size_t N) const;
     void renderLidarMap();
     void renderRadarCloud(const pcl::PointCloud<RadarPoint>::Ptr& cloud);
 

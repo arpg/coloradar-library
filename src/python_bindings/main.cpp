@@ -210,8 +210,7 @@ PYBIND11_MODULE(coloradar_dataset_lib, m) {
     m.def("find_closest_timestamp_index", &coloradar::findClosestTimestampIndex,
           py::arg("target_timestamp"),
           py::arg("timestamps"),
-          py::arg("before_allowed") = true,
-          py::arg("after_allowed") = true,
+          py::arg("preference") = "none",
           "Finds the closest timestamp index in a list with optional direction constraints."
     );
 
