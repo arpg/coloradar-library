@@ -9,7 +9,7 @@ namespace coloradar {
 
 
 DatasetVisualizer::DatasetVisualizer(
-    const RadarConfig* cascadeRadarConfig,
+    const CascadeConfig cascadeRadarConfig,
     const Eigen::Affine3f baseToLidarTransform,
     const Eigen::Affine3f baseToCascadeTransform,
     const int frameIncrement, 
@@ -139,9 +139,9 @@ void DatasetVisualizer::step(const int increment) {
 
 pcl::PointCloud<RadarPoint>::Ptr DatasetVisualizer::readCascadeCloud(const int scanIdx) {
     auto cascadeHeatmap = run->getCascadeHeatmap(scanIdx);
-    auto heatmapConfig = new CascadeConfig(*static_cast<CascadeConfig*>(cascadeRadarConfig));            
-    cascadeHeatmap = heatmapConfig->clipHeatmap(cascadeHeatmap, heatmapConfig->numAzimuthBeams, 0, heatmapConfig->nRangeBins(), false);
-    auto cascadeCloud = heatmapConfig->heatmapToPointcloud(cascadeHeatmap, cascadeRadarIntensityThreshold);
+    auto heatmapConfig = CascadeConfig(cascadeRadarConfig);
+    cascadeHeatmap = heatmapConfig.clipHeatmap(cascadeHeatmap, heatmapConfig.numAzimuthBeams, 0, heatmapConfig.nRangeBins(), false);
+    auto cascadeCloud = heatmapConfig.heatmapToPointcloud(cascadeHeatmap, cascadeRadarIntensityThreshold);
     // cascadeCloud = extractTopNIntensity(cascadeCloud, 500);
     cascadeCloud = normalizeRadarCloudIntensity(cascadeCloud);
 

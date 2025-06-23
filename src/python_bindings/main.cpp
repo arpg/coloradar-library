@@ -430,7 +430,7 @@ PYBIND11_MODULE(coloradar_dataset_lib, m) {
 
     // DatasetVisualizer
     py::class_<coloradar::DatasetVisualizer>(m, "DatasetVisualizer")
-        .def(py::init([](const coloradar::RadarConfig* radarConfig,
+        .def(py::init([](const coloradar::CascadeConfig cascadeRadarConfig,
                         const py::array_t<float>& baseToLidarArray,
                         const py::array_t<float>& baseToCascadeArray,
                         int frameIncrement,
@@ -438,7 +438,7 @@ PYBIND11_MODULE(coloradar_dataset_lib, m) {
                         const std::string cameraConfigPath) {
                 Eigen::Affine3f baseToLidar = numpyToPose(baseToLidarArray);
                 Eigen::Affine3f baseToCascade = numpyToPose(baseToCascadeArray);
-                return std::make_unique<coloradar::DatasetVisualizer>(radarConfig, baseToLidar, baseToCascade, frameIncrement, cascadeRadarIntensityThreshold, cameraConfigPath);
+                return std::make_unique<coloradar::DatasetVisualizer>(cascadeRadarConfig, baseToLidar, baseToCascade, frameIncrement, cascadeRadarIntensityThreshold, cameraConfigPath);
             }),
             py::arg("cascade_radar_config"),
             py::arg("base_to_lidar_transform"),

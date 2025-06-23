@@ -11,7 +11,7 @@ class DatasetVisualizer {
 
 protected:
     // constructor parameters
-    const RadarConfig* cascadeRadarConfig;
+    const CascadeConfig cascadeRadarConfig;
     const Eigen::Affine3f baseToLidarTransform;
     const Eigen::Affine3f baseToCascadeTransform;
     int frameIncrement;
@@ -55,7 +55,7 @@ protected:
 
 public:
     DatasetVisualizer(
-        const RadarConfig* cascadeRadarConfig,
+        const CascadeConfig cascadeRadarConfig,
         const Eigen::Affine3f baseToLidarTransform,
         const Eigen::Affine3f baseToCascadeTransform,
         const int frameIncrement = 1, 
