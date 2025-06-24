@@ -43,7 +43,7 @@ namespace coloradar::internal {
 
     template<typename PointT, typename CloudT> void filterFov(std::shared_ptr<CloudT>& cloud, const float& horizontalFov, const float& verticalFov, const float& range);
 
-    Eigen::Vector3f sphericalToCartesian(const double& az, const double& el, const double& range);
+    // Eigen::Vector3f sphericalToCartesian(const double& az, const double& el, const double& range);
 
     bool parseBoolYamlKey(const YAML::Node &nodeValue, bool defaultValue);
     int parseIntYamlKey(const YAML::Node &nodeValue, int defaultValue);

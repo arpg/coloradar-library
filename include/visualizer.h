@@ -11,7 +11,8 @@ class DatasetVisualizer {
 
 protected:
     // constructor parameters
-    const CascadeConfig cascadeRadarConfig;
+    CascadeConfig cascadeRadarConfig;
+    CascadeConfig clippedCascadeRadarConfig;
     const Eigen::Affine3f baseToLidarTransform;
     const Eigen::Affine3f baseToCascadeTransform;
     int frameIncrement;
@@ -27,7 +28,6 @@ protected:
     vtkSmartPointer<vtkImageData> vtkImage;
     vtkSmartPointer<vtkImageActor> imageActor;
     
-
     // dynamic variables, vary per run
     const ColoradarPlusRun* run;
     std::vector<Eigen::Affine3f> basePoses;
@@ -42,7 +42,6 @@ protected:
 
     // methods
     void reset();
-    void initPoses();
     void step(const int increment = 1);
     void keyboardCallback(const pcl::visualization::KeyboardEvent &event);
     pcl::PointCloud<RadarPoint>::Ptr readCascadeCloud(const int scanIdx);

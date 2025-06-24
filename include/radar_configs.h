@@ -19,7 +19,6 @@ protected:
     void initCouplingParams(const std::filesystem::path& couplingCfgFile);
     void initPhaseFrequencyParams(const std::filesystem::path& phaseFrequencyCfgFile);
     void initInternalParams();
-    void precomputePointcloudTemplate();
     void setNumRangeBins(const int& num);  // abstracted as a method because distinction between numRangeBins and numPosRangeBins may be unclear
 
 public:
@@ -82,6 +81,8 @@ public:
 
     const int& nRangeBins() const;  // abstracted as a method because distinction between numRangeBins and numPosRangeBins may be unclear
     float maxRange() const;
+    const int heatmapSize() const;
+    
     int clipAzimuthMaxBin(const int& azMaxBin);
     int clipElevationMaxBin(const int& elMaxBin);
     int clipRangeMaxBin(const int& rangeMaxBin);
@@ -99,6 +100,7 @@ public:
     std::vector<float> removeDoppler(const std::vector<float>& image, bool updateConfig = true);
     std::vector<float> swapHeatmapDimensions(const std::vector<float>& heatmap);
     pcl::PointCloud<RadarPoint>::Ptr heatmapToPointcloud(const std::vector<float>& heatmap, const double intensityThreshold = 0.0) const;
+    void precomputePointcloudTemplate();  // call for correct point cloud conversion if config parameters changed
 };
 
 

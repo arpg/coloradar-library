@@ -26,8 +26,8 @@ void RadarConfig::precomputePointcloudTemplate() {
             for (int rangeIdx = 0; rangeIdx < nRangeBins(); ++rangeIdx, ++pointIdx) {
                 float range = rangeIdx * rangeBinWidth;
                 RadarPoint& point = (*pointcloudTemplate)[pointIdx];
-                point.x = range * cosElevations[elIdx] * sinAzimuths[azIdx];
-                point.y = range * cosElevations[elIdx] * cosAzimuths[azIdx];
+                point.x = range * cosElevations[elIdx] * cosAzimuths[azIdx];
+                point.y = range * cosElevations[elIdx] * sinAzimuths[azIdx];
                 point.z = range * sinElevations[elIdx];
                 point.intensity = 0.0f;
                 point.doppler = 0.0f;
@@ -37,9 +37,15 @@ void RadarConfig::precomputePointcloudTemplate() {
 }
 
 
+const int RadarConfig::heatmapSize() const {
+    return numElevationBins * numAzimuthBins * nRangeBins() * (hasDoppler ? 2 : 1);
+}
+
+
 pcl::PointCloud<RadarPoint>::Ptr RadarConfig::heatmapToPointcloud(const std::vector<float>& heatmap, const double intensityThreshold) const {
-    const size_t expectedHeatmapSize = pointcloudTemplate->size() * 2;
-    if (heatmap.size() != expectedHeatmapSize) throw std::runtime_error("Heatmap size mismatch. Expected: " + std::to_string(expectedHeatmapSize) + ", got: " + std::to_string(heatmap.size()));
+    const size_t expectedCloudSize = numElevationBins * numAzimuthBins * nRangeBins();
+    if (heatmap.size() != heatmapSize()) throw std::runtime_error("Heatmap size mismatch. Expected: " + std::to_string(heatmapSize()) + ", got: " + std::to_string(heatmap.size()));
+    if (!pointcloudTemplate || pointcloudTemplate->size() != expectedCloudSize) throw std::runtime_error("Pointcloud template size mismatch. Expected: " + std::to_string(expectedCloudSize) + ", got: " + std::to_string(pointcloudTemplate->size()));
 
     pcl::PointCloud<RadarPoint>::Ptr outputCloud(new pcl::PointCloud<RadarPoint>);
     outputCloud->reserve(pointcloudTemplate->size());
