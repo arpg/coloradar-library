@@ -27,16 +27,13 @@ DatasetVisualizer::DatasetVisualizer(
     imageActor(vtkSmartPointer<vtkImageActor>::New())
 {
     reset();
+    std::cout << "cameraConfigPath: " << cameraConfigPath << std::endl;
     
     // init radar config
     std::vector<float> sampleHeatmap(cascadeRadarConfig.heatmapSize(), 0.0f);
     clippedCascadeRadarConfig = CascadeConfig(cascadeRadarConfig); // copy config
     clippedCascadeRadarConfig.clipHeatmap(sampleHeatmap, cascadeRadarConfig.numAzimuthBins, 0, static_cast<int>(cascadeRadarConfig.nRangeBins() * 0.75), true); // clip sample heatmap to modify the config
     clippedCascadeRadarConfig.precomputePointcloudTemplate(); // update cloud template
-    std::cout << "clippedCascadeRadarConfig num elevation bins: " << clippedCascadeRadarConfig.numElevationBins << std::endl;
-    std::cout << "clippedCascadeRadarConfig num range bins: " << clippedCascadeRadarConfig.nRangeBins() << std::endl;
-    std::cout << "clippedCascadeRadarConfig max range: " << clippedCascadeRadarConfig.maxRange() << std::endl;
-    std::cout << "clippedCascadeRadarConfig heatmap size: " << clippedCascadeRadarConfig.heatmapSize() << std::endl;
 }
 
 
@@ -53,6 +50,7 @@ void DatasetVisualizer::reset() {
     viewer->removeAllCoordinateSystems();
     viewer->removeAllShapes();
     viewer->resetCamera();
+    viewer->initCameraParameters();
 
     vtkImage->Initialize();
     imageActor->GetMapper()->SetInputData(vtkImage);
@@ -82,9 +80,9 @@ void DatasetVisualizer::visualize(const ColoradarPlusRun* run, const bool usePre
     mapIsPrebuilt = usePrebuiltMap;
     if (usePrebuiltMap) {
         lidarMapCloud = run->readLidarOctomap();
-        std::cout << "Loaded pre-built map of size: " << lidarMapCloud->size() << std::endl;
+        // std::cout << "Loaded pre-built map of size: " << lidarMapCloud->size() << std::endl;
         filterOccupancy(lidarMapCloud, 0, true);
-        std::cout << "Filtered pre-built map of size: " << lidarMapCloud->size() << std::endl;
+        // std::cout << "Filtered pre-built map of size: " << lidarMapCloud->size() << std::endl;
         renderLidarMap();
     }
     
@@ -94,10 +92,10 @@ void DatasetVisualizer::visualize(const ColoradarPlusRun* run, const bool usePre
     // start viewer
     viewer->setBackgroundColor(0, 0, 0);
     viewer->addCoordinateSystem(2.0);
-    viewer->initCameraParameters();
+    std::cout << "cameraConfigPath exists: " << std::filesystem::exists(cameraConfigPath) << std::endl;
     if (std::filesystem::exists(cameraConfigPath)) {
         viewer->loadCameraParameters(cameraConfigPath);
-        std::cout << "Camera parameters loaded from " << cameraConfigPath << "." << std::endl;
+        std::cout << "Camera parameters loaded from " << std::filesystem::absolute(cameraConfigPath) << "." << std::endl;
     }
     viewer->registerKeyboardCallback(std::bind(&DatasetVisualizer::keyboardCallback, this, std::placeholders::_1));
     while (!viewer->wasStopped()) {
@@ -109,7 +107,7 @@ void DatasetVisualizer::visualize(const ColoradarPlusRun* run, const bool usePre
 void DatasetVisualizer::keyboardCallback(const pcl::visualization::KeyboardEvent &event) {
     std::cout.precision(20);
     if (!event.keyDown()) return;
-    std::cout << "Key pressed: " << event.getKeySym() << std::endl;
+    // std::cout << "Key pressed: " << event.getKeySym() << std::endl;
 
     if (event.getKeySym() == "Up") {
         this->step(frameIncrement);
@@ -117,10 +115,10 @@ void DatasetVisualizer::keyboardCallback(const pcl::visualization::KeyboardEvent
         this->step(-frameIncrement);
     } else if (event.getKeySym() == "s") {
         viewer->saveCameraParameters(cameraConfigPath);
-        std::cout << "Camera parameters saved." << std::endl;
+        std::cout << "Camera parameters saved to " << std::filesystem::absolute(cameraConfigPath) << std::endl;
     } else if (event.getKeySym() == "l") {
         viewer->loadCameraParameters(cameraConfigPath);
-        std::cout << "Camera parameters loaded." << std::endl;
+        std::cout << "Camera parameters loaded from " << std::filesystem::absolute(cameraConfigPath) << std::endl;
     }
 }
 
@@ -128,26 +126,26 @@ void DatasetVisualizer::keyboardCallback(const pcl::visualization::KeyboardEvent
 void DatasetVisualizer::step(const int increment) {
     if (increment == 0) throw std::runtime_error("Step increment must be non-zero.");
     int targetStep = std::clamp(currentStep + increment, 0, numSteps - 1);
-    std::cout << "targetStep: " << targetStep << std::endl;
+    // std::cout << "targetStep: " << targetStep << std::endl;
     if (targetStep == currentStep) return;
     currentStep = targetStep;
     
     if (!mapIsPrebuilt) {
         int lidarFrameIdx = baseToLidarFrameIndices[currentStep];
         auto lidarCloud = readLidarCloud(lidarFrameIdx);
-        std::cout << "using lidar frame " << lidarFrameIdx << " for frame " << currentStep << std::endl;
-        std::cout << "lidarCloud size: " << lidarCloud->size() << std::endl;
+        // std::cout << "using lidar frame " << lidarFrameIdx << " for frame " << currentStep << std::endl;
+        // std::cout << "lidarCloud size: " << lidarCloud->size() << std::endl;
         lidarCloud = downsampleLidarCloud(lidarCloud);
-        std::cout << "lidarCloud size after downsampling: " << lidarCloud->size() << std::endl;
+        // std::cout << "lidarCloud size after downsampling: " << lidarCloud->size() << std::endl;
         *lidarMapCloud += *lidarCloud;
-        std::cout << "lidarMapCloud size: " << lidarMapCloud->size() << std::endl;
+        // std::cout << "lidarMapCloud size: " << lidarMapCloud->size() << std::endl;
         renderLidarMap();
     }
 
     int cascadeFrameIdx = baseToCascadeFrameIndices[currentStep];
     auto cascadeCloud = readCascadeCloud(cascadeFrameIdx);
-    std::cout << "using cascade frame " << cascadeFrameIdx << " for frame " << currentStep << std::endl;
-    std::cout << "cascadeCloud size: " << cascadeCloud->size() << std::endl << std::endl;
+    // std::cout << "using cascade frame " << cascadeFrameIdx << " for frame " << currentStep << std::endl;
+    // std::cout << "cascadeCloud size: " << cascadeCloud->size() << std::endl << std::endl;
     renderRadarCloud(cascadeCloud);
     
     imageActor->GetMapper()->SetInputData(vtkImage);
@@ -162,8 +160,7 @@ pcl::PointCloud<RadarPoint>::Ptr DatasetVisualizer::readCascadeCloud(const int s
     cascadeCloud = normalizeRadarCloudIntensity(cascadeCloud);
 
     auto cascadePose = cascadePoses[scanIdx];                                                                 // base frame, cascade timestamp
-    auto cascadeToMapT = cascadePose.inverse() * baseToCascadeTransform.inverse();  // T_m_s = T_m_b * T_b_s
-    // auto cascadeToMapT = cascadePose * baseToCascadeTransform;  // looks right, logic off
+    auto cascadeToMapT = cascadePose * baseToCascadeTransform;
     pcl::transformPointCloud(*cascadeCloud, *cascadeCloud, cascadeToMapT);                                        // map frame
     return cascadeCloud;
 }
@@ -172,8 +169,7 @@ pcl::PointCloud<RadarPoint>::Ptr DatasetVisualizer::readCascadeCloud(const int s
 pcl::PointCloud<pcl::PointXYZI>::Ptr DatasetVisualizer::readLidarCloud(const int scanIdx) {
     auto lidarCloud = run->getLidarPointCloud<pcl::PointCloud<pcl::PointXYZI>>(scanIdx);  // lidar frame
     auto lidarPose = lidarPoses[scanIdx];                                             // base frame, lidar timestamp
-    auto lidarToMapT = lidarPose.inverse() * baseToLidarTransform.inverse();
-    // auto lidarToMapT = lidarPose * baseToLidarTransform; // .inverse();
+    auto lidarToMapT = lidarPose * baseToLidarTransform;
     pcl::transformPointCloud(*lidarCloud, *lidarCloud, lidarToMapT);                      // map frame
     return lidarCloud;
 }

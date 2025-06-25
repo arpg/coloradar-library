@@ -1,5 +1,13 @@
 # Coloradar Library
 
+- [Build Options](#build-options)
+  - [1. Pre-built Images](#1-pre-built-images)
+  - [2. Building Your Own Images](#2-building-your-own-images)
+  - [3. Local Build](#3-local-build)
+
+
+# Build Options
+
 ## 1. Pre-built Images
 
 Login to the Github container Registry:
@@ -33,11 +41,10 @@ docker pull ghcr.io/arpg/coloradar-lib:12.6-jazzy
 - **NVIDIA GPU Drivers (Optional)**: Compatible with the chosen CUDA version
 - **NVIDIA Container Toolkit (Optional)**: For GPU support in Docker
 
----
 
 ## 2. Building Your Own Images
 
-Run the provided script to build an image for your desired **ROS** and **CUDA** versions:
+Run the provided script to build an image for your desired **ROS** and **CUDA** versions
 
 ```bash
 python3 build.py --ros <ros_distro> --cuda <cuda_version>
@@ -65,7 +72,6 @@ python3 build.py --ros <ros_distro> --cuda <cuda_version>
 
 *Note*: the CUDA-ROS base images are pulled from [my dockerhub](https://hub.docker.com/repository/docker/annazabnus/ros-cuda).
 
----
 
 ## 3. Local Build
 

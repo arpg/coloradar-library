@@ -20,8 +20,6 @@ void coloradar::ColoradarPlusDataset::init(const std::filesystem::path& pathToDa
 
     imuTransform_ = loadTransform(transformsDirPath_ / "base_to_imu.txt");
     lidarTransform_ = loadTransform(transformsDirPath_ / "base_to_lidar.txt");
-    // T_s_i = T_s_b * T_b_i = base-to-lidar * base_to_imu.inverse()
-    lidarTransform_ = lidarTransform_ * imuTransform_.inverse();  // WARNING: assuming base frame is IMU
 
     base_device_ = std::make_unique<BaseDevice>();
     imu_ = std::make_unique<ImuDevice>();
@@ -631,7 +629,6 @@ std::filesystem::path ColoradarPlusDataset::exportToFile(const std::string &yaml
 coloradar::ColoradarDataset::ColoradarDataset(const std::filesystem::path& pathToDataset) {
     init(pathToDataset);
     cascadeTransform_ = loadTransform(transformsDirPath_ / "base_to_cascade.txt");
-    cascadeTransform_ = cascadeTransform_ * imuTransform_.inverse();  // WARNING: assuming base frame is IMU
     singleChipTransform_ = loadTransform(transformsDirPath_ / "base_to_single_chip.txt");
 
     single_chip_ = std::make_unique<SingleChipDevice>();

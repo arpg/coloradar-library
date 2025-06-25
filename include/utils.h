@@ -31,10 +31,10 @@ template <Pcl4dPointType PointT, template <typename> class CloudT> void filterOc
 class OctoPointcloud : public octomap::Pointcloud, public std::enable_shared_from_this<OctoPointcloud> {
 public:
     OctoPointcloud() = default;
-    OctoPointcloud(const OctoPointcloud& other) : octomap::Pointcloud(other) {}
-    template <PclPointType PointT, template <PclCloudType> class CloudT> OctoPointcloud(const CloudT<PointT>& cloud);
+    OctoPointcloud(std::shared_ptr<OctoPointcloud>& other) : octomap::Pointcloud(*other) {}
+    template <PclPointType PointT, template <PclCloudType> class CloudT> OctoPointcloud(std::shared_ptr<CloudT<PointT>>& cloud);
 
-    template <PclCloudType CloudT> CloudT toPcl();
+    template <PclCloudType CloudT> std::shared_ptr<CloudT> toPcl();
 
     void filterFov(const float& horizontalFovTan, const float& verticalFovTan, const float& range);
     void transform(const Eigen::Affine3f& transformMatrix);
