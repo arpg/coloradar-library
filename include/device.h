@@ -21,11 +21,12 @@ public:
     BaseExportConfig(const BaseExportConfig& other) = default;
     BaseExportConfig& operator=(const BaseExportConfig& other) = default;
 
-    const bool& exportPoses() const { return exportPoses_; }
-    const bool& exportTimestamps() const { return exportTimestamps_; }
+    const bool exportPoses() const { return exportPoses_; }
+    const bool exportTimestamps() const { return exportTimestamps_; }
 
     virtual void loadFromFile(const YAML::Node& deviceNode);
 };
+
 
 class BaseDevice {
 protected:
@@ -80,7 +81,7 @@ protected:
     bool exportDatacubes_;
     bool exportHeatmaps_;
     bool exportClouds_;
-    float intensityThresholdPercent_;
+    double intensityThreshold_;
     bool cloudsInGlobalFrame_;
 
     virtual void validate() override;
@@ -99,7 +100,7 @@ public:
         bool exportDatacubes = false,
         bool exportHeatmaps = false,
         bool exportClouds = false,
-        float intensityThresholdPercent = 0.0f,
+        double intensityThreshold = 0.0f,
         bool cloudsInGlobalFrame = false
 
     ) : BaseExportConfig(exportPoses, exportTimestamps),
@@ -111,23 +112,23 @@ public:
         exportDatacubes_(exportDatacubes),
         exportHeatmaps_(exportHeatmaps),
         exportClouds_(exportClouds),
-        intensityThresholdPercent_(intensityThresholdPercent),
+        intensityThreshold_(intensityThreshold),
         cloudsInGlobalFrame_(cloudsInGlobalFrame) {
         validate();
     }
     RadarExportConfig(const RadarExportConfig& other) = default;
     RadarExportConfig& operator=(const RadarExportConfig& other) = default;
 
-    const bool& collapseElevation() const { return collapseElevation_; }
-    const float& collapseElevationMinZ() const { return collapseElevationMinZ_; }
-    const float& collapseElevationMaxZ() const { return collapseElevationMaxZ_; }
-    const bool& removeDopplerDim() const { return removeDopplerDim_; }
+    const bool collapseElevation() const { return collapseElevation_; }
+    const float collapseElevationMinZ() const { return collapseElevationMinZ_; }
+    const float collapseElevationMaxZ() const { return collapseElevationMaxZ_; }
+    const bool removeDopplerDim() const { return removeDopplerDim_; }
     const FovConfig& fov() const { return fov_; }
-    const bool& exportDatacubes() const { return exportDatacubes_; }
-    const bool& exportHeatmaps() const { return exportHeatmaps_; }
-    const bool& exportClouds() const { return exportClouds_; }
-    const float& intensityThresholdPercent() const { return intensityThresholdPercent_; }
-    const bool& cloudsInGlobalFrame() const { return cloudsInGlobalFrame_; }
+    const bool exportDatacubes() const { return exportDatacubes_; }
+    const bool exportHeatmaps() const { return exportHeatmaps_; }
+    const bool exportClouds() const { return exportClouds_; }
+    const double intensityThreshold() const { return intensityThreshold_; }
+    const bool cloudsInGlobalFrame() const { return cloudsInGlobalFrame_; }
 
     void loadFromFile(const YAML::Node& deviceNode) override;
 };
@@ -242,20 +243,20 @@ public:
         return *this;
     }
 
-    const bool& collapseElevation() const { return collapseElevation_; }
-    const float& collapseElevationMinZ() const { return collapseElevationMinZ_; }
-    const float& collapseElevationMaxZ() const { return collapseElevationMaxZ_; }
-    const bool& exportClouds() const { return exportClouds_; }
-    const bool& removeIntensityDim() const { return removeIntensityDim_; }
+    const bool collapseElevation() const { return collapseElevation_; }
+    const float collapseElevationMinZ() const { return collapseElevationMinZ_; }
+    const float collapseElevationMaxZ() const { return collapseElevationMaxZ_; }
+    const bool exportClouds() const { return exportClouds_; }
+    const bool removeIntensityDim() const { return removeIntensityDim_; }
     const FovConfig& cloudFov() const { return cloudFov_; }
-    const bool& exportMap() const { return exportMap_; }
-    const bool& exportMapSamples() const { return exportMapSamples_; }
-    const bool& removeOccupancyDim() const { return removeOccupancyDim_; }
-    const bool& logOddsToProbability() const { return logOddsToProbability_; }
-    const float& occupancyThresholdPercent() const { return occupancyThresholdPercent_; }
-    const bool& allowResample() const { return allowResample_; }
-    const bool& forceResample() const { return forceResample_; }
-    const bool& saveSamples() const { return saveSamples_; }
+    const bool exportMap() const { return exportMap_; }
+    const bool exportMapSamples() const { return exportMapSamples_; }
+    const bool removeOccupancyDim() const { return removeOccupancyDim_; }
+    const bool logOddsToProbability() const { return logOddsToProbability_; }
+    const float occupancyThresholdPercent() const { return occupancyThresholdPercent_; }
+    const bool allowResample() const { return allowResample_; }
+    const bool forceResample() const { return forceResample_; }
+    const bool saveSamples() const { return saveSamples_; }
     const BaseDevice* centerSensor() const { return centerSensor_.get(); }
     const FovConfig& mapSampleFov() const { return mapSampleFov_; }
 
@@ -269,7 +270,7 @@ protected:
 public:
     ImuExportConfig(bool exportPoses = false, bool exportTimestamps = false, bool exportData = false) : BaseExportConfig(exportPoses, exportTimestamps), exportData_(exportData) {}
 
-    const bool& exportData() const { return exportData_; }
+    const bool exportData() const { return exportData_; }
 
     void loadFromFile(const YAML::Node& deviceNode) override;
 };

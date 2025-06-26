@@ -75,9 +75,7 @@ Eigen::Affine3f numpyToPose(const py::array_t<float>& array) {
     auto array_data = array.unchecked<1>();
     Eigen::Vector3f translation(array_data(0), array_data(1), array_data(2));
     Eigen::Quaternionf rotation(array_data(6), array_data(3), array_data(4), array_data(5));
-    Eigen::Affine3f pose = Eigen::Affine3f::Identity();
-    pose.translate(translation);
-    pose.rotate(rotation);
+    Eigen::Affine3f pose = Eigen::Translation3f(translation) * rotation;
     return pose;
 }
 
@@ -91,21 +89,19 @@ std::vector<Eigen::Affine3f> numpyToPoses(const py::array_t<float>& array) {
     for (ssize_t i = 0; i < array.shape(0); ++i) {
         Eigen::Vector3f translation(array_data(i, 0), array_data(i, 1), array_data(i, 2));
         Eigen::Quaternionf rotation(array_data(i, 6), array_data(i, 3), array_data(i, 4), array_data(i, 5));
-        Eigen::Affine3f pose = Eigen::Affine3f::Identity();
-        pose.translate(translation);
-        pose.rotate(rotation);
+        Eigen::Affine3f pose = Eigen::Translation3f(translation) * rotation;
         poses.push_back(pose);
     }
     return poses;
 }
 
 
-py::array_t<float> radarCloudToNumpy(const pcl::PointCloud<coloradar::RadarPoint>& cloud) {
-    py::array_t<float>::ShapeContainer shape({static_cast<long int>(cloud.points.size()), 5});
+py::array_t<float> radarCloudToNumpy(const pcl::PointCloud<coloradar::RadarPoint>::Ptr& cloud) {
+    py::array_t<float>::ShapeContainer shape({static_cast<long int>(cloud->points.size()), 5});
     py::array_t<float> result(shape);
     auto result_buffer = result.mutable_unchecked<2>();
-    for (size_t i = 0; i < cloud.points.size(); ++i) {
-        const auto& point = cloud.points[i];
+    for (size_t i = 0; i < cloud->points.size(); ++i) {
+        const auto& point = cloud->points[i];
         result_buffer(i, 0) = point.x;
         result_buffer(i, 1) = point.y;
         result_buffer(i, 2) = point.z;
@@ -116,12 +112,12 @@ py::array_t<float> radarCloudToNumpy(const pcl::PointCloud<coloradar::RadarPoint
 }
 
 
-py::array_t<float> pointcloudToNumpy(const pcl::PointCloud<pcl::PointXYZI>& cloud) {
-    py::array_t<float>::ShapeContainer shape({static_cast<long int>(cloud.points.size()), 4});
+py::array_t<float> pointcloudToNumpy(const pcl::PointCloud<pcl::PointXYZI>::Ptr& cloud) {
+    py::array_t<float>::ShapeContainer shape({static_cast<long int>(cloud->points.size()), 4});
     py::array_t<float> result(shape);
     auto result_buffer = result.mutable_unchecked<2>();
-    for (size_t i = 0; i < cloud.points.size(); ++i) {
-        const auto& point = cloud.points[i];
+    for (size_t i = 0; i < cloud->points.size(); ++i) {
+        const auto& point = cloud->points[i];
         result_buffer(i, 0) = point.x;
         result_buffer(i, 1) = point.y;
         result_buffer(i, 2) = point.z;
@@ -130,7 +126,7 @@ py::array_t<float> pointcloudToNumpy(const pcl::PointCloud<pcl::PointXYZI>& clou
     return result;
 }
 
-pcl::PointCloud<pcl::PointXYZI> numpyToPointcloud(const py::array_t<float>& array) {
+pcl::PointCloud<pcl::PointXYZI>::Ptr numpyToPointcloud(const py::array_t<float>& array) {
     if (isNumpyArrayEmpty(array)) {
         throw std::runtime_error("Input NumPy array is empty or invalid.");
     }
@@ -138,19 +134,19 @@ pcl::PointCloud<pcl::PointXYZI> numpyToPointcloud(const py::array_t<float>& arra
         throw std::runtime_error("Input NumPy array must have shape (N, 4) where N is the number of points.");
     }
     auto array_data = array.unchecked<2>();
-    pcl::PointCloud<pcl::PointXYZI> cloud;
-    cloud.points.reserve(array.shape(0));
+    auto cloud = pcl::PointCloud<pcl::PointXYZI>::Ptr(new pcl::PointCloud<pcl::PointXYZI>());
+    cloud->points.reserve(array.shape(0));
     for (ssize_t i = 0; i < array.shape(0); ++i) {
         pcl::PointXYZI point;
         point.x = array_data(i, 0);
         point.y = array_data(i, 1);
         point.z = array_data(i, 2);
         point.intensity = array_data(i, 3);
-        cloud.points.push_back(point);
+        cloud->points.push_back(point);
     }
-    cloud.width = static_cast<uint32_t>(cloud.points.size());
-    cloud.height = 1;
-    cloud.is_dense = false;
+    cloud->width = static_cast<uint32_t>(cloud->points.size());
+    cloud->height = 1;
+    cloud->is_dense = false;
     return cloud;
 }
 
@@ -176,25 +172,24 @@ std::vector<T> numpyToVector(const py::array_t<T>& array) {
     return vec;
 }
 
-pcl::PointCloud<coloradar::RadarPoint> heatmapToPointcloudBinding(
+
+pcl::PointCloud<coloradar::RadarPoint>::Ptr heatmapToPointcloudBinding(
     const py::array_t<float>& heatmap_array,
     coloradar::RadarConfig& config,
-    float intensityThresholdPercent)
-{
+    float intensityThreshold
+) {
     auto buf = heatmap_array.request();
     if (buf.ndim != 1) {
-         throw std::runtime_error("Heatmap array must be a flat 1D array.");
+        throw std::runtime_error("Heatmap array must be 1-dimensional");
     }
-    size_t expected_size = static_cast<size_t>(config.numElevationBins *
-                                               config.numAzimuthBins *
-                                               config.nRangeBins() * 2);
-    if (buf.size != expected_size) {
-         throw std::runtime_error("Heatmap size (" + std::to_string(buf.size) + ") does not match expected (" + std::to_string(expected_size) + ").");
-    }
-    const float* data = static_cast<const float*>(buf.ptr);
-    std::vector<float> heatmap(data, data + buf.size);
-    return heatmapToPointcloud(heatmap, &config, intensityThresholdPercent);
+    const size_t expected_size = static_cast<size_t>(config.numElevationBins * config.numAzimuthBins * config.nRangeBins() * 2);
+    if (buf.size != expected_size) throw std::runtime_error("Heatmap size mismatch: expected " + std::to_string(expected_size) + ", got " + std::to_string(buf.size));
+
+    const float* data_ptr = static_cast<const float*>(buf.ptr);
+    std::vector<float> heatmap(data_ptr, data_ptr + buf.size);
+    return config.heatmapToPointcloud(heatmap, intensityThreshold);
 }
+
 
 
 PYBIND11_MODULE(coloradar_dataset_lib, m) {
@@ -211,6 +206,25 @@ PYBIND11_MODULE(coloradar_dataset_lib, m) {
         .def("width", [](const pcl::PointCloud<pcl::PointXYZI>& pc) { return pc.width; })
         .def("height", [](const pcl::PointCloud<pcl::PointXYZI>& pc) { return pc.height; })
         .def("is_dense", [](const pcl::PointCloud<pcl::PointXYZI>& pc) { return pc.is_dense; });
+
+    m.def("find_closest_timestamp_index", &coloradar::findClosestTimestampIndex,
+          py::arg("target_timestamp"),
+          py::arg("timestamps"),
+          py::arg("preference") = "none",
+          "Finds the closest timestamp index in a list with optional direction constraints."
+    );
+
+    m.def("interpolate_poses", [](const py::array_t<float>& poses_array,
+                                  const std::vector<double>& pose_timestamps,
+                                  const std::vector<double>& target_timestamps) {
+        std::vector<Eigen::Affine3f> poses = numpyToPoses(poses_array);
+        std::vector<Eigen::Affine3f> result = coloradar::interpolatePoses<Eigen::Affine3f>(
+            poses, pose_timestamps, target_timestamps);
+        return posesToNumpy(result);
+    }, py::arg("poses"), py::arg("pose_timestamps"), py::arg("target_timestamps"), 
+       "Interpolates poses to match new timestamps. Expects input shape (N, 7) [x, y, z, qx, qy, qz, qw]."
+    );
+
 
     // RadarConfig
     py::class_<coloradar::RadarConfig, std::shared_ptr<coloradar::RadarConfig>>(m, "RadarConfig")
@@ -273,15 +287,30 @@ PYBIND11_MODULE(coloradar_dataset_lib, m) {
         .def("collapse_heatmap_elevation", [](coloradar::RadarConfig& self, const std::vector<float>& image, double elevation_min_meters, double elevation_max_meters, bool update_config) {
             auto result = self.collapseHeatmapElevation(image, elevation_min_meters, elevation_max_meters, update_config);
             return vectorToNumpy(result);
-        }, py::arg("image"), py::arg("elevation_min_meters") = -100.0, py::arg("elevation_max_meters") = 100.0, py::arg("update_config") = true)
+        }, py::arg("image"), 
+           py::arg("elevation_min_meters") = -100.0, 
+           py::arg("elevation_max_meters") = 100.0, 
+           py::arg("update_config") = true
+        )
+
         .def("remove_doppler", [](coloradar::RadarConfig& self, const std::vector<float>& image, bool update_config) {
             auto result = self.removeDoppler(image, update_config);
             return vectorToNumpy(result);
-        }, py::arg("image"), py::arg("update_config") = true)
+        }, py::arg("image"), 
+           py::arg("update_config") = true
+        )
+
         .def("swap_heatmap_dimensions", [](coloradar::RadarConfig& self, const std::vector<float>& heatmap) {
             auto result = self.swapHeatmapDimensions(heatmap);
             return vectorToNumpy(result);
-        }, py::arg("heatmap"));
+        }, py::arg("heatmap"))
+
+        .def("heatmap_to_pointcloud", [](coloradar::RadarConfig& self, const py::array_t<float>& heatmap, float intensityThreshold = 0.0f) {
+            auto cloud = heatmapToPointcloudBinding(heatmap, self, intensityThreshold);
+            return radarCloudToNumpy(cloud);
+        }, py::arg("heatmap"),
+           py::arg("intensity_threshold") = 0.0f
+    );
 
     // SingleChipConfig
     py::class_<coloradar::SingleChipConfig, coloradar::RadarConfig, std::shared_ptr<coloradar::SingleChipConfig>>(m, "SingleChipConfig")
@@ -295,17 +324,6 @@ PYBIND11_MODULE(coloradar_dataset_lib, m) {
         .def("__copy__", [](const coloradar::CascadeConfig &self) { return std::make_shared<coloradar::CascadeConfig>(self); })
         .def("__deepcopy__", [](const coloradar::CascadeConfig &self, py::dict) { return std::make_shared<coloradar::CascadeConfig>(self); });
 
-    // Utils
-    m.def("heatmap_to_pointcloud",
-        [](const py::array_t<float>& heatmap, coloradar::RadarConfig& config, float intensityThresholdPercent = 0.0f) {
-            auto cloud = heatmapToPointcloudBinding(heatmap, config, intensityThresholdPercent);
-            return radarCloudToNumpy(cloud);
-        },
-        py::arg("heatmap"),
-        py::arg("config"),
-        py::arg("intensity_threshold_percent") = 0.0f
-    );
-
     // ColoradarPlusRun
     py::class_<coloradar::ColoradarPlusRun>(m, "ColoradarPlusRun")
         .def(py::init<const std::filesystem::path&, coloradar::RadarConfig*>())
@@ -315,20 +333,26 @@ PYBIND11_MODULE(coloradar_dataset_lib, m) {
         .def("lidar_timestamps", [](coloradar::ColoradarPlusRun& self) { return vectorToNumpy(self.lidarTimestamps()); })
         .def("cascade_cube_timestamps", [](coloradar::ColoradarPlusRun& self) { return vectorToNumpy(self.cascadeCubeTimestamps()); })
         .def("cascade_timestamps", [](coloradar::ColoradarPlusRun& self) { return vectorToNumpy(self.cascadeTimestamps()); })
+        
+        .def("get_lidar_pointcloud",
+            static_cast<std::shared_ptr<pcl::PointCloud<pcl::PointXYZI>> (coloradar::ColoradarPlusRun::*)(const std::filesystem::path&) const>
+            (&coloradar::ColoradarPlusRun::getLidarPointCloud<pcl::PointCloud<pcl::PointXYZI>>))
 
-        .def("get_lidar_pointcloud", py::overload_cast<const std::filesystem::path&>(&coloradar::ColoradarPlusRun::getLidarPointCloud<pcl::PointCloud<pcl::PointXYZI>>))
-        .def("get_lidar_pointcloud", py::overload_cast<const int&>(&coloradar::ColoradarPlusRun::getLidarPointCloud<pcl::PointCloud<pcl::PointXYZI>>))
+        .def("get_lidar_pointcloud",
+            static_cast<std::shared_ptr<pcl::PointCloud<pcl::PointXYZI>> (coloradar::ColoradarPlusRun::*)(const int) const>
+            (&coloradar::ColoradarPlusRun::getLidarPointCloud<pcl::PointCloud<pcl::PointXYZI>>))
+
         .def("get_cascade_datacube", [](coloradar::ColoradarPlusRun& self, const std::filesystem::path& binFilePath) { return vectorToNumpy(self.getCascadeDatacube(binFilePath)); })
         .def("get_cascade_datacube", [](coloradar::ColoradarPlusRun& self, const int& cubeIdx) { return vectorToNumpy(self.getCascadeDatacube(cubeIdx)); })
         .def("get_cascade_heatmap", [](coloradar::ColoradarPlusRun& self, const std::filesystem::path& binFilePath) { return vectorToNumpy(self.getCascadeHeatmap(binFilePath)); })
         .def("get_cascade_heatmap", [](coloradar::ColoradarPlusRun& self, const int& hmIdx) { return vectorToNumpy(self.getCascadeHeatmap(hmIdx)); })
-        .def("create_cascade_pointclouds", &coloradar::ColoradarPlusRun::createCascadePointclouds, py::arg("intensity_threshold_percent") = 0)
-        .def("get_cascade_pointcloud", [](coloradar::ColoradarPlusRun& self, std::filesystem::path binFilePath, float intensityThresholdPercent = 0.0f) {
-            pcl::PointCloud<coloradar::RadarPoint> cloud = self.getCascadePointcloud(binFilePath, intensityThresholdPercent); return radarCloudToNumpy(cloud);
-        }, py::arg("bin_file_path"), py::arg("intensity_threshold_percent") = 0)
-        .def("get_cascade_pointcloud", [](coloradar::ColoradarPlusRun& self, int cloudIdx, float intensityThresholdPercent = 0.0f) {
-            pcl::PointCloud<coloradar::RadarPoint> cloud = self.getCascadePointcloud(cloudIdx, intensityThresholdPercent); return radarCloudToNumpy(cloud);
-        }, py::arg("cloud_idx"), py::arg("intensity_threshold_percent") = 0)
+        .def("create_cascade_pointclouds", &coloradar::ColoradarPlusRun::createCascadePointclouds, py::arg("intensity_threshold") = 0)
+        .def("get_cascade_pointcloud", [](coloradar::ColoradarPlusRun& self, std::filesystem::path binFilePath, float intensityThreshold = 0.0f) {
+            pcl::PointCloud<coloradar::RadarPoint>::Ptr cloud = self.getCascadePointcloud(binFilePath, intensityThreshold); return radarCloudToNumpy(cloud);
+        }, py::arg("bin_file_path"), py::arg("intensity_threshold") = 0)
+        .def("get_cascade_pointcloud", [](coloradar::ColoradarPlusRun& self, int cloudIdx, float intensityThreshold = 0.0f) {
+            pcl::PointCloud<coloradar::RadarPoint>::Ptr cloud = self.getCascadePointcloud(cloudIdx, intensityThreshold); return radarCloudToNumpy(cloud);
+        }, py::arg("cloud_idx"), py::arg("intensity_threshold") = 0)
 
         .def("create_lidar_octomap", [](coloradar::ColoradarPlusRun& self, const double mapResolution, const float lidarTotalHorizontalFov, const float lidarTotalVerticalFov, const float lidarMaxRange, const py::array_t<float>& baseToLidarTransformArray) {
             self.createLidarOctomap(mapResolution, lidarTotalHorizontalFov, lidarTotalVerticalFov, lidarMaxRange, numpyToPose(baseToLidarTransformArray));
@@ -341,7 +365,7 @@ PYBIND11_MODULE(coloradar_dataset_lib, m) {
                                     const py::array_t<float>& mapFramePoseArray,
                                     const py::array_t<float>& mapCloudArray) {
             Eigen::Affine3f mapFramePose = numpyToPose(mapFramePoseArray);
-            pcl::PointCloud<pcl::PointXYZI> mapCloud = numpyToPointcloud(mapCloudArray);
+            pcl::PointCloud<pcl::PointXYZI>::Ptr mapCloud = numpyToPointcloud(mapCloudArray);
             auto sampledFrame = self.sampleMapFrame(horizontalFov, verticalFov, range, mapFramePose, mapCloud);
             return pointcloudToNumpy(sampledFrame);
         }, py::arg("horizontal_fov") = 360, py::arg("vertical_fov") = 180, py::arg("range") = 100, py::arg("map_frame_pose"), py::arg("map_cloud"))
@@ -365,10 +389,7 @@ PYBIND11_MODULE(coloradar_dataset_lib, m) {
 
         .def("get_poses", [](coloradar::ColoradarPlusRun& self) {
             std::vector<Eigen::Affine3f> poses = self.getPoses<Eigen::Affine3f>(); return posesToNumpy(poses);
-        }, "Returns poses as an Nx7 numpy array [x, y, z, qx, qy, qz, qw]")
-        .def("interpolate_poses", [](coloradar::ColoradarPlusRun& self, const py::array_t<float>& poses_array, const std::vector<double>& pose_timestamps, const std::vector<double>& target_timestamps) {
-            std::vector<Eigen::Affine3f> interpolated_poses = self.interpolatePoses<Eigen::Affine3f>(numpyToPoses(poses_array), pose_timestamps, target_timestamps); return posesToNumpy(interpolated_poses);
-        }, py::arg("poses"), py::arg("pose_timestamps"), py::arg("target_timestamps"), "Interpolates poses and returns an Nx7 numpy array [x, y, z, qx, qy, qz, qw]");
+        }, "Returns poses as an Nx7 numpy array [x, y, z, qx, qy, qz, qw]");
 
     // ColoradarRun
     py::class_<coloradar::ColoradarRun, coloradar::ColoradarPlusRun>(m, "ColoradarRun")
@@ -379,17 +400,18 @@ PYBIND11_MODULE(coloradar_dataset_lib, m) {
         .def("get_single_chip_datacube", [](coloradar::ColoradarRun& self, const int& cubeIdx) { return vectorToNumpy(self.getSingleChipDatacube(cubeIdx)); })
         .def("get_single_chip_heatmap", [](coloradar::ColoradarRun& self, const std::filesystem::path& binFilePath) { return vectorToNumpy(self.getSingleChipHeatmap(binFilePath)); })
         .def("get_single_chip_heatmap", [](coloradar::ColoradarRun& self, const int& hmIdx) { return vectorToNumpy(self.getSingleChipHeatmap(hmIdx)); })
-        .def("get_single_chip_pointcloud", [](coloradar::ColoradarRun& self, std::filesystem::path binFilePath, float intensityThresholdPercent = 0.0f) {
-            pcl::PointCloud<coloradar::RadarPoint> cloud = self.getSingleChipPointcloud(binFilePath, intensityThresholdPercent); return radarCloudToNumpy(cloud);
-        }, py::arg("bin_file_path"), py::arg("intensity_threshold_percent") = 0)
+        .def("get_single_chip_pointcloud", [](coloradar::ColoradarRun& self, std::filesystem::path binFilePath, float intensityThreshold = 0.0f) {
+            pcl::PointCloud<coloradar::RadarPoint>::Ptr cloud = self.getSingleChipPointcloud(binFilePath, intensityThreshold); return radarCloudToNumpy(cloud);
+        }, py::arg("bin_file_path"), py::arg("intensity_threshold") = 0)
 
-        .def("get_single_chip_pointcloud", [](coloradar::ColoradarRun& self, int cloudIdx, float intensityThresholdPercent = 0.0f) {
-            pcl::PointCloud<coloradar::RadarPoint> cloud = self.getSingleChipPointcloud(cloudIdx, intensityThresholdPercent); return radarCloudToNumpy(cloud);
-        }, py::arg("cloud_idx"), py::arg("intensity_threshold_percent") = 0);
+        .def("get_single_chip_pointcloud", [](coloradar::ColoradarRun& self, int cloudIdx, float intensityThreshold = 0.0f) {
+            pcl::PointCloud<coloradar::RadarPoint>::Ptr cloud = self.getSingleChipPointcloud(cloudIdx, intensityThreshold); return radarCloudToNumpy(cloud);
+        }, py::arg("cloud_idx"), py::arg("intensity_threshold") = 0);
 
     // ColoradarPlusDataset
     py::class_<coloradar::ColoradarPlusDataset, std::shared_ptr<coloradar::ColoradarPlusDataset>>(m, "ColoradarPlusDataset")
         .def(py::init<const std::filesystem::path&>())
+        .def(py::init<const std::filesystem::path&, const std::filesystem::path&>(), py::arg("runs_dir"), py::arg("calib_dir"))
         .def("list_runs", &coloradar::ColoradarPlusDataset::listRuns)
         .def("get_runs", &coloradar::ColoradarPlusDataset::getRuns, py::return_value_policy::reference)
         .def("get_run", &coloradar::ColoradarPlusDataset::getRun, py::return_value_policy::reference)
@@ -403,7 +425,32 @@ PYBIND11_MODULE(coloradar_dataset_lib, m) {
     // ColoradarDataset
     py::class_<coloradar::ColoradarDataset, std::shared_ptr<coloradar::ColoradarDataset>, coloradar::ColoradarPlusDataset>(m, "ColoradarDataset")
         .def(py::init<const std::filesystem::path&>())
+        .def(py::init<const std::filesystem::path&, const std::filesystem::path&>(), py::arg("runs_dir"), py::arg("calib_dir"))
         .def("get_run", &coloradar::ColoradarDataset::getRun, py::return_value_policy::reference)
         .def("single_chip_transform", [](coloradar::ColoradarDataset& self) { return poseToNumpy(self.singleChipTransform()); })
         .def("single_chip_config", &coloradar::ColoradarDataset::singleChipConfig, py::return_value_policy::reference);
+
+    // DatasetVisualizer
+    py::class_<coloradar::DatasetVisualizer>(m, "DatasetVisualizer")
+        .def(py::init([](const coloradar::CascadeConfig cascadeRadarConfig,
+                        const py::array_t<float>& baseToLidarArray,
+                        const py::array_t<float>& baseToCascadeArray,
+                        int frameIncrement,
+                        double cascadeRadarIntensityThreshold,
+                        const std::string cameraConfigPath) {
+                Eigen::Affine3f baseToLidar = numpyToPose(baseToLidarArray);
+                Eigen::Affine3f baseToCascade = numpyToPose(baseToCascadeArray);
+                return std::make_unique<coloradar::DatasetVisualizer>(cascadeRadarConfig, baseToLidar, baseToCascade, frameIncrement, cascadeRadarIntensityThreshold, cameraConfigPath);
+            }),
+            py::arg("cascade_radar_config"),
+            py::arg("base_to_lidar_transform"),
+            py::arg("base_to_cascade_transform"),
+            py::arg("frame_increment") = 1,
+            py::arg("cascade_radar_intensity_threshold") = 0.0,
+            py::arg("camera_config_path") = "camera_config.txt")
+           
+        .def("visualize", &coloradar::DatasetVisualizer::visualize,
+            py::arg("run"),
+            py::arg("use_prebuilt_map") = false);
+
 }

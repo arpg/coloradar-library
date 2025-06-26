@@ -11,8 +11,9 @@ This directory contains example scripts and configurations for working with the 
   - [2.1. Get Export Config Template](#21-get-export-config-template)
   - [2.2. Build Lidar Maps](#22-build-lidar-maps)
   - [2.3. Sample Lidar Maps](#23-sample-lidar-maps)
-  - [2.4. Export Dataset](#24-export-dataset)
-  - [2.5. Jupyter Notebook Server](#25-jupyter-notebook-server)
+  - [2.4 Visualize Dataset](#24-visualize-dataset)
+  - [2.5. Export Dataset](#25-export-dataset)
+  - [2.6. Jupyter Notebook Server](#26-jupyter-notebook-server)
 - [3. Using the FOV Notebook](#3-using-the-fov-notebook)
   - [3.1. Run the Jupyter Server](#31-run-the-jupyter-server)
   - [3.2. Example Functions](#32-example-functions)
@@ -75,13 +76,25 @@ docker compose run sample_maps
 Samples maps from the dataset. Similar to build_maps, this service uses your local data directory. The sampling FOV is hardcoded in the script `scripts/sample_maps`.
 
 
-### 2.4. Export Dataset
+### 2.4. Visualize Dataset
+```bash
+docker compose up visualize_run
+```
+Tested on Ubuntu only. If seeing a display error, run
+```bash
+xhost +local:docker
+```
+
+Specify the target run name and optionally the frame step size in `docker-compose.yaml` under `services.visualize_run.command`.
+
+
+### 2.5. Export Dataset
 ```bash
 docker compose run export_dataset
 ```
 Exports the dataset according to the configuration in `export-config.yaml`. This service mounts both your local data directory and the current directory for access to the configuration file.
 
-### 2.5. Jupyter Notebook Server
+### 2.6. Jupyter Notebook Server
 ```bash
 docker compose up jupyter
 ```

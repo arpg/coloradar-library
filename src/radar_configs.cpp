@@ -1,6 +1,72 @@
 #include "radar_configs.h"
 
 
+namespace coloradar {
+
+
+void RadarConfig::precomputePointcloudTemplate() {
+    const size_t totalSize = numElevationBins * numAzimuthBins * nRangeBins();
+    pointcloudTemplate.reset(new pcl::PointCloud<RadarPoint>);
+    pointcloudTemplate->resize(totalSize);
+
+    std::vector<float> cosAzimuths(numAzimuthBins), sinAzimuths(numAzimuthBins);
+    for (int azIdx = 0; azIdx < numAzimuthBins; ++azIdx) {
+        cosAzimuths[azIdx] = std::cos(azimuthBins[azIdx]);
+        sinAzimuths[azIdx] = std::sin(azimuthBins[azIdx]);
+    }
+    std::vector<float> cosElevations(numElevationBins), sinElevations(numElevationBins);
+    for (int elIdx = 0; elIdx < numElevationBins; ++elIdx) {
+        cosElevations[elIdx] = std::cos(elevationBins[elIdx]);
+        sinElevations[elIdx] = std::sin(elevationBins[elIdx]);
+    }
+
+    size_t pointIdx = 0;
+    for (int elIdx = 0; elIdx < numElevationBins; ++elIdx) {
+        for (int azIdx = 0; azIdx < numAzimuthBins; ++azIdx) {
+            for (int rangeIdx = 0; rangeIdx < nRangeBins(); ++rangeIdx, ++pointIdx) {
+                float range = rangeIdx * rangeBinWidth;
+                RadarPoint& point = (*pointcloudTemplate)[pointIdx];
+                point.x = range * cosElevations[elIdx] * cosAzimuths[azIdx];
+                point.y = range * cosElevations[elIdx] * sinAzimuths[azIdx];
+                point.z = range * sinElevations[elIdx];
+                point.intensity = 0.0f;
+                point.doppler = 0.0f;
+            }
+        }
+    }
+}
+
+
+const int RadarConfig::heatmapSize() const {
+    return numElevationBins * numAzimuthBins * nRangeBins() * (hasDoppler ? 2 : 1);
+}
+
+
+pcl::PointCloud<RadarPoint>::Ptr RadarConfig::heatmapToPointcloud(const std::vector<float>& heatmap, const double intensityThreshold) const {
+    const size_t expectedCloudSize = numElevationBins * numAzimuthBins * nRangeBins();
+    if (heatmap.size() != heatmapSize()) throw std::runtime_error("Heatmap size mismatch. Expected: " + std::to_string(heatmapSize()) + ", got: " + std::to_string(heatmap.size()));
+    if (!pointcloudTemplate || pointcloudTemplate->size() != expectedCloudSize) throw std::runtime_error("Pointcloud template size mismatch. Expected: " + std::to_string(expectedCloudSize) + ", got: " + std::to_string(pointcloudTemplate->size()));
+
+    pcl::PointCloud<RadarPoint>::Ptr outputCloud(new pcl::PointCloud<RadarPoint>);
+    outputCloud->reserve(pointcloudTemplate->size());
+    size_t heatmapIdx = 0;
+
+    for (size_t pointIdx = 0; pointIdx < pointcloudTemplate->size(); ++pointIdx) {
+        const float intensity = heatmap[heatmapIdx++];
+        const float doppler   = heatmap[heatmapIdx++];
+        if (intensity >= intensityThreshold) {
+            RadarPoint point = (*pointcloudTemplate)[pointIdx];
+            point.intensity = intensity;
+            point.doppler = doppler;
+            outputCloud->push_back(point);
+        }
+    }
+    return outputCloud;
+}
+
+}
+
+
 std::map<std::string, std::vector<std::string>> readConfig(const std::filesystem::path& configFile) {
     coloradar::internal::checkPathExists(configFile);
     std::ifstream infile(configFile);
@@ -398,6 +464,7 @@ void coloradar::SingleChipConfig::init(const std::filesystem::path& calibDir) {
     initWaveformParams(waveformConfigFilePath);
     initCouplingParams(couplingConfigFilePath);
     initInternalParams();
+    precomputePointcloudTemplate();
 }
 
 coloradar::CascadeConfig::CascadeConfig(const std::filesystem::path& calibDir, const int& nAzimuthBeams, const int& nElevationBeams) : coloradar::RadarConfig(nAzimuthBeams, nElevationBeams) {
@@ -419,6 +486,7 @@ void coloradar::CascadeConfig::init(const std::filesystem::path& calibDir) {
     initCouplingParams(couplingConfigFilePath);
     initPhaseFrequencyParams(phaseFrequencyConfigFilePath);
     initInternalParams();
+    precomputePointcloudTemplate();
 }
 
 
@@ -755,60 +823,4 @@ std::vector<float> coloradar::RadarConfig::swapHeatmapDimensions(const std::vect
         }
     }
     return reorganizedHeatmap;
-}
-
-
-pcl::PointCloud<coloradar::RadarPoint> coloradar::heatmapToPointcloud(
-    const std::vector<float>& heatmap,
-    coloradar::RadarConfig* config,
-    const float intensityThresholdPercent)
-{
-    if (intensityThresholdPercent < 0 || intensityThresholdPercent >= 100) {
-        throw std::runtime_error("Invalid intensityThresholdPercent: expected value in [0; 100), got " + std::to_string(intensityThresholdPercent));
-    }
-    float maxIntensity = 0.0f;
-    pcl::PointCloud<coloradar::RadarPoint> cloud;
-    cloud.reserve(config->numElevationBins * config->numAzimuthBins * config->nRangeBins());
-
-    std::vector<float> cosAzimuths(config->numAzimuthBins), sinAzimuths(config->numAzimuthBins);
-    for (int az = 0; az < config->numAzimuthBins; ++az) {
-        float angle = config->azimuthBins[az];
-        cosAzimuths[az] = std::cos(angle);
-        sinAzimuths[az] = std::sin(angle);
-    }
-    std::vector<float> cosElevations(config->numElevationBins), sinElevations(config->numElevationBins);
-    for (int el = 0; el < config->numElevationBins; ++el) {
-        float angle = config->elevationBins[el];
-        cosElevations[el] = std::cos(angle);
-        sinElevations[el] = std::sin(angle);
-    }
-    auto heatmapIt = heatmap.begin();
-    for (int elIdx = 0; elIdx < config->numElevationBins; ++elIdx) {
-        for (int azIdx = 0; azIdx < config->numAzimuthBins; ++azIdx) {
-            for (int rangeIdx = 0; rangeIdx < config->nRangeBins(); ++rangeIdx) {
-                float intensity = *heatmapIt; ++heatmapIt;
-                float doppler   = *heatmapIt; ++heatmapIt;
-                if (intensity > maxIntensity) {
-                    maxIntensity = intensity;
-                }
-                float range = rangeIdx * config->rangeBinWidth;
-                RadarPoint point;
-                point.x = range * cosElevations[elIdx] * sinAzimuths[azIdx];
-                point.y = range * cosElevations[elIdx] * cosAzimuths[azIdx];
-                point.z = range * sinElevations[elIdx];
-                point.intensity = intensity;
-                point.doppler = doppler;
-                cloud.push_back(point);
-            }
-        }
-    }
-    float threshold = maxIntensity * intensityThresholdPercent / 100.0f;
-    pcl::PointCloud<coloradar::RadarPoint> filteredCloud;
-    filteredCloud.reserve(cloud.size());
-    for (const auto& pt : cloud) {
-        if (pt.intensity >= threshold) {
-            filteredCloud.push_back(pt);
-        }
-    }
-    return filteredCloud;
 }

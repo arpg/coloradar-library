@@ -38,7 +38,7 @@ devices:
     # - point clouds
     export_clouds: False
     # relative intensity per frame
-    intensity_threshold_percent: 0
+    intensity_threshold: 0
     # False for ego-centric clouds
     clouds_in_global_frame: True
 
@@ -119,5 +119,5 @@ devices:
     export_heatmaps: True
 
     export_clouds: False
-    intensity_threshold_percent: 0
+    intensity_threshold: 0
     clouds_in_global_frame: True

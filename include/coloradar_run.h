@@ -4,8 +4,6 @@
 #include "radar_configs.h"
 #include "dataset_configs.h"
 
-#include <H5Cpp.h>
-
 
 namespace coloradar {
 
@@ -30,10 +28,10 @@ protected:
     std::vector<double> readTimestamps(const std::filesystem::path& path);
 
     RadarConfig* cascadeConfig_;
-    std::vector<int16_t> getDatacube(const std::filesystem::path& binFilePath, RadarConfig* config);
-    std::vector<float> getHeatmap(const std::filesystem::path& binFilePath, RadarConfig* config);
-    void createRadarPointclouds(RadarConfig* config, const std::filesystem::path& heatmapDirPath, const std::filesystem::path& pointcloudDirPath, const float& intensityThresholdPercent = 0.0);
-    pcl::PointCloud<RadarPoint> getRadarPointcloud(const std::filesystem::path& binFilePath, RadarConfig* config, const float& intensityThresholdPercent = 0.0);
+    std::vector<int16_t> getDatacube(const std::filesystem::path& binFilePath, RadarConfig* config) const;
+    std::vector<float> getHeatmap(const std::filesystem::path& binFilePath, RadarConfig* config) const;
+    void createRadarPointclouds(RadarConfig* config, const std::filesystem::path& heatmapDirPath, const std::filesystem::path& pointcloudDirPath, const double intensityThreshold = 0.0);
+    pcl::PointCloud<RadarPoint>::Ptr getRadarPointcloud(const std::filesystem::path& binFilePath, RadarConfig* config, const double intensityThreshold = 0.0);
 
     void saveVectorToHDF5(const std::string& name, H5::H5File& file, const std::vector<double>& vec);
     void savePosesToHDF5(const std::string& name, H5::H5File& file, const std::vector<Eigen::Affine3f>& poses);
@@ -52,22 +50,25 @@ public:
     const std::vector<double>& cascadeCubeTimestamps() const;
     const std::vector<double>& cascadeTimestamps() const;
 
-    std::vector<int16_t> getCascadeDatacube(const std::filesystem::path& binFilePath);
-    std::vector<int16_t> getCascadeDatacube(const int& cubeIdx);
-    std::vector<float> getCascadeHeatmap(const std::filesystem::path& binFilePath);
-    std::vector<float> getCascadeHeatmap(const int& hmIdx);
+    template<PoseType PoseT> std::vector<PoseT> getPoses() const;
 
-    void createCascadePointclouds(const float& intensityThresholdPercent = 0.0);
-    pcl::PointCloud<RadarPoint> getCascadePointcloud(const std::filesystem::path& binFilePath, const float& intensityThresholdPercent = 0.0);
-    pcl::PointCloud<RadarPoint> getCascadePointcloud(const int& cloudIdx, const float& intensityThresholdPercent = 0.0);
+    // cascade frame
+    std::vector<int16_t> getCascadeDatacube(const std::filesystem::path& binFilePath) const;
+    std::vector<int16_t> getCascadeDatacube(const int cubeIdx) const;
+    std::vector<float> getCascadeHeatmap(const std::filesystem::path& binFilePath) const;
+    std::vector<float> getCascadeHeatmap(const int hmIdx) const;
 
-    template<PoseType PoseT> std::vector<PoseT> getPoses();
-    template<PoseType PoseT> std::vector<PoseT> interpolatePoses(const std::vector<PoseT>& poses, const std::vector<double>& poseTimestamps, const std::vector<double>& targetTimestamps);
+    // cascade frame
+    void createCascadePointclouds(const double intensityThreshold = 0.0);
+    pcl::PointCloud<RadarPoint>::Ptr getCascadePointcloud(const std::filesystem::path& binFilePath, const double intensityThreshold = 0.0);
+    pcl::PointCloud<RadarPoint>::Ptr getCascadePointcloud(const int& cloudIdx, const double intensityThreshold = 0.0);
 
-    template<PclCloudType CloudT> CloudT getLidarPointCloud(const std::filesystem::path& binPath);
-    template<OctomapCloudType CloudT> CloudT getLidarPointCloud(const std::filesystem::path& binPath);
-    template<CloudType CloudT> CloudT getLidarPointCloud(const int& cloudIdx);
+    // lidar frame
+    template<PclCloudType CloudT> std::shared_ptr<CloudT> getLidarPointCloud(const std::filesystem::path& binPath) const;
+    template<OctomapCloudType CloudT> std::shared_ptr<CloudT> getLidarPointCloud(const std::filesystem::path& binPath) const;
+    template<CloudType CloudT> std::shared_ptr<CloudT> getLidarPointCloud(const int cloudIdx) const;
 
+    // map frame
     octomap::OcTree buildLidarOctomap(
         const double& mapResolution,
         const float& lidarTotalHorizontalFov,
@@ -76,7 +77,7 @@ public:
         Eigen::Affine3f baseToLidarTransform = Eigen::Affine3f::Identity()
     );
     void saveLidarOctomap(const octomap::OcTree& tree);
-    pcl::PointCloud<pcl::PointXYZI> readLidarOctomap();
+    pcl::PointCloud<pcl::PointXYZI>::Ptr readLidarOctomap() const;
     void createLidarOctomap(
         const double& mapResolution,
         const float& lidarTotalHorizontalFov,
@@ -85,12 +86,12 @@ public:
         Eigen::Affine3f baseToLidarTransform = Eigen::Affine3f::Identity()
     );
 
-    pcl::PointCloud<pcl::PointXYZI> readMapSample(const int& sampleIdx);
-    std::vector<pcl::PointCloud<pcl::PointXYZI>> readMapSamples(const int& numSamples = -1);
-    pcl::PointCloud<pcl::PointXYZI> sampleMapFrame(const float& horizontalFov, const float& verticalFov, const float& range, const Eigen::Affine3f& mapFramePose, const pcl::PointCloud<pcl::PointXYZI>& mapCloud);
-    std::vector<pcl::PointCloud<pcl::PointXYZI>> sampleMapFrames(const float& horizontalFov, const float& verticalFov, const float& range, const std::vector<Eigen::Affine3f>& mapFramePoses);
-    void saveMapSample(const pcl::PointCloud<pcl::PointXYZI>& sample, const int& sampleIdx);
-    void saveMapSamples(const std::vector<pcl::PointCloud<pcl::PointXYZI>>& frames);
+    pcl::PointCloud<pcl::PointXYZI>::Ptr readMapSample(const int& sampleIdx) const;
+    std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> readMapSamples(const int& numSamples = -1) const;
+    pcl::PointCloud<pcl::PointXYZI>::Ptr sampleMapFrame(const float& horizontalFov, const float& verticalFov, const float& range, const Eigen::Affine3f& mapFramePose, const pcl::PointCloud<pcl::PointXYZI>::Ptr& mapCloud);
+    std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> sampleMapFrames(const float& horizontalFov, const float& verticalFov, const float& range, const std::vector<Eigen::Affine3f>& mapFramePoses);
+    void saveMapSample(const pcl::PointCloud<pcl::PointXYZI>::Ptr& sample, const int& sampleIdx);
+    void saveMapSamples(const std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr>& samples);
     void createMapSamples(
         const float& horizontalFov,
         const float& verticalFov,
@@ -125,9 +126,9 @@ public:
     std::vector<int16_t> getSingleChipDatacube(const int& cubeIdx);
     std::vector<float> getSingleChipHeatmap(const std::filesystem::path& binFilePath);
     std::vector<float> getSingleChipHeatmap(const int& hmIdx);
-    pcl::PointCloud<RadarPoint> getSingleChipPointcloud(const std::filesystem::path& binFilePath, const float& intensityThresholdPercent = 0.0);
-    pcl::PointCloud<RadarPoint> getSingleChipPointcloud(const int& cloudIdx, const float& intensityThresholdPercent = 0.0);
-    // void createSingleChipPointclouds(const float& intensityThresholdPercent = 0.0);
+    pcl::PointCloud<RadarPoint>::Ptr getSingleChipPointcloud(const std::filesystem::path& binFilePath, const float& intensityThreshold = 0.0);
+    pcl::PointCloud<RadarPoint>::Ptr getSingleChipPointcloud(const int& cloudIdx, const float& intensityThreshold = 0.0);
+    // void createSingleChipPointclouds(const float& intensityThreshold = 0.0);
 };
 
 }

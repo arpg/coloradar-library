@@ -99,27 +99,27 @@ class CompileTest : public ::testing::Test {
 public:
     CompileTest() : gen(randomSeed) {}
 
-    pcl::PointCloud<pcl::PointXYZ> create3dPcl() {
-        pcl::PointCloud<pcl::PointXYZ> cloud;
-        cloud.points.push_back(pcl::PointXYZ(0.f, 0.f, 0.f));
-        cloud.points.push_back(pcl::PointXYZ(1.f, 1.f, 1.f));
-        cloud.points.push_back(pcl::PointXYZ(2.f, 1.f, 0.f));
-        cloud.points.push_back(pcl::PointXYZ(1.f, 5.f, 0.f));
-        cloud.points.push_back(pcl::PointXYZ(0.f, 1.f, 2.f));
-        cloud.points.push_back(pcl::PointXYZ(-2.f, 1.f, 3.f));
-        cloud.points.push_back(pcl::PointXYZ(10.f, 10.f, 10.f));
+    pcl::PointCloud<pcl::PointXYZ>::Ptr create3dPcl() {
+        pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
+        cloud->points.push_back(pcl::PointXYZ(0.f, 0.f, 0.f));
+        cloud->points.push_back(pcl::PointXYZ(1.f, 1.f, 1.f));
+        cloud->points.push_back(pcl::PointXYZ(2.f, 1.f, 0.f));
+        cloud->points.push_back(pcl::PointXYZ(1.f, 5.f, 0.f));
+        cloud->points.push_back(pcl::PointXYZ(0.f, 1.f, 2.f));
+        cloud->points.push_back(pcl::PointXYZ(-2.f, 1.f, 3.f));
+        cloud->points.push_back(pcl::PointXYZ(10.f, 10.f, 10.f));
         return cloud;
     }
 
-    pcl::PointCloud<pcl::PointXYZI> create4dPcl() {
-        pcl::PointCloud<pcl::PointXYZI> cloud;
-        cloud.points.push_back(pcl::PointXYZI(0.f, 0.f, 0.f, generateIntensity()));
-        cloud.points.push_back(pcl::PointXYZI(1.f, 1.f, 1.f, generateIntensity()));
-        cloud.points.push_back(pcl::PointXYZI(2.f, 1.f, 0.f, generateIntensity()));
-        cloud.points.push_back(pcl::PointXYZI(1.f, 5.f, 0.f, generateIntensity()));
-        cloud.points.push_back(pcl::PointXYZI(0.f, 1.f, 2.f, generateIntensity()));
-        cloud.points.push_back(pcl::PointXYZI(10.f, 10.f, 10.f, generateIntensity()));
-        cloud.points.push_back(pcl::PointXYZI(-2.f, 1.f, 3.f, generateIntensity()));
+    pcl::PointCloud<pcl::PointXYZI>::Ptr create4dPcl() {
+        pcl::PointCloud<pcl::PointXYZI>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZI>);
+        cloud->points.push_back(pcl::PointXYZI(0.f, 0.f, 0.f, generateIntensity()));
+        cloud->points.push_back(pcl::PointXYZI(1.f, 1.f, 1.f, generateIntensity()));
+        cloud->points.push_back(pcl::PointXYZI(2.f, 1.f, 0.f, generateIntensity()));
+        cloud->points.push_back(pcl::PointXYZI(1.f, 5.f, 0.f, generateIntensity()));
+        cloud->points.push_back(pcl::PointXYZI(0.f, 1.f, 2.f, generateIntensity()));
+        cloud->points.push_back(pcl::PointXYZI(10.f, 10.f, 10.f, generateIntensity()));
+        cloud->points.push_back(pcl::PointXYZI(-2.f, 1.f, 3.f, generateIntensity()));
         return cloud;
     }
 
@@ -134,7 +134,7 @@ protected:
 
 TEST_F(CompileTest, BasicFunctions) {
     octomap::OcTree tree(treeResolution);
-    pcl::PointCloud<pcl::PointXYZI> cloud;
+    pcl::PointCloud<pcl::PointXYZI>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZI>);
     coloradar::octreeToPcl(tree, cloud);
     coloradar::filterFov(cloud, 360, 180, 10);
 
@@ -146,11 +146,11 @@ TEST_F(CompileTest, BasicFunctions) {
 
 TEST_F(CompileTest, OctoPointcloud) {
     auto cloud3d = create3dPcl();
-    coloradar::OctoPointcloud octoCloud(cloud3d);
-    octoCloud.filterFov(360, 180, 10);
-    auto otherCloud = octoCloud.toPcl<pcl::PointCloud<pcl::PointXYZI>>();
+    std::shared_ptr<coloradar::OctoPointcloud> octoCloud = std::make_shared<coloradar::OctoPointcloud>(cloud3d);
+    octoCloud->filterFov(360, 180, 10);
+    auto otherCloud = octoCloud->toPcl<pcl::PointCloud<pcl::PointXYZI>>();
     auto cloud4d = create4dPcl();
-    octoCloud = coloradar::OctoPointcloud(cloud4d);
+    octoCloud = std::make_shared<coloradar::OctoPointcloud>(cloud4d);
 }
 
 //class PclFilterTest : public ::testing::Test {

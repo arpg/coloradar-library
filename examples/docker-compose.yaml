@@ -45,10 +45,26 @@ services:
     working_dir: /app
     volumes:
       # <local dataset directory>:/<container dataset directory>
-      - ~/data/coloradar:/data/coloradar
+      - ~/coloradar:/data/coloradar
       # <local export directory>:/<container export directory>
       - .:/export
     command: python3 /export/scripts/export_dataset.py
+
+  visualize_run:
+    extends:
+      service: base
+    working_dir: /app
+    environment:
+      - DISPLAY=${DISPLAY}
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      # <local dataset directory>:/<container dataset directory>
+      - ~/coloradar:/data/coloradar
+      # No adjustment necessary
+      - ./scripts/visualize_run.py:/app/visualize_run.py
+      - .:/export
+    # specify run name
+    command: python3 visualize_run.py --name edgar_classroom_run0 --step 10
 
   jupyter:
     build:
