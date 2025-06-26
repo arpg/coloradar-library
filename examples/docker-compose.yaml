@@ -7,9 +7,7 @@ services:
     image: *base_image
     environment:
       - PYTHONUNBUFFERED=1
-      - DISPLAY=${DISPLAY}
       - DOCKER_DATASET_VOLUME_PATH=/data/coloradar
-      - DOCKER_VISUALIZATION_CAMERA_CONFIG_PATH=/app/camera_config.txt
 
   get_export_config_template:
     extends:

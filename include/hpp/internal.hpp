@@ -141,4 +141,57 @@ void coloradar::internal::filterFov(std::shared_ptr<CloudT>& cloud, const float&
 }
 
 
+namespace coloradar::internal {
+
+template<coloradar::PclCloudType CloudT>
+std::vector<float> flattenLidarCloud(const std::shared_ptr<CloudT>& cloud, bool collapseElevation, bool removeIntensity) {
+    size_t numPoints = cloud->size();
+    std::vector<float> data;
+    if (numPoints == 0) return data;
+
+    size_t numDims = collapseElevation ? 3 : 4;
+    if (removeIntensity) numDims--;
+
+    data.resize(numPoints * numDims);
+    for (size_t i = 0; i < numPoints; ++i) {
+        data[i * numDims + 0] = (*cloud)[i].x;
+        data[i * numDims + 1] = (*cloud)[i].y;
+        if (collapseElevation) {
+            if (!removeIntensity) data[i * numDims + 2] = (*cloud)[i].intensity;
+        } else {
+            data[i * numDims + 2] = (*cloud)[i].z;
+            if (!removeIntensity) data[i * numDims + 3] = (*cloud)[i].intensity;
+        }
+    }
+    return data;
+}
+
+template<coloradar::PclCloudType CloudT>
+std::vector<float> flattenRadarCloud(const std::shared_ptr<CloudT>& cloud, const int numElevationBins, const bool hasDoppler) {
+    size_t numPoints = cloud->size();
+    std::vector<float> data;
+    if (numPoints == 0) return data;
+
+    bool hasZ = numElevationBins > 0;
+    size_t numDims = hasZ ? 5 : 4;
+    if (!hasDoppler) numDims -= 1;
+
+    data.resize(numPoints * numDims);
+    for (size_t i = 0; i < numPoints; ++i) {
+        data[i * numDims + 0] = (*cloud)[i].x;
+        data[i * numDims + 1] = (*cloud)[i].y;
+        if (hasZ) {
+            data[i * numDims + 2] = (*cloud)[i].z;
+            data[i * numDims + 3] = (*cloud)[i].intensity;
+            if (hasDoppler) data[i * numDims + 4] = (*cloud)[i].doppler;
+        } else {
+            data[i * numDims + 2] = (*cloud)[i].intensity;
+            if (hasDoppler) data[i * numDims + 3] = (*cloud)[i].doppler;
+        }
+    }
+    return data;
+}
+
+}
+
 #endif

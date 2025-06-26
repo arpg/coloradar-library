@@ -27,7 +27,6 @@ DatasetVisualizer::DatasetVisualizer(
     imageActor(vtkSmartPointer<vtkImageActor>::New())
 {
     reset();
-    std::cout << "cameraConfigPath: " << cameraConfigPath << std::endl;
     
     // init radar config
     std::vector<float> sampleHeatmap(cascadeRadarConfig.heatmapSize(), 0.0f);
@@ -92,7 +91,6 @@ void DatasetVisualizer::visualize(const ColoradarPlusRun* run, const bool usePre
     // start viewer
     viewer->setBackgroundColor(0, 0, 0);
     viewer->addCoordinateSystem(2.0);
-    std::cout << "cameraConfigPath exists: " << std::filesystem::exists(cameraConfigPath) << std::endl;
     if (std::filesystem::exists(cameraConfigPath)) {
         viewer->loadCameraParameters(cameraConfigPath);
         std::cout << "Camera parameters loaded from " << std::filesystem::absolute(cameraConfigPath) << "." << std::endl;

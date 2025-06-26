@@ -157,9 +157,14 @@ add_library(coloradar_lib SHARED
     src/radar_configs.cpp
     src/device.cpp
     src/dataset_configs.cpp
-    
     src/coloradar_run.cpp
-    src/dataset.cpp
+
+    src/dataset/parent_init.cpp
+    src/dataset/parent_data.cpp
+    src/dataset/parent_export.cpp
+    src/dataset/child_init.cpp
+    src/dataset/child_data.cpp
+
     src/visualizer.cpp
 )
 target_link_libraries(coloradar_lib Threads::Threads ${YAML_CPP_LIBRARIES} ${PCL_LIBRARIES} ${OCTOMAP_LIBRARIES} ${HDF5_LIBRARIES} ${JSONCPP_LIBRARIES})

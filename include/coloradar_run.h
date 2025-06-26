@@ -126,9 +126,9 @@ public:
     std::vector<int16_t> getSingleChipDatacube(const int& cubeIdx);
     std::vector<float> getSingleChipHeatmap(const std::filesystem::path& binFilePath);
     std::vector<float> getSingleChipHeatmap(const int& hmIdx);
-    pcl::PointCloud<RadarPoint>::Ptr getSingleChipPointcloud(const std::filesystem::path& binFilePath, const float& intensityThresholdPercent = 0.0);
-    pcl::PointCloud<RadarPoint>::Ptr getSingleChipPointcloud(const int& cloudIdx, const float& intensityThresholdPercent = 0.0);
-    // void createSingleChipPointclouds(const float& intensityThresholdPercent = 0.0);
+    pcl::PointCloud<RadarPoint>::Ptr getSingleChipPointcloud(const std::filesystem::path& binFilePath, const float& intensityThreshold = 0.0);
+    pcl::PointCloud<RadarPoint>::Ptr getSingleChipPointcloud(const int& cloudIdx, const float& intensityThreshold = 0.0);
+    // void createSingleChipPointclouds(const float& intensityThreshold = 0.0);
 };
 
 }

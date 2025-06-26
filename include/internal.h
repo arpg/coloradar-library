@@ -7,6 +7,8 @@
 
 namespace coloradar::internal {
 
+    std::string toLower(std::string s);
+    
     void checkPathExists(const std::filesystem::path& path);
     void createDirectoryIfNotExists(const std::filesystem::path& dirPath);
     std::vector<std::filesystem::path> readArrayDirectory(
@@ -43,11 +45,20 @@ namespace coloradar::internal {
 
     template<typename PointT, typename CloudT> void filterFov(std::shared_ptr<CloudT>& cloud, const float& horizontalFov, const float& verticalFov, const float& range);
 
-    // Eigen::Vector3f sphericalToCartesian(const double& az, const double& el, const double& range);
-
     bool parseBoolYamlKey(const YAML::Node &nodeValue, bool defaultValue);
     int parseIntYamlKey(const YAML::Node &nodeValue, int defaultValue);
     float parseFloatYamlKey(const YAML::Node &nodeValue, float defaultValue);
+
+    template<coloradar::PclCloudType CloudT> std::vector<float> flattenLidarCloud(const std::shared_ptr<CloudT>& cloud, bool collapseElevation, bool removeIntensity);
+    template<coloradar::PclCloudType CloudT> std::vector<float> flattenRadarCloud(const std::shared_ptr<CloudT>& cloud, const int numElevationBins, const bool hasDoppler);
+
+    void saveVectorToHDF5(const std::string& name, const H5::H5File& file, const std::vector<double>& vec);
+    void savePosesToHDF5(const std::string& name, const H5::H5File& file, const std::vector<Eigen::Affine3f>& poses);
+    void saveCloudToHDF5(const std::string& name, const H5::H5File& file, const std::vector<float>& flatCloud, const hsize_t& numDims);
+    void saveCloudsToHDF5(const std::string& name, const H5::H5File& file, const std::vector<float>& flatClouds, const hsize_t& numFrames, const std::vector<hsize_t>& cloudSizes, const hsize_t& numDims);
+    void saveDatacubesToHDF5(const std::string& name, const H5::H5File& file, const std::vector<int16_t>& flatDatacubes, const hsize_t& numFrames, const hsize_t datacubeSize);
+    void saveHeatmapsToHDF5(const std::string& name, const H5::H5File& file, const std::vector<float>& flatHeatmaps, const hsize_t& numFrames, const int numAzimuthBins, const int numRangeBins, const int numElevationBins, const bool hasDoppler);
+
 }
 
 #include "hpp/internal.hpp"

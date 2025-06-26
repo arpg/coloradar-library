@@ -12,6 +12,7 @@
 #include <cerrno>
 #include <locale>
 
+#include <cctype>
 #include <map>
 #include <string>
 #include <tuple>

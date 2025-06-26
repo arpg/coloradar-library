@@ -346,13 +346,13 @@ PYBIND11_MODULE(coloradar_dataset_lib, m) {
         .def("get_cascade_datacube", [](coloradar::ColoradarPlusRun& self, const int& cubeIdx) { return vectorToNumpy(self.getCascadeDatacube(cubeIdx)); })
         .def("get_cascade_heatmap", [](coloradar::ColoradarPlusRun& self, const std::filesystem::path& binFilePath) { return vectorToNumpy(self.getCascadeHeatmap(binFilePath)); })
         .def("get_cascade_heatmap", [](coloradar::ColoradarPlusRun& self, const int& hmIdx) { return vectorToNumpy(self.getCascadeHeatmap(hmIdx)); })
-        .def("create_cascade_pointclouds", &coloradar::ColoradarPlusRun::createCascadePointclouds, py::arg("intensity_threshold_percent") = 0)
-        .def("get_cascade_pointcloud", [](coloradar::ColoradarPlusRun& self, std::filesystem::path binFilePath, float intensityThresholdPercent = 0.0f) {
-            pcl::PointCloud<coloradar::RadarPoint>::Ptr cloud = self.getCascadePointcloud(binFilePath, intensityThresholdPercent); return radarCloudToNumpy(cloud);
-        }, py::arg("bin_file_path"), py::arg("intensity_threshold_percent") = 0)
-        .def("get_cascade_pointcloud", [](coloradar::ColoradarPlusRun& self, int cloudIdx, float intensityThresholdPercent = 0.0f) {
-            pcl::PointCloud<coloradar::RadarPoint>::Ptr cloud = self.getCascadePointcloud(cloudIdx, intensityThresholdPercent); return radarCloudToNumpy(cloud);
-        }, py::arg("cloud_idx"), py::arg("intensity_threshold_percent") = 0)
+        .def("create_cascade_pointclouds", &coloradar::ColoradarPlusRun::createCascadePointclouds, py::arg("intensity_threshold") = 0)
+        .def("get_cascade_pointcloud", [](coloradar::ColoradarPlusRun& self, std::filesystem::path binFilePath, float intensityThreshold = 0.0f) {
+            pcl::PointCloud<coloradar::RadarPoint>::Ptr cloud = self.getCascadePointcloud(binFilePath, intensityThreshold); return radarCloudToNumpy(cloud);
+        }, py::arg("bin_file_path"), py::arg("intensity_threshold") = 0)
+        .def("get_cascade_pointcloud", [](coloradar::ColoradarPlusRun& self, int cloudIdx, float intensityThreshold = 0.0f) {
+            pcl::PointCloud<coloradar::RadarPoint>::Ptr cloud = self.getCascadePointcloud(cloudIdx, intensityThreshold); return radarCloudToNumpy(cloud);
+        }, py::arg("cloud_idx"), py::arg("intensity_threshold") = 0)
 
         .def("create_lidar_octomap", [](coloradar::ColoradarPlusRun& self, const double mapResolution, const float lidarTotalHorizontalFov, const float lidarTotalVerticalFov, const float lidarMaxRange, const py::array_t<float>& baseToLidarTransformArray) {
             self.createLidarOctomap(mapResolution, lidarTotalHorizontalFov, lidarTotalVerticalFov, lidarMaxRange, numpyToPose(baseToLidarTransformArray));
@@ -400,17 +400,18 @@ PYBIND11_MODULE(coloradar_dataset_lib, m) {
         .def("get_single_chip_datacube", [](coloradar::ColoradarRun& self, const int& cubeIdx) { return vectorToNumpy(self.getSingleChipDatacube(cubeIdx)); })
         .def("get_single_chip_heatmap", [](coloradar::ColoradarRun& self, const std::filesystem::path& binFilePath) { return vectorToNumpy(self.getSingleChipHeatmap(binFilePath)); })
         .def("get_single_chip_heatmap", [](coloradar::ColoradarRun& self, const int& hmIdx) { return vectorToNumpy(self.getSingleChipHeatmap(hmIdx)); })
-        .def("get_single_chip_pointcloud", [](coloradar::ColoradarRun& self, std::filesystem::path binFilePath, float intensityThresholdPercent = 0.0f) {
-            pcl::PointCloud<coloradar::RadarPoint>::Ptr cloud = self.getSingleChipPointcloud(binFilePath, intensityThresholdPercent); return radarCloudToNumpy(cloud);
-        }, py::arg("bin_file_path"), py::arg("intensity_threshold_percent") = 0)
+        .def("get_single_chip_pointcloud", [](coloradar::ColoradarRun& self, std::filesystem::path binFilePath, float intensityThreshold = 0.0f) {
+            pcl::PointCloud<coloradar::RadarPoint>::Ptr cloud = self.getSingleChipPointcloud(binFilePath, intensityThreshold); return radarCloudToNumpy(cloud);
+        }, py::arg("bin_file_path"), py::arg("intensity_threshold") = 0)
 
-        .def("get_single_chip_pointcloud", [](coloradar::ColoradarRun& self, int cloudIdx, float intensityThresholdPercent = 0.0f) {
-            pcl::PointCloud<coloradar::RadarPoint>::Ptr cloud = self.getSingleChipPointcloud(cloudIdx, intensityThresholdPercent); return radarCloudToNumpy(cloud);
-        }, py::arg("cloud_idx"), py::arg("intensity_threshold_percent") = 0);
+        .def("get_single_chip_pointcloud", [](coloradar::ColoradarRun& self, int cloudIdx, float intensityThreshold = 0.0f) {
+            pcl::PointCloud<coloradar::RadarPoint>::Ptr cloud = self.getSingleChipPointcloud(cloudIdx, intensityThreshold); return radarCloudToNumpy(cloud);
+        }, py::arg("cloud_idx"), py::arg("intensity_threshold") = 0);
 
     // ColoradarPlusDataset
     py::class_<coloradar::ColoradarPlusDataset, std::shared_ptr<coloradar::ColoradarPlusDataset>>(m, "ColoradarPlusDataset")
         .def(py::init<const std::filesystem::path&>())
+        .def(py::init<const std::filesystem::path&, const std::filesystem::path&>(), py::arg("runs_dir"), py::arg("calib_dir"))
         .def("list_runs", &coloradar::ColoradarPlusDataset::listRuns)
         .def("get_runs", &coloradar::ColoradarPlusDataset::getRuns, py::return_value_policy::reference)
         .def("get_run", &coloradar::ColoradarPlusDataset::getRun, py::return_value_policy::reference)
@@ -424,6 +425,7 @@ PYBIND11_MODULE(coloradar_dataset_lib, m) {
     // ColoradarDataset
     py::class_<coloradar::ColoradarDataset, std::shared_ptr<coloradar::ColoradarDataset>, coloradar::ColoradarPlusDataset>(m, "ColoradarDataset")
         .def(py::init<const std::filesystem::path&>())
+        .def(py::init<const std::filesystem::path&, const std::filesystem::path&>(), py::arg("runs_dir"), py::arg("calib_dir"))
         .def("get_run", &coloradar::ColoradarDataset::getRun, py::return_value_policy::reference)
         .def("single_chip_transform", [](coloradar::ColoradarDataset& self) { return poseToNumpy(self.singleChipTransform()); })
         .def("single_chip_config", &coloradar::ColoradarDataset::singleChipConfig, py::return_value_policy::reference);

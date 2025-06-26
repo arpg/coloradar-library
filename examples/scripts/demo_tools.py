@@ -184,11 +184,11 @@ def show_heatmap_slice(hm0, slice_idx=None):
     plt.show()
 
 
-def show_radar_pcl(cloud, intensity_threshold_percent=0.0):
+def show_radar_pcl(cloud, intensity_threshold=0.0):
     min_intensity = np.min(cloud[:, 3])
     max_intensity = np.max(cloud[:, 3])
     normalized_intensities = (cloud[:, 3] - min_intensity) / (max_intensity - min_intensity)
-    filtered_idx = normalized_intensities >= intensity_threshold_percent / 100
+    filtered_idx = normalized_intensities >= intensity_threshold
     cmap = plt.get_cmap("plasma")
     colors = cmap(normalized_intensities[filtered_idx])[:, :3]
     pcd = o3d.geometry.PointCloud()
