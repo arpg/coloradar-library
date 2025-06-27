@@ -7,14 +7,14 @@ This directory contains example scripts and configurations for working with the 
   - [1.2. Detect your CUDA version](#12-detect-your-cuda-version)
   - [1.3. Set the corresponding container tag](#13-set-the-corresponding-container-tag)
   - [1.4. Set the volumes to point to the dataset](#14-set-the-volumes-to-point-to-the-dataset)
-- [2. Docker Compose Services](#2-docker-compose-services)
+- [2. Example Docker Compose Services](#2-example-docker-compose-services)
   - [2.1. Get Export Config Template](#21-get-export-config-template)
   - [2.2. Build Lidar Maps](#22-build-lidar-maps)
   - [2.3. Sample Lidar Maps](#23-sample-lidar-maps)
   - [2.4 Visualize Dataset](#24-visualize-dataset)
   - [2.5. Export Dataset](#25-export-dataset)
   - [2.6. Jupyter Notebook Server](#26-jupyter-notebook-server)
-- [3. Using the FOV Notebook](#3-using-the-fov-notebook)
+- [3. Using the Demo Notebook](#3-using-the-demo-notebook)
   - [3.1. Run the Jupyter Server](#31-run-the-jupyter-server)
   - [3.2. Example Functions](#32-example-functions)
 - [4. Notes and Troubleshooting](#4-notes-and-troubleshooting)
@@ -33,27 +33,13 @@ This directory contains example scripts and configurations for working with the 
 nvidia-smi
 ```
 
-#### 1.3. Set the corresponding container tag in `examples/docker-compose.yaml`:
-```docker
+#### 1.3. Set the container tag and dataset path in `examples/docker-compose.yaml`:
+```
 x-base-image: &base_image ghcr.io/arpg/coloradar-lib:12.6-jazzy
+x-dataset-volume: &dataset_volume ~/coloradar:/data/coloradar
 ```
 
-#### 1.4. Set the volumes to point to the dataset.
-```docker
-  jupyter:
-    build:
-      context: .
-      dockerfile: Dockerfile.demo
-    volumes:
-      # UPDATE LOCAL DIRECTORY HERE
-      # <local dataset directory>:/<container dataset directory>
-      - ~/coloradar:/data/coloradar
-      - .:/app
-    ports:
-      - "8888:8888"
-```
-
-## 2. Docker Compose Services
+## 2. Example Docker Compose Services
 
 The `docker-compose.yaml` file provides several services for different tasks, including **exporting** the necessary parts of the dataset into a *single **.h5** file*.
 
@@ -104,11 +90,11 @@ Starts a Jupyter notebook server accessible at http://localhost:8888. The server
 - Mount your local data directory and the current directory
 
 
-## 3. Using the FOV Notebook
+## 3. Using the Demo Notebook
 
 ### 3.1. Run the Jupyter Server
 
-The `fov.ipynb` notebook is designed to help you select the appropriate radar configuration for your dataset. To use it:
+The `demo.ipynb` notebook is designed to help you select the appropriate radar configuration for your dataset. To use it:
 
 1. Start the Jupyter server:
    ```bash
@@ -117,7 +103,7 @@ The `fov.ipynb` notebook is designed to help you select the appropriate radar co
 
 2. Open http://localhost:8888 in your browser or IDE
 
-3. Navigate to `fov.ipynb` and run the cells to:
+3. Navigate to `demo.ipynb` and run the cells to:
    - Visualize the radar's field of view
    - Test different FOV configurations
    - Generate the appropriate FOV parameters for your `export-config.yaml`
@@ -130,9 +116,7 @@ TBD
 
 - The Jupyter server is configured to run without authentication for development purposes. Remote access may be hindered.
 
-- The container paths (`/data/coloradar`, `/app`, `/export`) should not be changed randomly as they are hardcoded in the scripts. The following volume mounts are used across services:
-   - `~/data/coloradar:/data/coloradar`: This is the main data directory. You can change the local path (`~/data/coloradar`) to match your setup, but the container path (`/data/coloradar`) should remain unchanged.
-   - `.:/app` or `.:/export`: The current directory is mounted to either `/app` or `/export` depending on the service. This allows access to local scripts and configurations.
+- The container paths (`/data/coloradar`, `/app`, `/export`) should not be changed randomly as they are hardcoded in the scripts. The current directory is mounted to `/app` inside the container which allows access to local scripts and configurations.
 
 - If the first import cell in a notebook fails with this:
 ```bash

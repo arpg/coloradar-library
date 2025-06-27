@@ -1,10 +1,11 @@
-# Change base image accordingly to your setup
 x-base-image: &base_image ghcr.io/arpg/coloradar-lib:12.6-jazzy
+x-dataset-volume: &dataset_volume ~/coloradar:/data/coloradar
 
 
 services:
   base:
     image: *base_image
+    working_dir: /app
     environment:
       - PYTHONUNBUFFERED=1
       - DOCKER_DATASET_VOLUME_PATH=/data/coloradar
@@ -13,58 +14,45 @@ services:
     extends:
       service: base
     volumes:
-      # No adjustment necessary
-      - .:/export
+      - ./export:/export
     command: cp /src/coloradar_lib/export-config-template.yaml /export/export-config.yaml
 
   build_maps:
     extends:
       service: base
-    working_dir: /app
     volumes:
-      # <local dataset directory>:/<container dataset directory>
-      - ~/data/coloradar:/data/coloradar
-      # No adjustment necessary
-      - ./scripts/build_maps.py:/app/build_maps.py
-    command: python3 build_maps.py
+      - .:/app
+      - *dataset_volume
+    command: python3 scripts/build_maps.py
 
   sample_maps:
     extends:
       service: base
-    working_dir: /app
     volumes:
-      # <local dataset directory>:/<container dataset directory>
-      - ~/data/coloradar:/data/coloradar
-      # No adjustment necessary
-      - ./scripts/sample_maps.py:/app/sample_maps.py
-    command: python3 sample_maps.py
+      - .:/app
+      - *dataset_volume
+    command: python3 scripts/sample_maps.py
 
   export_dataset:
     extends:
       service: base
-    working_dir: /app
     volumes:
-      # <local dataset directory>:/<container dataset directory>
-      - ~/coloradar:/data/coloradar
-      # <local export directory>:/<container export directory>
-      - .:/export
-    command: python3 /export/scripts/export_dataset.py
+      - .:/app
+      - ./export:/export
+      - *dataset_volume
+    command: python3 scripts/export_dataset.py
 
   visualize_run:
     extends:
       service: base
-    working_dir: /app
     environment:
       - DISPLAY=${DISPLAY}
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix:rw
-      # <local dataset directory>:/<container dataset directory>
-      - ~/coloradar:/data/coloradar
-      # No adjustment necessary
-      - ./scripts/visualize_run.py:/app/visualize_run.py
-      - .:/export
-    # specify run name
-    command: python3 visualize_run.py --name edgar_classroom_run0 --step 10
+      - .:/app
+      - ./export:/export
+      - *dataset_volume
+    command: python3 scripts/visualize_run.py --name edgar_classroom_run0 --step 10
 
   jupyter:
     build:
@@ -73,10 +61,8 @@ services:
       args:
         BASE_IMAGE: *base_image
     volumes:
-      # <local dataset directory>:/<container dataset directory>
-      - ~/coloradar:/data/coloradar
-      # <local working directory>:/<container working directory>
       - .:/app
+      - *dataset_volume
     ports:
       - "8888:8888"
     deploy:
@@ -86,4 +72,3 @@ services:
             - driver: nvidia
               count: all
               capabilities: [gpu]
-

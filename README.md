@@ -1,4 +1,7 @@
-# Coloradar Library
+# Coloradar Dataset Library
+
+Here you will find a suite of tools designed to work with the ColoRadar Dataset.
+
 
 - [Build Options](#build-options)
   - [1. Pre-built Images](#1-pre-built-images)
@@ -97,4 +100,17 @@ make
 ```bash
 ./build/coloradar_tests
 python3 tests/test_bindings.py
+```
+
+
+# Reference
+
+```bibtex
+@article{Harlow2024ARXIV, 
+   title   = {ColoRadar+: An extension of the dense
+millimeter-wave radar dataset ColoRadar}, 
+   author  = {Kyle Harlow, Doncey Albin, Miles Mena}, 
+   journal = {arXiv preprint arXiv:####.#####},
+   year    = {2024}, 
+}
 ```
