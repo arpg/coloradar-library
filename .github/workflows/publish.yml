@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        ros: ["none", "jazzy"]
+        ros: ["none", "noetic", "jazzy"]
         cuda: ["none", "12.6", "12.8"]
       fail-fast: false
 
