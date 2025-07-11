@@ -81,7 +81,7 @@ class ImageBuild:
             build_args.append("--build-arg")
             build_args.append(f"DOCKER_{lib_name.upper()}_VERSION={self.version_selector.get_lib_version(lib_name, ubuntu_version)}")
         build_command = [
-            "docker", "buildx", "build",
+            "docker", "buildx", "build", # "--no-cache",
             "--build-arg", f"CUDA_ENV={'true' if cuda_version else 'false'}",
             "--build-arg", f"BASE_IMAGE={base_image}",
             "-t", image_name
