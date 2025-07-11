@@ -11,7 +11,7 @@ if __name__ == "__main__":
 
     dataset_path = os.getenv('DOCKER_DATASET_VOLUME_PATH')
 
-    dataset = tools.ColoradarDataset(dataset_path)
+    dataset = tools.ColoradarPlusDataset(dataset_path)
     run = dataset.get_run(args.name)
     radar_config = dataset.cascade_config()
     lidar_transform, radar_transform = dataset.lidar_transform(), dataset.cascade_transform()

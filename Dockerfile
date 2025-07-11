@@ -60,6 +60,7 @@ RUN set -eu; \
     fi
 
 
+
 # Install Ubuntu libraries
 RUN set -eu; \
     . $BUILD_VARIABLES; \
@@ -83,28 +84,8 @@ RUN set -eu; \
         cmake \
         tzdata \
         curl \
-        manpages-dev \
-        libeigen3-dev \
-        libflann-dev \
-        liboctomap-dev \
-        libgtest-dev \
-        libopencv-dev \
-        libopenmpi-dev \
-        openmpi-bin \
-        libjsoncpp-dev \
-        libyaml-cpp-dev \
-        libdbus-1-dev \
-        gobject-introspection \
-        libgirepository1.0-dev \
-        qtbase5-dev qt5-qmake qtbase5-dev-tools libqt5opengl5-dev \
-        python3-pip \
         $OUTPUT_REDIRECT"
 
-
-# VTK
-RUN if [ -n "$DOCKER_VTK_VERSION" ]; then \
-        apt update && apt install --no-install-recommends -y libvtk${DOCKER_VTK_VERSION}-dev python3-vtk${DOCKER_VTK_VERSION}; \
-    fi
 
 
 # GCC
@@ -129,6 +110,36 @@ RUN if [ -n "$DOCKER_BOOST_VERSION" ]; then \
     else \
         apt install -y libboost-all-dev; \
     fi
+
+
+# VTK
+RUN if [ -n "$DOCKER_VTK_VERSION" ]; then \
+        apt update && apt install --no-install-recommends -y libvtk${DOCKER_VTK_VERSION}-dev python3-vtk${DOCKER_VTK_VERSION}; \
+    fi
+
+
+# Install Ubuntu libraries
+RUN set -eu; \
+    . $BUILD_VARIABLES; \
+    sh -c "apt update $APT_FLAGS $OUTPUT_REDIRECT"; \
+    sh -c "apt upgrade -y $APT_FLAGS $OUTPUT_REDIRECT"; \
+    sh -c "apt install --no-install-recommends -y $APT_FLAGS \
+        manpages-dev \
+        libeigen3-dev \
+        libflann-dev \
+        liboctomap-dev \
+        libgtest-dev \
+        libopencv-dev \
+        libopenmpi-dev \
+        openmpi-bin \
+        libjsoncpp-dev \
+        libyaml-cpp-dev \
+        libdbus-1-dev \
+        gobject-introspection \
+        libgirepository1.0-dev \
+        qtbase5-dev qt5-qmake qtbase5-dev-tools libqt5opengl5-dev \
+        python3-pip \
+        $OUTPUT_REDIRECT"
 
 
 # PCL

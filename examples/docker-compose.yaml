@@ -1,5 +1,5 @@
 x-base-image: &base_image ghcr.io/arpg/coloradar-lib:12.6-jazzy
-x-dataset-volume: &dataset_volume ~/coloradar:/data/coloradar
+x-dataset-volume: &dataset_volume ~/coloradar_plus:/data/coloradar
 
 
 services:
@@ -52,7 +52,7 @@ services:
       - .:/app
       - ./export:/export
       - *dataset_volume
-    command: python3 scripts/visualize_run.py --name edgar_classroom_run0 --step 10
+    command: python3 scripts/visualize_run.py --name ec_hallways_run4 --step 1
 
   jupyter:
     build:
