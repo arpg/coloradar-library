@@ -154,14 +154,39 @@ if(APPLE)
         message(FATAL_ERROR "jsoncpp not found!")
     endif()
 else()
-    find_package(jsoncpp REQUIRED)
+    # find_package(jsoncpp REQUIRED)
+    # find_package(yaml-cpp REQUIRED)
+    # find_path(JSONCPP_INCLUDE_DIRS json.h
+    # PATHS
+    #     /usr/include
+    #     /usr/include/jsoncpp/json
+    #     NO_DEFAULT_PATH
+    # )
+
+    # jsoncpp layout on Ubuntu 22 puts headers in jsoncpp/json/
     find_package(yaml-cpp REQUIRED)
-    find_path(JSONCPP_INCLUDE_DIRS json.h
-    PATHS
-        /usr/include
-        /usr/include/jsoncpp/json
-        NO_DEFAULT_PATH
+
+    if(NOT TARGET JsonCpp::JsonCpp)
+        find_package(jsoncpp CONFIG QUIET)
+    endif()
+
+    if(NOT TARGET JsonCpp::JsonCpp)
+        find_package(jsoncpp REQUIRED)
+    endif()
+
+    set(JSONCPP_LIBRARIES JsonCpp::JsonCpp)
+
+    # Hack to make <json.h> resolve correctly (Ubuntu 22 jsoncpp layout)
+    find_path(JSONCPP_INCLUDE_H_PATH json.h
+        PATH_SUFFIXES jsoncpp/json
+        PATHS /usr/include
     )
+    if (NOT JSONCPP_INCLUDE_H_PATH)
+        message(FATAL_ERROR "Could not find json.h in expected location")
+    endif()
+
+    set(JSONCPP_INCLUDE_DIRS "${JSONCPP_INCLUDE_H_PATH}")
+
 endif()
 
 set(CUDA_LIBS ${CUDA_LIBRARIES} ${CUDA_CUFFT_LIBRARIES})

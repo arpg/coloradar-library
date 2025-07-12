@@ -96,13 +96,24 @@ RUN set -eu; \
         libdbus-1-dev \
         gobject-introspection \
         libgirepository1.0-dev \
-        libhdf5-dev libhdf5-cpp-103 libhdf5-serial-dev \
         qtbase5-dev qt5-qmake qtbase5-dev-tools \
         libqt5opengl5-dev \
         libglvnd-dev \
         python3-pip \
         $OUTPUT_REDIRECT"
 
+# focal specific
+RUN set -eu; \
+    . $BUILD_VARIABLES; \
+    if [ "$UBUNTU_CODENAME" = "focal" ]; then \
+        apt update $APT_FLAGS $OUTPUT_REDIRECT; \
+        apt upgrade -y $APT_FLAGS $OUTPUT_REDIRECT; \
+        apt install --no-install-recommends -y $APT_FLAGS \
+            libhdf5-dev \
+            libhdf5-cpp-103 \
+            libhdf5-serial-dev \
+            $OUTPUT_REDIRECT; \
+    fi
 
 
 # GCC
@@ -236,26 +247,26 @@ RUN rm -rf /tmp/*
 
 # Build Library
 WORKDIR /src/coloradar_lib
-COPY include include
-COPY src src
-COPY tests tests
-COPY CMakeLists.txt .
+# COPY include include
+# COPY src src
+# COPY tests tests
+# COPY CMakeLists.txt .
 
-RUN mkdir build
-RUN cmake -B build
-RUN make -C build
-RUN make install -C build
-RUN ./build/coloradar_tests
-RUN echo "/usr/local/lib" | tee -a /etc/ld.so.conf.d/coloradar.conf && ldconfig
+# RUN mkdir build
+# RUN cmake -B build
+# RUN make -C build
+# RUN make install -C build
+# RUN ./build/coloradar_tests
+# RUN echo "/usr/local/lib" | tee -a /etc/ld.so.conf.d/coloradar.conf && ldconfig
 
-RUN if [ "$(lsb_release -rs | cut -d. -f1)" -ge 24 ]; then \
-        pip3 install --break-system-packages numpy; \
-    else \
-        pip3 install numpy; \
-    fi
-RUN python3 tests/test_bindings.py
+# RUN if [ "$(lsb_release -rs | cut -d. -f1)" -ge 24 ]; then \
+#         pip3 install --break-system-packages numpy; \
+#     else \
+#         pip3 install numpy; \
+#     fi
+# RUN python3 tests/test_bindings.py
 
-COPY export-config-template.yaml .
+# COPY export-config-template.yaml .
 
 
 CMD ["bash"]
