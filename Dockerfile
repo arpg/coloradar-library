@@ -60,7 +60,6 @@ RUN set -eu; \
     fi
 
 
-
 # Install Ubuntu libraries
 RUN set -eu; \
     . $BUILD_VARIABLES; \
@@ -84,6 +83,24 @@ RUN set -eu; \
         cmake \
         tzdata \
         curl \
+        git \
+        manpages-dev \
+        libflann-dev \
+        liboctomap-dev \
+        libgtest-dev \
+        libopencv-dev \
+        libopenmpi-dev \
+        openmpi-bin \
+        libjsoncpp-dev \
+        libyaml-cpp-dev \
+        libdbus-1-dev \
+        gobject-introspection \
+        libgirepository1.0-dev \
+        libhdf5-dev libhdf5-cpp-103 libhdf5-serial-dev \
+        qtbase5-dev qt5-qmake qtbase5-dev-tools \
+        libqt5opengl5-dev \
+        libglvnd-dev \
+        python3-pip \
         $OUTPUT_REDIRECT"
 
 
@@ -112,34 +129,64 @@ RUN if [ -n "$DOCKER_BOOST_VERSION" ]; then \
     fi
 
 
-# VTK
-RUN if [ -n "$DOCKER_VTK_VERSION" ]; then \
-        apt update && apt install --no-install-recommends -y libvtk${DOCKER_VTK_VERSION}-dev python3-vtk${DOCKER_VTK_VERSION}; \
+# EIGEN
+RUN set -eu; \
+    . $BUILD_VARIABLES; \
+    if [ "$UBUNTU_CODENAME" = "focal" ]; then \
+        echo "Ubuntu 20 detected: installing Eigen 3.4.0 from source..."; \
+        wget https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.tar.gz && \
+        tar -xzf eigen-3.4.0.tar.gz && \
+        cd eigen-3.4.0 && \
+        mkdir build && cd build && \
+        cmake .. -DCMAKE_INSTALL_PREFIX=/usr/local && \
+        make install && \
+        cd /tmp && rm -rf eigen-3.4.0 eigen-3.4.0.tar.gz; \
+    else \
+        apt install -y libeigen3-dev; \
     fi
 
 
-# Install Ubuntu libraries
+
+# VTK
+# RUN if [ -n "$DOCKER_VTK_VERSION" ]; then \
+#         apt update && apt install --no-install-recommends -y libvtk${DOCKER_VTK_VERSION}-dev python3-vtk${DOCKER_VTK_VERSION}; \
+#     fi
+
 RUN set -eu; \
     . $BUILD_VARIABLES; \
-    sh -c "apt update $APT_FLAGS $OUTPUT_REDIRECT"; \
-    sh -c "apt upgrade -y $APT_FLAGS $OUTPUT_REDIRECT"; \
-    sh -c "apt install --no-install-recommends -y $APT_FLAGS \
-        manpages-dev \
-        libeigen3-dev \
-        libflann-dev \
-        liboctomap-dev \
-        libgtest-dev \
-        libopencv-dev \
-        libopenmpi-dev \
-        openmpi-bin \
-        libjsoncpp-dev \
-        libyaml-cpp-dev \
-        libdbus-1-dev \
-        gobject-introspection \
-        libgirepository1.0-dev \
-        qtbase5-dev qt5-qmake qtbase5-dev-tools libqt5opengl5-dev \
-        python3-pip \
-        $OUTPUT_REDIRECT"
+    if [ -n "$DOCKER_VTK_VERSION" ]; then \
+        echo "Requested VTK major version: $DOCKER_VTK_VERSION"; \
+        if apt-cache show libvtk${DOCKER_VTK_VERSION}-dev > /dev/null 2>&1; then \
+            echo "Installing libvtk${DOCKER_VTK_VERSION}-dev from APT..."; \
+            apt install --no-install-recommends -y $APT_FLAGS libvtk${DOCKER_VTK_VERSION}-dev python3-vtk${DOCKER_VTK_VERSION} $OUTPUT_REDIRECT; \
+        else \
+            echo "VTK $DOCKER_VTK_VERSION not available in APT. Building from source..."; \
+            if [ "$DOCKER_VTK_VERSION" = "9" ]; then \
+                VTK_TAG="v9.2.6"; \
+            elif [ "$DOCKER_VTK_VERSION" = "8" ]; then \
+                VTK_TAG="v8.2.0"; \
+            elif [ "$DOCKER_VTK_VERSION" = "7" ]; then \
+                VTK_TAG="v7.1.1"; \
+            else \
+                echo "Error: Unknown VTK version: $DOCKER_VTK_VERSION"; exit 1; \
+            fi; \
+            echo "Cloning VTK $VTK_TAG..."; \
+            git clone --branch $VTK_TAG --depth 1 https://gitlab.kitware.com/vtk/vtk.git && \
+            cd vtk && mkdir build && cd build && \
+            cmake .. \
+                -DCMAKE_BUILD_TYPE=Release \
+                -DCMAKE_INSTALL_PREFIX=/usr/local \
+                -DCMAKE_CXX_FLAGS="-include cmath -include cstring -include cstdlib" \
+                -DVTK_WRAP_PYTHON=OFF \
+                -DVTK_BUILD_TESTING=OFF \
+                -DBUILD_SHARED_LIBS=ON $OUTPUT_REDIRECT && \
+            make -j$(nproc) $OUTPUT_REDIRECT && \
+            make install $OUTPUT_REDIRECT && \
+            cd /tmp && rm -rf vtk; \
+        fi; \
+    else \
+        echo "No DOCKER_VTK_VERSION provided, skipping VTK install."; \
+    fi
 
 
 # PCL
@@ -159,7 +206,7 @@ RUN if [ -n "$DOCKER_PCL_VERSION" ]; then \
               -DBUILD_SHARED_LIBS=ON \
               -DBUILD_apps=OFF \
               -DBUILD_examples=OFF \
-              -DCMAKE_CXX_FLAGS="-march=native -U__SSE2__ -U__SSE3__ -U__SSE4_1__ -U__SSE4_2__" \
+              -DCMAKE_CXX_FLAGS="-march=native -U__SSE2__ -U__SSE3__ -U__SSE4_1__ -U__SSE4_2__ -include cmath -include cstring -include cstdlib" \
               ${SSE_FLAG} .. && \
         make -j2 && \
         make install; \

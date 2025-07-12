@@ -32,26 +32,46 @@ if(APPLE)
 
     add_definitions(-DWITH_SSE=OFF)
 else()
-    find_program(GCC_COMPILER 
-        NAMES gcc-12 gcc-11
-        PATHS /usr/bin /usr/local/bin
-        NO_DEFAULT_PATH
-    )
-    find_program(GPP_COMPILER 
-        NAMES g++-12 g++-11
-        PATHS /usr/bin /usr/local/bin
-        NO_DEFAULT_PATH
-    )
+    # List possible GCC versions (from newest to oldest)
+    set(POSSIBLE_GCC_VERSIONS 12 11)
+
+    # Try to find the newest available GCC/G++ pair
+    foreach(ver IN LISTS POSSIBLE_GCC_VERSIONS)
+        find_program(GCC_COMPILER gcc-${ver} PATHS /usr/bin /usr/local/bin NO_DEFAULT_PATH)
+        find_program(GPP_COMPILER g++-${ver} PATHS /usr/bin /usr/local/bin NO_DEFAULT_PATH)
+        if (GCC_COMPILER AND GPP_COMPILER)
+            set(SELECTED_GCC_VERSION ${ver})
+            break()
+        endif()
+    endforeach()
+
     if (NOT GCC_COMPILER OR NOT GPP_COMPILER)
-        message(FATAL_ERROR "No suitable GCC compiler found! Please ensure GCC version 11, or 12 is installed.")
+        message(FATAL_ERROR "No suitable GCC/G++ compiler found! Please ensure GCC version between 11 and 12 is installed.")
     endif()
-    string(REGEX REPLACE "gcc-([0-9]+)" "g++-\\1" GPP_COMPILER ${GCC_COMPILER})
+
     set(CMAKE_C_COMPILER ${GCC_COMPILER} CACHE PATH "C compiler" FORCE)
     set(CMAKE_CXX_COMPILER ${GPP_COMPILER} CACHE PATH "C++ compiler" FORCE)
     message(STATUS "Using GCC compiler: ${GCC_COMPILER}")
     message(STATUS "Using G++ compiler: ${GPP_COMPILER}")
+
     add_compile_options(-fconcepts)
 endif()
+
+    # find_program(GCC_COMPILER 
+    #     NAMES gcc-12 gcc-11
+    #    PATHS /usr/bin /usr/local/bin
+    #    NO_DEFAULT_PATH
+    #)
+    #find_program(GPP_COMPILER 
+    #    NAMES g++-12 g++-11
+    #    PATHS /usr/bin /usr/local/bin
+    #    NO_DEFAULT_PATH
+    #)
+    #if (NOT GCC_COMPILER OR NOT GPP_COMPILER)
+    #    message(FATAL_ERROR "No suitable GCC compiler found! Please ensure GCC version 11, or 12 is installed.")
+    #endif()
+    #string(REGEX REPLACE "gcc-([0-9]+)" "g++-\\1" GPP_COMPILER ${GCC_COMPILER})
+
 
 
 # System Paths (macOS & Linux)
@@ -107,7 +127,8 @@ execute_process(
 find_package(Boost 1.78 REQUIRED COMPONENTS system filesystem thread)
 find_package(Threads REQUIRED)
 find_package(MPI REQUIRED)
-find_package(VTK REQUIRED)
+find_package(Eigen3 3.4 REQUIRED NO_MODULE)
+find_package(VTK 9 REQUIRED)
 find_package(PCL 1.12 REQUIRED COMPONENTS visualization)
 find_package(octomap REQUIRED)
 find_package(OpenCV REQUIRED)

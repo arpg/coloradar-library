@@ -5,7 +5,7 @@ ros_versions:
 
 ubuntu_versions:
   "20.04":
-    vtk: 7
+    vtk: 9
     gcc: 11
     boost: 1.78.0
     pcl: 1.12.0

@@ -1,60 +1,99 @@
 #ifndef INCLUDE_H
 #define INCLUDE_H
 
-#define _USE_MATH_DEFINES
+// #define fabs(x) std::fabs(x)
+// #define ceil(x) std::ceil(x)
 
-// First include all standard headers correctly and completely.
-#include <cmath>
-#include <cstdlib>
+#define _USE_MATH_DEFINES
+// #include <cmath>
 #include <cstring>
-#include <algorithm>
-#include <memory>
-#include <string>
-#include <vector>
-#include <map>
-#include <unordered_map>
-#include <tuple>
-#include <iostream>
-#include <sstream>
-#include <fstream>
-#include <filesystem>
-#include <stdexcept>
-#include <typeinfo>
-#include <locale>
-#include <regex>
-#include <span>
-#include <functional>
-#include <chrono>
-#include <cctype>
+#include <cstdlib>
 
 #include <unistd.h>
-#include <sys/types.h>
 #include <sys/resource.h>
 #include <sys/syscall.h>
+#include <sys/types.h>
 
-// Critical compatibility macros for GCC 11 on Ubuntu 20
-#if defined(__GNUC__) && __GNUC__ == 11
-extern "C" void free(void*) throw();
+#include <cerrno>
+#include <locale>
 
-#define _GLIBCXX_USE_CXX11_ABI 1
-#define _GLIBCXX_ASSERTIONS 1
-#endif
+#include <cctype>
+#include <map>
+#include <string>
+#include <tuple>
+#include <unordered_map>
+#include <vector>
 
-// Explicitly define M_PI if missing
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
+#include <algorithm>
+#include <chrono>
+#include <filesystem>
+#include <functional>
+#include <fstream>
+#include <iostream>
+#include <memory>
+#include <regex>
+#include <span>
+#include <sstream>
+#include <stdexcept>
+#include <typeinfo>
+#include <cxxabi.h>  // optional for demangling on GCC/Clang
 
-// 3rd-party headers included after standard headers
 #include <json.h>
 #include <yaml-cpp/yaml.h>
 #include <H5Cpp.h>
 
+
+
+// #if defined(__GNUC__) && __GNUC__ == 10 && !defined(__clang__)
+// #pragma message(">>> Using GCC 10 compatibility block")
+
+// extern "C" void free(void*) throw();
+
+// namespace std {
+//     inline std::string to_string(float value) {
+//         std::ostringstream oss;
+//         oss.precision(8);  // GCC's default precision
+//         oss << value;
+//         return oss.str();
+//     }
+//     // inline double sqrt(double x) { return ::sqrt(static_cast<double>(x)); }
+//     // inline double fabs(double x) { return ::fabs(static_cast<double>(x)); }
+//     // inline double cos(double x)  { return ::cos(static_cast<double>(x)); }
+//     // inline double sin(double x)  { return ::sin(static_cast<double>(x)); }
+//     // inline double floor(double x) { return ::floor(static_cast<double>(x)); }
+//     // inline double log(double x) { return ::log(static_cast<double>(x)); }
+//     // inline double exp(double x) { return ::exp(static_cast<double>(x)); }
+//     // inline double acos(double x) { return ::acos(static_cast<double>(x)); }
+//     // inline double asin(double x) { return ::asin(static_cast<double>(x)); }
+// }
+
+// #ifndef M_PI
+// #define M_PI 3.14159265358979323846
+// #endif
+
+// extern "C" {
+//     #include <sys/types.h>
+//     #include <sys/syscall.h>
+//     #include <linux/futex.h>
+//     #include <errno.h>
+// }
+// #undef syscall
+// inline int syscall_wrapper(long number, ...) {
+//     return syscall(number);
+// }
+// #define syscall syscall_wrapper
+
+// #define _GLIBCXX_USE_CXX11_ABI 1
+// #define _GLIBCXX_ASSERTIONS 1
+
+// #endif
+
+
 #include <Eigen/Core>
 #include <Eigen/Dense>
-
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
+#include <pcl/point_types_conversion.h>
 #include <pcl/common/transforms.h>
 #include <pcl/filters/voxel_grid.h>
 #include <pcl/filters/passthrough.h>
@@ -68,7 +107,7 @@ extern "C" void free(void*) throw();
 #include <vtkImageData.h>
 #include <vtkImageActor.h>
 #include <vtkImageMapper3D.h>
-
 #include <octomap/octomap.h>
+
 
 #endif
