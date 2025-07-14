@@ -6,9 +6,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-add_compile_options(-Wall -Wextra -Wpedantic -Wno-unused-parameter)
 
-# Compiler
 add_definitions(-DNDEBUG)
 
 if(APPLE)
@@ -56,22 +54,6 @@ else()
 
     add_compile_options(-fconcepts)
 endif()
-
-    # find_program(GCC_COMPILER 
-    #     NAMES gcc-12 gcc-11
-    #    PATHS /usr/bin /usr/local/bin
-    #    NO_DEFAULT_PATH
-    #)
-    #find_program(GPP_COMPILER 
-    #    NAMES g++-12 g++-11
-    #    PATHS /usr/bin /usr/local/bin
-    #    NO_DEFAULT_PATH
-    #)
-    #if (NOT GCC_COMPILER OR NOT GPP_COMPILER)
-    #    message(FATAL_ERROR "No suitable GCC compiler found! Please ensure GCC version 11, or 12 is installed.")
-    #endif()
-    #string(REGEX REPLACE "gcc-([0-9]+)" "g++-\\1" GPP_COMPILER ${GCC_COMPILER})
-
 
 
 # System Paths (macOS & Linux)
@@ -127,7 +109,7 @@ execute_process(
 find_package(Boost 1.78 REQUIRED COMPONENTS system filesystem thread)
 find_package(Threads REQUIRED)
 find_package(MPI REQUIRED)
-find_package(Eigen3 3.4 REQUIRED NO_MODULE)
+find_package(Eigen3 3.4.0 REQUIRED NO_MODULE)
 find_package(VTK 9 REQUIRED)
 find_package(PCL 1.12 REQUIRED COMPONENTS visualization)
 find_package(octomap REQUIRED)
@@ -154,39 +136,62 @@ if(APPLE)
         message(FATAL_ERROR "jsoncpp not found!")
     endif()
 else()
-    # find_package(jsoncpp REQUIRED)
-    # find_package(yaml-cpp REQUIRED)
-    # find_path(JSONCPP_INCLUDE_DIRS json.h
-    # PATHS
-    #     /usr/include
-    #     /usr/include/jsoncpp/json
-    #     NO_DEFAULT_PATH
-    # )
-
-    # jsoncpp layout on Ubuntu 22 puts headers in jsoncpp/json/
+    message(STATUS "Setting up jsoncpp")
     find_package(yaml-cpp REQUIRED)
 
+    # Avoid duplicate target definition error (Ubuntu 22)
     if(NOT TARGET JsonCpp::JsonCpp)
         find_package(jsoncpp CONFIG QUIET)
     endif()
 
-    if(NOT TARGET JsonCpp::JsonCpp)
-        find_package(jsoncpp REQUIRED)
+    if(TARGET JsonCpp::JsonCpp)
+        message(STATUS "Using imported target JsonCpp::JsonCpp")
+        set(JSONCPP_LIBRARIES JsonCpp::JsonCpp)
+        find_path(JSONCPP_INCLUDE_H_PATH json.h
+            PATH_SUFFIXES jsoncpp/json
+            PATHS /usr/include /usr/local/include
+        )
+
+        if (NOT JSONCPP_INCLUDE_H_PATH)
+            message(FATAL_ERROR "Could not find json.h in expected location")
+        endif()
+        set(JSONCPP_INCLUDE_DIRS "${JSONCPP_INCLUDE_H_PATH}")
+
+    else()
+        message(STATUS "JsonCpp::JsonCpp target not found, falling back to manual config")
+        find_path(JSONCPP_HEADER_ROOT json/json.h
+            PATHS
+                /usr/include/jsoncpp
+                /usr/local/include/jsoncpp
+                /usr/include
+                /usr/local/include
+        )
+
+        if(JSONCPP_HEADER_ROOT)
+            set(JSONCPP_INCLUDE_DIRS "${JSONCPP_HEADER_ROOT}/json")
+            message(STATUS "Found json.h in: ${JSONCPP_INCLUDE_DIRS}")
+        else()
+            message(WARNING "Could NOT find json.h in expected locations.")
+        endif()
+
+        find_library(JSONCPP_LIBRARY jsoncpp
+            PATHS
+                /usr/lib
+                /usr/local/lib
+                /usr/lib/x86_64-linux-gnu
+                /usr/lib/aarch64-linux-gnu
+        )
+        if(JSONCPP_LIBRARY)
+            message(STATUS "Found libjsoncpp in: ${JSONCPP_LIBRARY}")
+        else()
+            message(WARNING "Could NOT find libjsoncpp in expected locations.")
+        endif()
+
+        if(NOT JSONCPP_INCLUDE_DIRS OR NOT JSONCPP_LIBRARY)
+            message(FATAL_ERROR "Could not find jsoncpp manually")
+        endif()
+        set(JSONCPP_LIBRARIES ${JSONCPP_LIBRARY})
     endif()
-
-    set(JSONCPP_LIBRARIES JsonCpp::JsonCpp)
-
-    # Hack to make <json.h> resolve correctly (Ubuntu 22 jsoncpp layout)
-    find_path(JSONCPP_INCLUDE_H_PATH json.h
-        PATH_SUFFIXES jsoncpp/json
-        PATHS /usr/include
-    )
-    if (NOT JSONCPP_INCLUDE_H_PATH)
-        message(FATAL_ERROR "Could not find json.h in expected location")
-    endif()
-
-    set(JSONCPP_INCLUDE_DIRS "${JSONCPP_INCLUDE_H_PATH}")
-
 endif()
 
 set(CUDA_LIBS ${CUDA_LIBRARIES} ${CUDA_CUFFT_LIBRARIES})

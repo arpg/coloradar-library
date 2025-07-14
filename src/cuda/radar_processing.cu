@@ -1,7 +1,6 @@
 #include <fstream>
 #include <sstream>
 #include <thread>
-#include <math.h>
 #include <Eigen/Core>
 #include <mutex>
 
