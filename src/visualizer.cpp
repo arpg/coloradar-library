@@ -44,7 +44,7 @@ void DatasetVisualizer::reset() {
     cascadePoses.clear();
     numSteps = 0;
     currentStep = -1;
-
+    currentMapStep = -1;
     viewer->removeAllPointClouds();
     viewer->removeAllCoordinateSystems();
     viewer->removeAllShapes();
@@ -79,9 +79,7 @@ void DatasetVisualizer::visualize(const ColoradarPlusRun* run, const bool usePre
     mapIsPrebuilt = usePrebuiltMap;
     if (usePrebuiltMap) {
         lidarMapCloud = run->readLidarOctomap();
-        // std::cout << "Loaded pre-built map of size: " << lidarMapCloud->size() << std::endl;
         filterOccupancy(lidarMapCloud, 0, true);
-        // std::cout << "Filtered pre-built map of size: " << lidarMapCloud->size() << std::endl;
         renderLidarMap();
     }
     
@@ -123,30 +121,34 @@ void DatasetVisualizer::keyboardCallback(const pcl::visualization::KeyboardEvent
 
 void DatasetVisualizer::step(const int increment) {
     if (increment == 0) throw std::runtime_error("Step increment must be non-zero.");
+    int prevStep = currentStep;
     int targetStep = std::clamp(currentStep + increment, 0, numSteps - 1);
-    // std::cout << "targetStep: " << targetStep << std::endl;
     if (targetStep == currentStep) return;
     currentStep = targetStep;
     
+    // update lidar map is accumulating
     if (!mapIsPrebuilt) {
-        int lidarFrameIdx = baseToLidarFrameIndices[currentStep];
-        auto lidarCloud = readLidarCloud(lidarFrameIdx);
-        // std::cout << "using lidar frame " << lidarFrameIdx << " for frame " << currentStep << std::endl;
-        // std::cout << "lidarCloud size: " << lidarCloud->size() << std::endl;
-        lidarCloud = downsampleLidarCloud(lidarCloud);
-        // std::cout << "lidarCloud size after downsampling: " << lidarCloud->size() << std::endl;
-        *lidarMapCloud += *lidarCloud;
-        // std::cout << "lidarMapCloud size: " << lidarMapCloud->size() << std::endl;
+        updateLidarMap(currentStep);
         renderLidarMap();
     }
-
+    
+    // render radar scan
     int cascadeFrameIdx = baseToCascadeFrameIndices[currentStep];
     auto cascadeCloud = readCascadeCloud(cascadeFrameIdx);
-    // std::cout << "using cascade frame " << cascadeFrameIdx << " for frame " << currentStep << std::endl;
-    // std::cout << "cascadeCloud size: " << cascadeCloud->size() << std::endl << std::endl;
     renderRadarCloud(cascadeCloud);
-    
-    imageActor->GetMapper()->SetInputData(vtkImage);
+}
+
+
+void DatasetVisualizer::updateLidarMap(const int step) {
+    if (step >= numSteps) throw std::runtime_error("Step " + std::to_string(step) + " is out of range [0, " + std::to_string(numSteps) + ").");
+    if (currentMapStep >= step) return;
+    for (int i = currentMapStep + 1; i <= step; i++) {
+        int lidarFrameIdx = baseToLidarFrameIndices[i];
+        auto lidarCloud = readLidarCloud(lidarFrameIdx);
+        lidarCloud = downsampleLidarCloud(lidarCloud);
+        *lidarMapCloud += *lidarCloud;
+    }
+    currentMapStep = step;
 }
 
 

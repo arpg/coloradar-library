@@ -71,7 +71,11 @@ Tested on Ubuntu only. If seeing a display error, run
 xhost +local:docker
 ```
 
-Specify the target run name and optionally the frame step size in `docker-compose.yaml` under `services.visualize_run.command`.
+Specify the target run name and optionally the frame step size in `docker-compose.yaml` under `services.visualize_run.command`. Below is an example of a visualized run.
+
+![Example Visualization](readme_images/visualize.png "Example Visualization")
+
+The visualization downsamples the lidar scans from the target run to accumulate the map. The colored FOV depicts a 2D slice of the radar scans. To move along the timestamps, use `↑` and `↓`.
 
 
 ### 2.5. Export Dataset

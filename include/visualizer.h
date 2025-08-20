@@ -39,6 +39,7 @@ protected:
     pcl::PointCloud<pcl::PointXYZI>::Ptr lidarMapCloud;
     int numSteps;
     int currentStep;
+    int currentMapStep;
 
     // methods
     void reset();
@@ -49,6 +50,7 @@ protected:
     pcl::PointCloud<pcl::PointXYZI>::Ptr downsampleLidarCloud(const pcl::PointCloud<pcl::PointXYZI>::Ptr& inputCloud, const float leafSize = 0.1) const;
     pcl::PointCloud<RadarPoint>::Ptr normalizeRadarCloudIntensity(const pcl::PointCloud<RadarPoint>::Ptr& inputCloud) const;
     pcl::PointCloud<RadarPoint>::Ptr extractTopNIntensity(const pcl::PointCloud<RadarPoint>::Ptr& inputCloud, size_t N) const;
+    void updateLidarMap(const int lastStep);
     void renderLidarMap();
     void renderRadarCloud(const pcl::PointCloud<RadarPoint>::Ptr& cloud);
 
