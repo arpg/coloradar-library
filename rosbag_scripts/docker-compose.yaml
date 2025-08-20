@@ -1,0 +1,8 @@
+services:
+  grayscale:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - /home/arpg:/host
+    command: python3 /scripts/bag_rgb_to_grayscale.py
