@@ -16,7 +16,7 @@ protected:
     Eigen::Affine3f lidarTransform_;
     Eigen::Affine3f cascadeTransform_;
 
-    RadarConfig* cascadeConfig_;
+    std::shared_ptr<RadarConfig> cascadeConfig_;
 
     std::unique_ptr<BaseDevice> base_device_;
     std::unique_ptr<ImuDevice> imu_;
@@ -24,7 +24,7 @@ protected:
     std::unique_ptr<LidarDevice> lidar_;
 
     std::unordered_map<std::string, std::shared_ptr<H5Run>> runs_;
-
+    
 
     // dataset/h5_init.cpp
     H5Dataset() = default;
@@ -44,7 +44,7 @@ public:
     const Eigen::Affine3f& lidarTransform() const;
     const Eigen::Affine3f& cascadeTransform() const;
     const RadarConfig* cascadeConfig() const;
-    
+
     std::vector<std::string> listRuns();
     std::vector<std::shared_ptr<H5Run>> getRuns();
     std::shared_ptr<H5Run> getRun(const std::string& runName);

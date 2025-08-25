@@ -227,63 +227,69 @@ PYBIND11_MODULE(coloradar_dataset_lib, m) {
 
 
     // RadarConfig
-    py::class_<coloradar::RadarConfig, std::shared_ptr<coloradar::RadarConfig>>(m, "RadarConfig")
-        .def_readonly("num_elevation_bins", &coloradar::RadarConfig::numElevationBins)
-        .def_readonly("num_azimuth_bins", &coloradar::RadarConfig::numAzimuthBins)
-        .def_readonly("range_bin_width", &coloradar::RadarConfig::rangeBinWidth)
-        .def_readonly("azimuth_bins", &coloradar::RadarConfig::azimuthBins)
-        .def_readonly("elevation_bins", &coloradar::RadarConfig::elevationBins)
-        .def_readonly("design_frequency", &coloradar::RadarConfig::designFrequency)
-        .def_readonly("num_tx_antennas", &coloradar::RadarConfig::numTxAntennas)
-        .def_readonly("num_rx_antennas", &coloradar::RadarConfig::numRxAntennas)
-        .def_readonly("tx_centers", &coloradar::RadarConfig::txCenters)
-        .def_readonly("rx_centers", &coloradar::RadarConfig::rxCenters)
-        .def_readonly("num_adc_samples_per_chirp", &coloradar::RadarConfig::numAdcSamplesPerChirp)
-        .def_readonly("num_chirps_per_frame", &coloradar::RadarConfig::numChirpsPerFrame)
-        .def_readonly("adc_sample_frequency", &coloradar::RadarConfig::adcSampleFrequency)
-        .def_readonly("start_frequency", &coloradar::RadarConfig::startFrequency)
-        .def_readonly("idle_time", &coloradar::RadarConfig::idleTime)
-        .def_readonly("adc_start_time", &coloradar::RadarConfig::adcStartTime)
-        .def_readonly("ramp_end_time", &coloradar::RadarConfig::rampEndTime)
-        .def_readonly("frequency_slope", &coloradar::RadarConfig::frequencySlope)
-        .def_readonly("num_doppler_bins", &coloradar::RadarConfig::numDopplerBins)
-        .def_readonly("coupling_calib_matrix", &coloradar::RadarConfig::couplingCalibMatrix)
-        .def_readonly("calib_adc_sample_frequency", &coloradar::RadarConfig::calibAdcSampleFrequency)
-        .def_readonly("calib_frequency_slope", &coloradar::RadarConfig::calibFrequencySlope)
-        .def_readonly("frequency_calib_matrix", &coloradar::RadarConfig::frequencyCalibMatrix)
-        .def_readonly("phase_calib_matrix", &coloradar::RadarConfig::phaseCalibMatrix)
-        .def_readonly("num_azimuth_beams", &coloradar::RadarConfig::numAzimuthBeams)
-        .def_readonly("num_elevation_beams", &coloradar::RadarConfig::numElevationBeams)
-        .def_readonly("azimuth_aperture_len", &coloradar::RadarConfig::azimuthApertureLen)
-        .def_readonly("elevation_aperture_len", &coloradar::RadarConfig::elevationApertureLen)
-        .def_readonly("num_angles", &coloradar::RadarConfig::numAngles)
-        .def_readonly("num_virtual_elements", &coloradar::RadarConfig::numVirtualElements)
-        .def_readonly("virtual_array_map", &coloradar::RadarConfig::virtualArrayMap)
-        .def_readonly("azimuth_angles", &coloradar::RadarConfig::azimuthAngles)
-        .def_readonly("elevation_angles", &coloradar::RadarConfig::elevationAngles)
-        .def_readonly("doppler_bin_width", &coloradar::RadarConfig::dopplerBinWidth)
-        .def("n_range_bins", &coloradar::RadarConfig::nRangeBins)
-        .def("max_range", &coloradar::RadarConfig::maxRange)
-        .def("to_json", &coloradar::RadarConfig::toJson)
-        .def("from_json", &coloradar::RadarConfig::fromJson)
-        .def("clip_azimuth_max_bin", &coloradar::RadarConfig::clipAzimuthMaxBin, py::arg("az_max_bin"))
-        .def("clip_elevation_max_bin", &coloradar::RadarConfig::clipElevationMaxBin, py::arg("el_max_bin"))
-        .def("clip_range_max_bin", &coloradar::RadarConfig::clipRangeMaxBin, py::arg("range_max_bin"))
-        .def("clip_range", &coloradar::RadarConfig::clipRange, py::arg("range"))
-        .def("azimuth_idx_to_fov_degrees", &coloradar::RadarConfig::azimuthIdxToFovDegrees, py::arg("az_max_bin"))
-        .def("elevation_idx_to_fov_degrees", &coloradar::RadarConfig::elevationIdxToFovDegrees, py::arg("el_max_bin"))
-        .def("range_idx_to_range", &coloradar::RadarConfig::rangeIdxToRange, py::arg("range_max_bin"))
-        .def("horizontal_fov_to_azimuth_idx", &coloradar::RadarConfig::horizontalFovToAzimuthIdx, py::arg("horizontal_fov"))
-        .def("vertical_fov_to_elevation_idx", &coloradar::RadarConfig::verticalFovToElevationIdx, py::arg("vertical_fov"))
-        .def("range_to_range_idx", &coloradar::RadarConfig::rangeToRangeIdx, py::arg("range"))
+    using RC = coloradar::RadarConfig;
+
+    py::class_<RC, std::shared_ptr<RC>>(m, "RadarConfig")
+        .def_readonly("num_elevation_bins", &RC::numElevationBins)
+        .def_readonly("num_azimuth_bins",   &RC::numAzimuthBins)
+        .def_readonly("range_bin_width",    &RC::rangeBinWidth)
+        .def_readonly("azimuth_bins",       &RC::azimuthBins)
+        .def_readonly("elevation_bins",     &RC::elevationBins)
+        .def_readonly("design_frequency",   &RC::designFrequency)
+        .def_readonly("num_tx_antennas",    &RC::numTxAntennas)
+        .def_readonly("num_rx_antennas",    &RC::numRxAntennas)
+        .def_readonly("tx_centers",         &RC::txCenters)
+        .def_readonly("rx_centers",         &RC::rxCenters)
+        .def_readonly("num_adc_samples_per_chirp", &RC::numAdcSamplesPerChirp)
+        .def_readonly("num_chirps_per_frame",      &RC::numChirpsPerFrame)
+        .def_readonly("adc_sample_frequency",      &RC::adcSampleFrequency)
+        .def_readonly("start_frequency",           &RC::startFrequency)
+        .def_readonly("idle_time",                 &RC::idleTime)
+        .def_readonly("adc_start_time",            &RC::adcStartTime)
+        .def_readonly("ramp_end_time",             &RC::rampEndTime)
+        .def_readonly("frequency_slope",           &RC::frequencySlope)
+        .def_readonly("num_doppler_bins",          &RC::numDopplerBins)
+        .def_readonly("coupling_calib_matrix",     &RC::couplingCalibMatrix)
+        .def_readonly("calib_adc_sample_frequency",&RC::calibAdcSampleFrequency)
+        .def_readonly("calib_frequency_slope",     &RC::calibFrequencySlope)
+        .def_readonly("frequency_calib_matrix",    &RC::frequencyCalibMatrix)
+        .def_readonly("phase_calib_matrix",        &RC::phaseCalibMatrix)
+        .def_readonly("num_azimuth_beams",         &RC::numAzimuthBeams)
+        .def_readonly("num_elevation_beams",       &RC::numElevationBeams)
+        .def_readonly("azimuth_aperture_len",      &RC::azimuthApertureLen)
+        .def_readonly("elevation_aperture_len",    &RC::elevationApertureLen)
+        .def_readonly("num_angles",                &RC::numAngles)
+        .def_readonly("num_virtual_elements",      &RC::numVirtualElements)
+        .def_readonly("virtual_array_map",         &RC::virtualArrayMap)
+        .def_readonly("azimuth_angles",            &RC::azimuthAngles)
+        .def_readonly("elevation_angles",          &RC::elevationAngles)
+        .def_readonly("doppler_bin_width",         &RC::dopplerBinWidth)
+
+        .def("n_range_bins", &RC::nRangeBins)
+        .def("max_range",    &RC::maxRange)
+        .def("to_json",      &RC::toJson)
+        .def("from_json", static_cast<void (RC::*)(const std::string&)>(&RC::fromJson), py::arg("json_string"))
+        .def("clip_azimuth_max_bin",        &RC::clipAzimuthMaxBin,        py::arg("az_max_bin"))
+        .def("clip_elevation_max_bin",      &RC::clipElevationMaxBin,      py::arg("el_max_bin"))
+        .def("clip_range_max_bin",          &RC::clipRangeMaxBin,          py::arg("range_max_bin"))
+        .def("clip_range",                  &RC::clipRange,                py::arg("range"))
+        .def("azimuth_idx_to_fov_degrees",  &RC::azimuthIdxToFovDegrees,   py::arg("az_max_bin"))
+        .def("elevation_idx_to_fov_degrees",&RC::elevationIdxToFovDegrees, py::arg("el_max_bin"))
+        .def("range_idx_to_range",          &RC::rangeIdxToRange,          py::arg("range_max_bin"))
+        .def("horizontal_fov_to_azimuth_idx",&RC::horizontalFovToAzimuthIdx, py::arg("horizontal_fov"))
+        .def("vertical_fov_to_elevation_idx",&RC::verticalFovToElevationIdx, py::arg("vertical_fov"))
+        .def("range_to_range_idx",          &RC::rangeToRangeIdx,          py::arg("range"))
+
         .def("clip_heatmap", [](coloradar::RadarConfig& self, const std::vector<float>& heatmap, int azimuth_max_bin, int elevation_max_bin, int range_max_bin, bool update_config) {
             auto clipped = self.clipHeatmap(heatmap, azimuth_max_bin, elevation_max_bin, range_max_bin, update_config);
             return vectorToNumpy(clipped);
         }, py::arg("heatmap"), py::arg("azimuth_max_bin"), py::arg("elevation_max_bin"), py::arg("range_max_bin"), py::arg("update_config") = true)
+
         .def("clip_heatmap", [](coloradar::RadarConfig& self, const std::vector<float>& heatmap, float horizontal_fov, float vertical_fov, float range, bool update_config) {
             auto clipped = self.clipHeatmap(heatmap, horizontal_fov, vertical_fov, range, update_config);
             return vectorToNumpy(clipped);
         }, py::arg("heatmap"), py::arg("horizontal_fov"), py::arg("vertical_fov"), py::arg("range"), py::arg("update_config") = true)
+
         .def("collapse_heatmap_elevation", [](coloradar::RadarConfig& self, const std::vector<float>& image, double elevation_min_meters, double elevation_max_meters, bool update_config) {
             auto result = self.collapseHeatmapElevation(image, elevation_min_meters, elevation_max_meters, update_config);
             return vectorToNumpy(result);
@@ -316,13 +322,33 @@ PYBIND11_MODULE(coloradar_dataset_lib, m) {
     py::class_<coloradar::SingleChipConfig, coloradar::RadarConfig, std::shared_ptr<coloradar::SingleChipConfig>>(m, "SingleChipConfig")
         .def(py::init<const std::filesystem::path&, const int&, const int&>(), py::arg("calib_dir"), py::arg("num_azimuth_beams") = 64, py::arg("num_elevation_beams") = 8)
         .def("__copy__", [](const coloradar::SingleChipConfig &self) { return std::make_shared<coloradar::SingleChipConfig>(self); })
-        .def("__deepcopy__", [](const coloradar::SingleChipConfig &self, py::dict) { return std::make_shared<coloradar::SingleChipConfig>(self); });
+        .def("__deepcopy__", [](const coloradar::SingleChipConfig &self, py::dict) { return std::make_shared<coloradar::SingleChipConfig>(self); })
+        .def(py::init([](const std::string& json_str) {
+            Json::CharReaderBuilder b;
+            std::unique_ptr<Json::CharReader> reader(b.newCharReader());
+            Json::Value root; std::string errs;
+            const char* begin = json_str.data(); const char* end = begin + json_str.size();
+            if (!reader->parse(begin, end, &root, &errs)) {
+                throw std::invalid_argument(std::string("SingleChipConfig(json_string): parse error: ") + errs);
+            }
+            return std::make_shared<coloradar::SingleChipConfig>(root);
+        }), py::arg("json_string"));
 
     // CascadeConfig
     py::class_<coloradar::CascadeConfig, coloradar::RadarConfig, std::shared_ptr<coloradar::CascadeConfig>>(m, "CascadeConfig")
         .def(py::init<const std::filesystem::path&, const int&, const int&>(), py::arg("calib_dir"), py::arg("num_azimuth_beams") = 128, py::arg("num_elevation_beams") = 32)
         .def("__copy__", [](const coloradar::CascadeConfig &self) { return std::make_shared<coloradar::CascadeConfig>(self); })
-        .def("__deepcopy__", [](const coloradar::CascadeConfig &self, py::dict) { return std::make_shared<coloradar::CascadeConfig>(self); });
+        .def("__deepcopy__", [](const coloradar::CascadeConfig &self, py::dict) { return std::make_shared<coloradar::CascadeConfig>(self); })
+        .def(py::init([](const std::string& json_str) {
+            Json::CharReaderBuilder b;
+            std::unique_ptr<Json::CharReader> reader(b.newCharReader());
+            Json::Value root; std::string errs;
+            const char* begin = json_str.data(); const char* end = begin + json_str.size();
+            if (!reader->parse(begin, end, &root, &errs)) {
+                throw std::invalid_argument(std::string("CascadeConfig(json_string): parse error: ") + errs);
+            }
+            return std::make_shared<coloradar::CascadeConfig>(root);
+        }), py::arg("json_string"));
 
     // ColoradarPlusRun
     py::class_<coloradar::ColoradarPlusRun>(m, "ColoradarPlusRun")
@@ -407,6 +433,15 @@ PYBIND11_MODULE(coloradar_dataset_lib, m) {
         .def("get_single_chip_pointcloud", [](coloradar::ColoradarRun& self, int cloudIdx, float intensityThreshold = 0.0f) {
             pcl::PointCloud<coloradar::RadarPoint>::Ptr cloud = self.getSingleChipPointcloud(cloudIdx, intensityThreshold); return radarCloudToNumpy(cloud);
         }, py::arg("cloud_idx"), py::arg("intensity_threshold") = 0);
+
+
+    // H5Dataset
+    py::class_<coloradar::H5Dataset, std::shared_ptr<coloradar::H5Dataset>>(m, "H5Dataset")
+        .def(py::init<const std::filesystem::path&>(), py::arg("h5_path"))
+        .def(py::init([](const std::string& h5_path) {
+            return std::make_shared<coloradar::H5Dataset>(std::filesystem::path(h5_path));
+        }), py::arg("h5_path"));
+
 
     // ColoradarPlusDataset
     py::class_<coloradar::ColoradarPlusDataset, std::shared_ptr<coloradar::ColoradarPlusDataset>>(m, "ColoradarPlusDataset")

@@ -77,6 +77,7 @@ public:
     RadarConfig(const RadarConfig& other) = default;
 
     Json::Value toJson() const;
+    void fromJson(const Json::Value& root);          
     void fromJson(const std::string& jsonString);
 
     const int& nRangeBins() const;  // abstracted as a method because distinction between numRangeBins and numPosRangeBins may be unclear
@@ -108,6 +109,7 @@ class SingleChipConfig : public RadarConfig {
 public:
     SingleChipConfig() = default;
     SingleChipConfig(const std::filesystem::path& calibDir, const int& nAzimuthBeams = 64, const int& nElevationBeams = 8);
+    explicit SingleChipConfig(const Json::Value& root) { fromJson(root); }
 
 protected:
     void init(const std::filesystem::path& calibDir) override;
@@ -118,6 +120,7 @@ class CascadeConfig : public RadarConfig {
 public:
     CascadeConfig() = default;
     CascadeConfig(const std::filesystem::path& calibDir, const int& nAzimuthBeams = 128, const int& nElevationBeams = 32);
+    explicit CascadeConfig(const Json::Value& root) { fromJson(root); }
 
 protected:
     void init(const std::filesystem::path& calibDir) override;

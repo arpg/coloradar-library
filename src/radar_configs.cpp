@@ -64,6 +64,333 @@ pcl::PointCloud<RadarPoint>::Ptr RadarConfig::heatmapToPointcloud(const std::vec
     return outputCloud;
 }
 
+
+Json::Value RadarConfig::toJson() const {
+    Json::Value jsonConfig;
+
+    // Heatmap parameters
+    jsonConfig["heatmap"]["numRangeBins"]     = numRangeBins;     
+    jsonConfig["heatmap"]["numPosRangeBins"]  = numPosRangeBins; 
+    jsonConfig["heatmap"]["numElevationBins"] = numElevationBins;
+    jsonConfig["heatmap"]["numAzimuthBins"]   = numAzimuthBins;
+    jsonConfig["heatmap"]["rangeBinWidth"]    = rangeBinWidth;
+    jsonConfig["heatmap"]["azimuthBins"]      = Json::arrayValue;
+    for (const auto& bin : azimuthBins) jsonConfig["heatmap"]["azimuthBins"].append(bin);
+    jsonConfig["heatmap"]["elevationBins"]    = Json::arrayValue;
+    for (const auto& bin : elevationBins) jsonConfig["heatmap"]["elevationBins"].append(bin);
+
+    // Antenna parameters
+    jsonConfig["antenna"]["designFrequency"] = designFrequency;
+    jsonConfig["antenna"]["numTxAntennas"]   = numTxAntennas;
+    jsonConfig["antenna"]["numRxAntennas"]   = numRxAntennas;
+    jsonConfig["antenna"]["txCenters"]       = Json::arrayValue;
+    for (const auto& center : txCenters) {
+        Json::Value p; p["x"] = center.x; p["y"] = center.y;
+        jsonConfig["antenna"]["txCenters"].append(p);
+    }
+    jsonConfig["antenna"]["rxCenters"] = Json::arrayValue;
+    for (const auto& center : rxCenters) {
+        Json::Value p; p["x"] = center.x; p["y"] = center.y;
+        jsonConfig["antenna"]["rxCenters"].append(p);
+    }
+
+    // Waveform parameters
+    jsonConfig["waveform"]["numAdcSamplesPerChirp"] = numAdcSamplesPerChirp;
+    jsonConfig["waveform"]["numChirpsPerFrame"]     = numChirpsPerFrame;
+    jsonConfig["waveform"]["adcSampleFrequency"]    = adcSampleFrequency;
+    jsonConfig["waveform"]["startFrequency"]        = startFrequency;
+    jsonConfig["waveform"]["idleTime"]              = idleTime;
+    jsonConfig["waveform"]["adcStartTime"]          = adcStartTime;
+    jsonConfig["waveform"]["rampEndTime"]           = rampEndTime;
+    jsonConfig["waveform"]["frequencySlope"]        = frequencySlope;
+
+    // Calibration parameters
+    jsonConfig["calibration"]["numDopplerBins"]     = numDopplerBins;
+    jsonConfig["calibration"]["couplingCalibMatrix"] = Json::arrayValue;
+    for (const auto& z : couplingCalibMatrix) {
+        Json::Value c; c["real"] = z.real(); c["imag"] = z.imag();
+        jsonConfig["calibration"]["couplingCalibMatrix"].append(c);
+    }
+
+    // Phase frequency parameters
+    jsonConfig["phaseFrequency"]["calibAdcSampleFrequency"] = calibAdcSampleFrequency;
+    jsonConfig["phaseFrequency"]["calibFrequencySlope"]     = calibFrequencySlope;
+    jsonConfig["phaseFrequency"]["frequencyCalibMatrix"]    = Json::arrayValue;
+    for (const auto& z : frequencyCalibMatrix) {
+        Json::Value c; c["real"] = z.real(); c["imag"] = z.imag();
+        jsonConfig["phaseFrequency"]["frequencyCalibMatrix"].append(c);
+    }
+    jsonConfig["phaseFrequency"]["phaseCalibMatrix"] = Json::arrayValue;
+    for (const auto& z : phaseCalibMatrix) {
+        Json::Value c; c["real"] = z.real(); c["imag"] = z.imag();
+        jsonConfig["phaseFrequency"]["phaseCalibMatrix"].append(c);
+    }
+
+    // Internal parameters
+    jsonConfig["internal"]["numAzimuthBeams"]     = numAzimuthBeams;
+    jsonConfig["internal"]["numElevationBeams"]   = numElevationBeams;
+    jsonConfig["internal"]["azimuthApertureLen"]  = azimuthApertureLen;
+    jsonConfig["internal"]["elevationApertureLen"]= elevationApertureLen;
+    jsonConfig["internal"]["numAngles"]           = numAngles;
+    jsonConfig["internal"]["numVirtualElements"]  = numVirtualElements;
+    jsonConfig["internal"]["virtualArrayMap"]     = Json::arrayValue;
+    for (const auto& v : virtualArrayMap) jsonConfig["internal"]["virtualArrayMap"].append(v);
+    jsonConfig["internal"]["azimuthAngles"]       = Json::arrayValue;
+    for (const auto& a : azimuthAngles) jsonConfig["internal"]["azimuthAngles"].append(a);
+    jsonConfig["internal"]["elevationAngles"]     = Json::arrayValue;
+    for (const auto& a : elevationAngles) jsonConfig["internal"]["elevationAngles"].append(a);
+    jsonConfig["internal"]["hasDoppler"]          = hasDoppler;
+    jsonConfig["internal"]["dopplerBinWidth"]     = dopplerBinWidth;
+
+    return jsonConfig;
+}
+
+
+void RadarConfig::fromJson(const std::string& jsonString) {
+    Json::CharReaderBuilder b;
+    std::unique_ptr<Json::CharReader> reader(b.newCharReader());
+    Json::Value root;
+    std::string errs;
+    const char* begin = jsonString.data();
+    const char* end   = begin + jsonString.size();
+    if (!reader->parse(begin, end, &root, &errs)) {
+        throw std::invalid_argument(std::string("RadarConfig::fromJson: parse error: ") + errs);
+    }
+    fromJson(root);
+}
+
+
+void RadarConfig::fromJson(const Json::Value& root) {
+    if (!root.isObject()) {
+        throw std::invalid_argument("RadarConfig::fromJson: root must be an object.");
+    }
+
+    // ---- heatmap
+    if (!root.isMember("heatmap") || !root["heatmap"].isObject())
+        throw std::invalid_argument("RadarConfig::fromJson: missing 'heatmap' object.");
+    const auto& H = root["heatmap"];
+
+    if (!H.isMember("numRangeBins") || !H["numRangeBins"].isInt())
+        throw std::invalid_argument("RadarConfig::fromJson: heatmap.numRangeBins missing or not int.");
+    // if (!H.isMember("numPosRangeBins") || !H["numPosRangeBins"].isInt())
+    //     throw std::invalid_argument("RadarConfig::fromJson: heatmap.numPosRangeBins missing or not int.");
+    if (!H.isMember("numElevationBins") || !H["numElevationBins"].isInt())
+        throw std::invalid_argument("RadarConfig::fromJson: heatmap.numElevationBins missing or not int.");
+    if (!H.isMember("numAzimuthBins") || !H["numAzimuthBins"].isInt())
+        throw std::invalid_argument("RadarConfig::fromJson: heatmap.numAzimuthBins missing or not int.");
+    if (!H.isMember("rangeBinWidth") || !H["rangeBinWidth"].isNumeric())
+        throw std::invalid_argument("RadarConfig::fromJson: heatmap.rangeBinWidth missing or not number.");
+    if (!H.isMember("azimuthBins") || !H["azimuthBins"].isArray())
+        throw std::invalid_argument("RadarConfig::fromJson: heatmap.azimuthBins missing or not array.");
+    if (!H.isMember("elevationBins") || !H["elevationBins"].isArray())
+        throw std::invalid_argument("RadarConfig::fromJson: heatmap.elevationBins missing or not array.");
+
+    // numRangeBins     = H["numRangeBins"].asInt();
+    // numPosRangeBins  = H["numPosRangeBins"].asInt();
+    numPosRangeBins  = H["numRangeBins"].asInt();
+    numRangeBins     = numPosRangeBins * 2;
+
+    numElevationBins = H["numElevationBins"].asInt();
+    numAzimuthBins   = H["numAzimuthBins"].asInt();
+    rangeBinWidth    = H["rangeBinWidth"].asDouble();
+
+    azimuthBins.clear();
+    azimuthBins.reserve(H["azimuthBins"].size());
+    for (const auto& v : H["azimuthBins"]) {
+        if (!v.isNumeric()) throw std::invalid_argument("heatmap.azimuthBins: all values must be numbers.");
+        azimuthBins.push_back(static_cast<float>(v.asDouble()));
+    }
+    elevationBins.clear();
+    elevationBins.reserve(H["elevationBins"].size());
+    for (const auto& v : H["elevationBins"]) {
+        if (!v.isNumeric()) throw std::invalid_argument("heatmap.elevationBins: all values must be numbers.");
+        elevationBins.push_back(static_cast<float>(v.asDouble()));
+    }
+
+    // ---- antenna
+    if (!root.isMember("antenna") || !root["antenna"].isObject())
+        throw std::invalid_argument("RadarConfig::fromJson: missing 'antenna' object.");
+    const auto& A = root["antenna"];
+
+    if (!A.isMember("designFrequency") || !A["designFrequency"].isNumeric())
+        throw std::invalid_argument("RadarConfig::fromJson: antenna.designFrequency missing or not number.");
+    if (!A.isMember("numTxAntennas") || !A["numTxAntennas"].isInt())
+        throw std::invalid_argument("RadarConfig::fromJson: antenna.numTxAntennas missing or not int.");
+    if (!A.isMember("numRxAntennas") || !A["numRxAntennas"].isInt())
+        throw std::invalid_argument("RadarConfig::fromJson: antenna.numRxAntennas missing or not int.");
+    if (!A.isMember("txCenters") || !A["txCenters"].isArray())
+        throw std::invalid_argument("RadarConfig::fromJson: antenna.txCenters missing or not array.");
+    if (!A.isMember("rxCenters") || !A["rxCenters"].isArray())
+        throw std::invalid_argument("RadarConfig::fromJson: antenna.rxCenters missing or not array.");
+
+    designFrequency = A["designFrequency"].asDouble();
+    numTxAntennas   = A["numTxAntennas"].asInt();
+    numRxAntennas   = A["numRxAntennas"].asInt();
+
+    txCenters.clear();
+    txCenters.reserve(A["txCenters"].size());
+    for (const auto& p : A["txCenters"]) {
+        if (!p.isObject() || !p.isMember("x") || !p.isMember("y") || !p["x"].isNumeric() || !p["y"].isNumeric())
+            throw std::invalid_argument("antenna.txCenters: each entry must be {x:number, y:number}.");
+        pcl::PointXY pt; pt.x = static_cast<float>(p["x"].asDouble()); pt.y = static_cast<float>(p["y"].asDouble());
+        txCenters.push_back(pt);
+    }
+    rxCenters.clear();
+    rxCenters.reserve(A["rxCenters"].size());
+    for (const auto& p : A["rxCenters"]) {
+        if (!p.isObject() || !p.isMember("x") || !p.isMember("y") || !p["x"].isNumeric() || !p["y"].isNumeric())
+            throw std::invalid_argument("antenna.rxCenters: each entry must be {x:number, y:number}.");
+        pcl::PointXY pt; pt.x = static_cast<float>(p["x"].asDouble()); pt.y = static_cast<float>(p["y"].asDouble());
+        rxCenters.push_back(pt);
+    }
+
+    // ---- waveform
+    if (!root.isMember("waveform") || !root["waveform"].isObject())
+        throw std::invalid_argument("RadarConfig::fromJson: missing 'waveform' object.");
+    const auto& W = root["waveform"];
+
+    if (!W.isMember("numAdcSamplesPerChirp") || !W["numAdcSamplesPerChirp"].isInt())
+        throw std::invalid_argument("waveform.numAdcSamplesPerChirp missing or not int.");
+    if (!W.isMember("numChirpsPerFrame") || !W["numChirpsPerFrame"].isInt())
+        throw std::invalid_argument("waveform.numChirpsPerFrame missing or not int.");
+    if (!W.isMember("adcSampleFrequency") || !W["adcSampleFrequency"].isInt())
+        throw std::invalid_argument("waveform.adcSampleFrequency missing or not int.");
+    if (!W.isMember("startFrequency") || !W["startFrequency"].isNumeric())
+        throw std::invalid_argument("waveform.startFrequency missing or not number.");
+    if (!W.isMember("idleTime") || !W["idleTime"].isNumeric())
+        throw std::invalid_argument("waveform.idleTime missing or not number.");
+    if (!W.isMember("adcStartTime") || !W["adcStartTime"].isNumeric())
+        throw std::invalid_argument("waveform.adcStartTime missing or not number.");
+    if (!W.isMember("rampEndTime") || !W["rampEndTime"].isNumeric())
+        throw std::invalid_argument("waveform.rampEndTime missing or not number.");
+    if (!W.isMember("frequencySlope") || !W["frequencySlope"].isNumeric())
+        throw std::invalid_argument("waveform.frequencySlope missing or not number.");
+
+    numAdcSamplesPerChirp = W["numAdcSamplesPerChirp"].asInt();
+    numChirpsPerFrame     = W["numChirpsPerFrame"].asInt();
+    adcSampleFrequency    = W["adcSampleFrequency"].asInt();
+    startFrequency        = W["startFrequency"].asDouble();
+    idleTime              = W["idleTime"].asDouble();
+    adcStartTime          = W["adcStartTime"].asDouble();
+    rampEndTime           = W["rampEndTime"].asDouble();
+    frequencySlope        = W["frequencySlope"].asDouble();
+
+    // ---- calibration
+    if (!root.isMember("calibration") || !root["calibration"].isObject())
+        throw std::invalid_argument("RadarConfig::fromJson: missing 'calibration' object.");
+    const auto& C = root["calibration"];
+
+    if (!C.isMember("numDopplerBins") || !C["numDopplerBins"].isInt())
+        throw std::invalid_argument("calibration.numDopplerBins missing or not int.");
+    if (!C.isMember("couplingCalibMatrix") || !C["couplingCalibMatrix"].isArray())
+        throw std::invalid_argument("calibration.couplingCalibMatrix missing or not array.");
+
+    numDopplerBins = C["numDopplerBins"].asInt();
+    couplingCalibMatrix.clear();
+    couplingCalibMatrix.reserve(C["couplingCalibMatrix"].size());
+    for (const auto& z : C["couplingCalibMatrix"]) {
+        if (!z.isObject() || !z.isMember("real") || !z.isMember("imag") ||
+            !z["real"].isNumeric() || !z["imag"].isNumeric())
+            throw std::invalid_argument("calibration.couplingCalibMatrix elements must be {real,imag} numbers.");
+        couplingCalibMatrix.emplace_back(z["real"].asDouble(), z["imag"].asDouble());
+    }
+
+    // ---- phaseFrequency
+    if (!root.isMember("phaseFrequency") || !root["phaseFrequency"].isObject())
+        throw std::invalid_argument("RadarConfig::fromJson: missing 'phaseFrequency' object.");
+    const auto& P = root["phaseFrequency"];
+
+    if (!P.isMember("calibAdcSampleFrequency") || !P["calibAdcSampleFrequency"].isInt())
+        throw std::invalid_argument("phaseFrequency.calibAdcSampleFrequency missing or not int.");
+    if (!P.isMember("calibFrequencySlope") || !P["calibFrequencySlope"].isNumeric())
+        throw std::invalid_argument("phaseFrequency.calibFrequencySlope missing or not number.");
+    if (!P.isMember("frequencyCalibMatrix") || !P["frequencyCalibMatrix"].isArray())
+        throw std::invalid_argument("phaseFrequency.frequencyCalibMatrix missing or not array.");
+    if (!P.isMember("phaseCalibMatrix") || !P["phaseCalibMatrix"].isArray())
+        throw std::invalid_argument("phaseFrequency.phaseCalibMatrix missing or not array.");
+
+    calibAdcSampleFrequency = P["calibAdcSampleFrequency"].asInt();
+    calibFrequencySlope     = P["calibFrequencySlope"].asDouble();
+
+    frequencyCalibMatrix.clear();
+    frequencyCalibMatrix.reserve(P["frequencyCalibMatrix"].size());
+    for (const auto& z : P["frequencyCalibMatrix"]) {
+        if (!z.isObject() || !z.isMember("real") || !z.isMember("imag") ||
+            !z["real"].isNumeric() || !z["imag"].isNumeric())
+            throw std::invalid_argument("phaseFrequency.frequencyCalibMatrix elements must be {real,imag} numbers.");
+        frequencyCalibMatrix.emplace_back(z["real"].asDouble(), z["imag"].asDouble());
+    }
+    phaseCalibMatrix.clear();
+    phaseCalibMatrix.reserve(P["phaseCalibMatrix"].size());
+    for (const auto& z : P["phaseCalibMatrix"]) {
+        if (!z.isObject() || !z.isMember("real") || !z.isMember("imag") ||
+            !z["real"].isNumeric() || !z["imag"].isNumeric())
+            throw std::invalid_argument("phaseFrequency.phaseCalibMatrix elements must be {real,imag} numbers.");
+        phaseCalibMatrix.emplace_back(z["real"].asDouble(), z["imag"].asDouble());
+    }
+
+    // ---- internal
+    if (!root.isMember("internal") || !root["internal"].isObject())
+        throw std::invalid_argument("RadarConfig::fromJson: missing 'internal' object.");
+    const auto& I = root["internal"];
+
+    if (!I.isMember("numAzimuthBeams") || !I["numAzimuthBeams"].isInt())
+        throw std::invalid_argument("internal.numAzimuthBeams missing or not int.");
+    if (!I.isMember("numElevationBeams") || !I["numElevationBeams"].isInt())
+        throw std::invalid_argument("internal.numElevationBeams missing or not int.");
+    if (!I.isMember("azimuthApertureLen") || !I["azimuthApertureLen"].isInt())
+        throw std::invalid_argument("internal.azimuthApertureLen missing or not int.");
+    if (!I.isMember("elevationApertureLen") || !I["elevationApertureLen"].isInt())
+        throw std::invalid_argument("internal.elevationApertureLen missing or not int.");
+    if (!I.isMember("numAngles") || !I["numAngles"].isInt())
+        throw std::invalid_argument("internal.numAngles missing or not int.");
+    if (!I.isMember("numVirtualElements") || !I["numVirtualElements"].isInt())
+        throw std::invalid_argument("internal.numVirtualElements missing or not int.");
+    if (!I.isMember("virtualArrayMap") || !I["virtualArrayMap"].isArray())
+        throw std::invalid_argument("internal.virtualArrayMap missing or not array.");
+    if (!I.isMember("azimuthAngles") || !I["azimuthAngles"].isArray())
+        throw std::invalid_argument("internal.azimuthAngles missing or not array.");
+    if (!I.isMember("elevationAngles") || !I["elevationAngles"].isArray())
+        throw std::invalid_argument("internal.elevationAngles missing or not array.");
+    if (!I.isMember("hasDoppler") || !I["hasDoppler"].isBool())
+        throw std::invalid_argument("internal.hasDoppler missing or not bool.");
+    if (!I.isMember("dopplerBinWidth") || !I["dopplerBinWidth"].isNumeric())
+        throw std::invalid_argument("internal.dopplerBinWidth missing or not number.");
+
+    numAzimuthBeams     = I["numAzimuthBeams"].asInt();
+    numElevationBeams   = I["numElevationBeams"].asInt();
+    azimuthApertureLen  = I["azimuthApertureLen"].asInt();
+    elevationApertureLen= I["elevationApertureLen"].asInt();
+    numAngles           = I["numAngles"].asInt();
+    numVirtualElements  = I["numVirtualElements"].asInt();
+
+    virtualArrayMap.clear();
+    virtualArrayMap.reserve(I["virtualArrayMap"].size());
+    for (const auto& v : I["virtualArrayMap"]) {
+        if (!v.isInt()) throw std::invalid_argument("internal.virtualArrayMap: all values must be ints.");
+        virtualArrayMap.push_back(v.asInt());
+    }
+
+    azimuthAngles.clear();
+    azimuthAngles.reserve(I["azimuthAngles"].size());
+    for (const auto& a : I["azimuthAngles"]) {
+        if (!a.isNumeric()) throw std::invalid_argument("internal.azimuthAngles: all values must be numbers.");
+        azimuthAngles.push_back(static_cast<float>(a.asDouble()));
+    }
+    elevationAngles.clear();
+    elevationAngles.reserve(I["elevationAngles"].size());
+    for (const auto& a : I["elevationAngles"]) {
+        if (!a.isNumeric()) throw std::invalid_argument("internal.elevationAngles: all values must be numbers.");
+        elevationAngles.push_back(static_cast<float>(a.asDouble()));
+    }
+
+    hasDoppler      = I["hasDoppler"].asBool();
+    dopplerBinWidth = I["dopplerBinWidth"].asDouble();
+
+    precomputePointcloudTemplate();
+}
+
+
 }
 
 
@@ -487,174 +814,6 @@ void coloradar::CascadeConfig::init(const std::filesystem::path& calibDir) {
     initPhaseFrequencyParams(phaseFrequencyConfigFilePath);
     initInternalParams();
     precomputePointcloudTemplate();
-}
-
-
-Json::Value coloradar::RadarConfig::toJson() const {
-    Json::Value jsonConfig;
-
-    // Heatmap parameters
-    jsonConfig["heatmap"]["numRangeBins"] = nRangeBins();
-    jsonConfig["heatmap"]["numElevationBins"] = numElevationBins;
-    jsonConfig["heatmap"]["numAzimuthBins"] = numAzimuthBins;
-    jsonConfig["heatmap"]["rangeBinWidth"] = rangeBinWidth;
-    jsonConfig["heatmap"]["azimuthBins"] = Json::arrayValue;
-    for (const auto& bin : azimuthBins) jsonConfig["heatmap"]["azimuthBins"].append(bin);
-    jsonConfig["heatmap"]["elevationBins"] = Json::arrayValue;
-    for (const auto& bin : elevationBins) jsonConfig["heatmap"]["elevationBins"].append(bin);
-
-    // Antenna parameters
-    jsonConfig["antenna"]["designFrequency"] = designFrequency;
-    jsonConfig["antenna"]["numTxAntennas"] = numTxAntennas;
-    jsonConfig["antenna"]["numRxAntennas"] = numRxAntennas;
-    jsonConfig["antenna"]["txCenters"] = Json::arrayValue;
-    for (const auto& center : txCenters) {
-        Json::Value point;
-        point["x"] = center.x;
-        point["y"] = center.y;
-        jsonConfig["antenna"]["txCenters"].append(point);
-    }
-    jsonConfig["antenna"]["rxCenters"] = Json::arrayValue;
-    for (const auto& center : rxCenters) {
-        Json::Value point;
-        point["x"] = center.x;
-        point["y"] = center.y;
-        jsonConfig["antenna"]["rxCenters"].append(point);
-    }
-
-    // Waveform parameters
-    jsonConfig["waveform"]["numAdcSamplesPerChirp"] = numAdcSamplesPerChirp;
-    jsonConfig["waveform"]["numChirpsPerFrame"] = numChirpsPerFrame;
-    jsonConfig["waveform"]["adcSampleFrequency"] = adcSampleFrequency;
-    jsonConfig["waveform"]["startFrequency"] = startFrequency;
-    jsonConfig["waveform"]["idleTime"] = idleTime;
-    jsonConfig["waveform"]["adcStartTime"] = adcStartTime;
-    jsonConfig["waveform"]["rampEndTime"] = rampEndTime;
-    jsonConfig["waveform"]["frequencySlope"] = frequencySlope;
-
-    // Calibration parameters
-    jsonConfig["calibration"]["numDopplerBins"] = numDopplerBins;
-    jsonConfig["calibration"]["couplingCalibMatrix"] = Json::arrayValue;
-    for (const auto& element : couplingCalibMatrix) {
-        Json::Value complexElem;
-        complexElem["real"] = element.real();
-        complexElem["imag"] = element.imag();
-        jsonConfig["calibration"]["couplingCalibMatrix"].append(complexElem);
-    }
-
-    // Phase frequency parameters
-    jsonConfig["phaseFrequency"]["calibAdcSampleFrequency"] = calibAdcSampleFrequency;
-    jsonConfig["phaseFrequency"]["calibFrequencySlope"] = calibFrequencySlope;
-    jsonConfig["phaseFrequency"]["frequencyCalibMatrix"] = Json::arrayValue;
-    for (const auto& element : frequencyCalibMatrix) {
-        Json::Value complexElem;
-        complexElem["real"] = element.real();
-        complexElem["imag"] = element.imag();
-        jsonConfig["phaseFrequency"]["frequencyCalibMatrix"].append(complexElem);
-    }
-    jsonConfig["phaseFrequency"]["phaseCalibMatrix"] = Json::arrayValue;
-    for (const auto& element : phaseCalibMatrix) {
-        Json::Value complexElem;
-        complexElem["real"] = element.real();
-        complexElem["imag"] = element.imag();
-        jsonConfig["phaseFrequency"]["phaseCalibMatrix"].append(complexElem);
-    }
-
-    // Internal parameters
-    jsonConfig["internal"]["numAzimuthBeams"] = numAzimuthBeams;
-    jsonConfig["internal"]["numElevationBeams"] = numElevationBeams;
-    jsonConfig["internal"]["azimuthApertureLen"] = azimuthApertureLen;
-    jsonConfig["internal"]["elevationApertureLen"] = elevationApertureLen;
-    jsonConfig["internal"]["numAngles"] = numAngles;
-    jsonConfig["internal"]["numVirtualElements"] = numVirtualElements;
-    jsonConfig["internal"]["virtualArrayMap"] = Json::arrayValue;
-    for (const auto& val : virtualArrayMap) jsonConfig["internal"]["virtualArrayMap"].append(val);
-    jsonConfig["internal"]["azimuthAngles"] = Json::arrayValue;
-    for (const auto& angle : azimuthAngles) jsonConfig["internal"]["azimuthAngles"].append(angle);
-    jsonConfig["internal"]["elevationAngles"] = Json::arrayValue;
-    for (const auto& angle : elevationAngles) jsonConfig["internal"]["elevationAngles"].append(angle);
-    jsonConfig["internal"]["hasDoppler"] = hasDoppler;
-    jsonConfig["internal"]["dopplerBinWidth"] = dopplerBinWidth;
-
-    return jsonConfig;
-}
-
-void coloradar::RadarConfig::fromJson(const std::string& jsonString) {
-    Json::CharReaderBuilder reader;
-    Json::Value jsonConfig;
-    std::istringstream s(jsonString);
-    std::string errs;
-
-    if (!Json::parseFromStream(reader, s, &jsonConfig, &errs)) {
-        throw std::runtime_error("Failed to parse JSON: " + errs);
-    }
-
-    // Heatmap parameters
-    numElevationBins = jsonConfig["heatmap"]["numElevationBins"].asInt();
-    numAzimuthBins = jsonConfig["heatmap"]["numAzimuthBins"].asInt();
-    rangeBinWidth = jsonConfig["heatmap"]["rangeBinWidth"].asFloat();
-    azimuthBins.clear();
-    for (const auto& bin : jsonConfig["heatmap"]["azimuthBins"]) azimuthBins.push_back(bin.asFloat());
-    elevationBins.clear();
-    for (const auto& bin : jsonConfig["heatmap"]["elevationBins"]) elevationBins.push_back(bin.asFloat());
-
-    // Antenna parameters
-    designFrequency = jsonConfig["antenna"]["designFrequency"].asFloat();
-    numTxAntennas = jsonConfig["antenna"]["numTxAntennas"].asInt();
-    numRxAntennas = jsonConfig["antenna"]["numRxAntennas"].asInt();
-    txCenters.clear();
-    for (const auto& point : jsonConfig["antenna"]["txCenters"]) {
-        txCenters.emplace_back(pcl::PointXY{point["x"].asFloat(), point["y"].asFloat()});
-    }
-    rxCenters.clear();
-    for (const auto& point : jsonConfig["antenna"]["rxCenters"]) {
-        rxCenters.emplace_back(pcl::PointXY{point["x"].asFloat(), point["y"].asFloat()});
-    }
-
-    // Waveform parameters
-    numAdcSamplesPerChirp = jsonConfig["waveform"]["numAdcSamplesPerChirp"].asInt();
-    numChirpsPerFrame = jsonConfig["waveform"]["numChirpsPerFrame"].asInt();
-    adcSampleFrequency = jsonConfig["waveform"]["adcSampleFrequency"].asFloat();
-    startFrequency = jsonConfig["waveform"]["startFrequency"].asFloat();
-    idleTime = jsonConfig["waveform"]["idleTime"].asFloat();
-    adcStartTime = jsonConfig["waveform"]["adcStartTime"].asFloat();
-    rampEndTime = jsonConfig["waveform"]["rampEndTime"].asFloat();
-    frequencySlope = jsonConfig["waveform"]["frequencySlope"].asFloat();
-
-    // Calibration parameters
-    numDopplerBins = jsonConfig["calibration"]["numDopplerBins"].asInt();
-    couplingCalibMatrix.clear();
-    for (const auto& element : jsonConfig["calibration"]["couplingCalibMatrix"]) {
-        couplingCalibMatrix.emplace_back(std::complex<float>(element["real"].asFloat(), element["imag"].asFloat()));
-    }
-
-    // Phase frequency parameters
-    calibAdcSampleFrequency = jsonConfig["phaseFrequency"]["calibAdcSampleFrequency"].asFloat();
-    calibFrequencySlope = jsonConfig["phaseFrequency"]["calibFrequencySlope"].asFloat();
-    frequencyCalibMatrix.clear();
-    for (const auto& element : jsonConfig["phaseFrequency"]["frequencyCalibMatrix"]) {
-        frequencyCalibMatrix.emplace_back(std::complex<float>(element["real"].asFloat(), element["imag"].asFloat()));
-    }
-    phaseCalibMatrix.clear();
-    for (const auto& element : jsonConfig["phaseFrequency"]["phaseCalibMatrix"]) {
-        phaseCalibMatrix.emplace_back(std::complex<float>(element["real"].asFloat(), element["imag"].asFloat()));
-    }
-
-    // Internal parameters
-    numAzimuthBeams = jsonConfig["internal"]["numAzimuthBeams"].asInt();
-    numElevationBeams = jsonConfig["internal"]["numElevationBeams"].asInt();
-    azimuthApertureLen = jsonConfig["internal"]["azimuthApertureLen"].asFloat();
-    elevationApertureLen = jsonConfig["internal"]["elevationApertureLen"].asFloat();
-    numAngles = jsonConfig["internal"]["numAngles"].asInt();
-    numVirtualElements = jsonConfig["internal"]["numVirtualElements"].asInt();
-    virtualArrayMap.clear();
-    for (const auto& val : jsonConfig["internal"]["virtualArrayMap"]) virtualArrayMap.push_back(val.asInt());
-    azimuthAngles.clear();
-    for (const auto& angle : jsonConfig["internal"]["azimuthAngles"]) azimuthAngles.push_back(angle.asFloat());
-    elevationAngles.clear();
-    for (const auto& angle : jsonConfig["internal"]["elevationAngles"]) elevationAngles.push_back(angle.asFloat());
-    hasDoppler = jsonConfig["internal"]["hasDoppler"].asBool();
-    dopplerBinWidth = jsonConfig["internal"]["dopplerBinWidth"].asFloat();
 }
 
 

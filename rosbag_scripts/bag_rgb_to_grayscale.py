@@ -54,7 +54,7 @@ def print_topics(bag):
 
 
 if __name__ == "__main__":
-    bag_path = '/host/coloradar_plus/bags/bike_path_run2.bag'
+    bag_path = '/host/coloradar_plus/bags/bike_path_run0.bag'
     # bag_path = '/host/Downloads/total.bag'
     topic = '/camera/color/image_raw'
     out_topic = 'camera/grayscale/image_raw'

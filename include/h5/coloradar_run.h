@@ -1,5 +1,5 @@
-#ifndef COLORADAR_RUN_H
-#define COLORADAR_RUN_H
+#ifndef H5_COLORADAR_RUN_H
+#define H5_COLORADAR_RUN_H
 
 #include "radar_configs.h"
 #include "dataset_configs.h"
@@ -10,34 +10,42 @@ namespace coloradar {
 class H5Run {
 protected:
     // ATTRIBUTES
+    std::string name_;
+    std::shared_ptr<RadarConfig> cascadeConfig_;
+    
     std::vector<double> poseTimestamps_;
     std::vector<double> imuTimestamps_;
     std::vector<double> lidarTimestamps_;
     std::vector<double> cascadeCubeTimestamps_;
     std::vector<double> cascadeTimestamps_;
 
-    RadarConfig* cascadeConfig_;
-
     std::vector<std::shared_ptr<Eigen::Affine3f>> poses_;
     std::vector<std::shared_ptr<std::vector<int16_t>>> cascadeDatacubes_;
     std::vector<std::shared_ptr<std::vector<float>>> cascadeHeatmaps_;
     std::vector<pcl::PointCloud<RadarPoint>::Ptr> cascadePointclouds_;
+    std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> lidarPointclouds_;
 
     std::shared_ptr<octomap::OcTree> lidarOctomap_;
     std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> mapSamples_;
 
-
-    // h5/coloradar_run.cpp
-    // std::vector<double> readTimestamps(const std::filesystem::path& path);
-    // std::vector<int16_t> getDatacube(const std::filesystem::path& binFilePath, RadarConfig* config) const;
-    // std::vector<float> getHeatmap(const std::filesystem::path& binFilePath, RadarConfig* config) const;
-    // void createRadarPointclouds(RadarConfig* config, const std::filesystem::path& heatmapDirPath, const std::filesystem::path& pointcloudDirPath, const double intensityThreshold = 0.0);
-    // pcl::PointCloud<RadarPoint>::Ptr getRadarPointcloud(const std::filesystem::path& binFilePath, RadarConfig* config, const double intensityThreshold = 0.0);
-
 public:
-    const std::string name;
+    H5Run(
+        std::string name,
+        std::shared_ptr<RadarConfig> cascadeRadarConfig = nullptr,
+        std::vector<double> poseTimestamps = {},
+        std::vector<std::shared_ptr<Eigen::Affine3f>> poses = {},
+        std::vector<double> imuTimestamps = {},
+        std::vector<double> lidarTimestamps = {},
+        std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> lidarPointclouds = {},
+        std::vector<double> cascadeCubeTimestamps = {},
+        std::vector<std::shared_ptr<std::vector<int16_t>>> cascadeDatacubes = {},
+        std::vector<double> cascadeTimestamps = {},
+        std::vector<std::shared_ptr<std::vector<float>>> cascadeHeatmaps = {},
+        std::vector<pcl::PointCloud<RadarPoint>::Ptr> cascadePointclouds = {}
+    );
 
-    // H5Run(const std::filesystem::path& runPath, RadarConfig* cascadeRadarConfig);
+    const std::string& name() const noexcept { return name_; }
+    std::shared_ptr<RadarConfig> cascadeConfig() const noexcept { return cascadeConfig_; }
 
     const std::vector<double>& poseTimestamps() const;
     const std::vector<double>& imuTimestamps() const;
@@ -79,6 +87,6 @@ public:
 
 }
 
-#include "h5_hpp/coloradar_run.hpp"
+// #include "h5_hpp/coloradar_run.hpp"
 
 #endif
