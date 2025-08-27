@@ -192,6 +192,49 @@ std::vector<float> flattenRadarCloud(const std::shared_ptr<CloudT>& cloud, const
     return data;
 }
 
+
+template <class T> struct H5MemType;
+template <> struct H5MemType<double>   { static const H5::PredType& get(){ return H5::PredType::NATIVE_DOUBLE; } };
+template <> struct H5MemType<float>    { static const H5::PredType& get(){ return H5::PredType::NATIVE_FLOAT; } };
+template <> struct H5MemType<int16_t>  { static const H5::PredType& get(){ return H5::PredType::NATIVE_INT16; } };
+template <> struct H5MemType<hsize_t>  { static const H5::PredType& get(){ return H5::PredType::NATIVE_HSIZE; } };
+template <> struct H5MemType<size_t>   { static const H5::PredType& get(){ return H5::PredType::NATIVE_HSIZE; } };
+
+template <class T>
+inline std::vector<T> readH5Vector1D(const H5::H5File& file, const std::string& name) {
+    H5::DataSet ds = file.openDataSet(name);
+    H5::DataSpace sp = ds.getSpace();
+    if (sp.getSimpleExtentNdims() != 1) {
+        throw std::runtime_error(name + ": expected rank-1 dataset");
+    }
+    hsize_t dim{};
+    sp.getSimpleExtentDims(&dim);
+    std::vector<T> v(static_cast<size_t>(dim));
+    if (dim > 0) {
+        ds.read(v.data(), H5MemType<T>::get());
+    }
+    return v;
+}
+
+template <class T>
+inline std::vector<T> readH5Matrix2D(const H5::H5File& file, const std::string& name, size_t& rows, size_t& cols) {
+    H5::DataSet ds = file.openDataSet(name);
+    H5::DataSpace sp = ds.getSpace();
+    if (sp.getSimpleExtentNdims() != 2) {
+        throw std::runtime_error(name + ": expected rank-2 dataset");
+    }
+    hsize_t dims[2]{};
+    sp.getSimpleExtentDims(dims);
+    rows = static_cast<size_t>(dims[0]);
+    cols = static_cast<size_t>(dims[1]);
+    std::vector<T> buf(rows * cols);
+    if (rows * cols) {
+        ds.read(buf.data(), H5MemType<T>::get());
+    }
+    return buf;
+}
+
+
 }
 
 #endif

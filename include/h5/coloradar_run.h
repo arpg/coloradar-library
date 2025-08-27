@@ -19,7 +19,7 @@ protected:
     std::vector<double> cascadeCubeTimestamps_;
     std::vector<double> cascadeTimestamps_;
 
-    std::vector<std::shared_ptr<Eigen::Affine3f>> poses_;
+    std::vector<Eigen::Affine3f> poses_;
     std::vector<std::shared_ptr<std::vector<int16_t>>> cascadeDatacubes_;
     std::vector<std::shared_ptr<std::vector<float>>> cascadeHeatmaps_;
     std::vector<pcl::PointCloud<RadarPoint>::Ptr> cascadePointclouds_;
@@ -33,7 +33,7 @@ public:
         std::string name,
         std::shared_ptr<RadarConfig> cascadeRadarConfig = nullptr,
         std::vector<double> poseTimestamps = {},
-        std::vector<std::shared_ptr<Eigen::Affine3f>> poses = {},
+        std::vector<Eigen::Affine3f> poses = {},
         std::vector<double> imuTimestamps = {},
         std::vector<double> lidarTimestamps = {},
         std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> lidarPointclouds = {},
@@ -47,14 +47,13 @@ public:
     const std::string& name() const noexcept { return name_; }
     std::shared_ptr<RadarConfig> cascadeConfig() const noexcept { return cascadeConfig_; }
 
-    const std::vector<double>& poseTimestamps() const;
-    const std::vector<double>& imuTimestamps() const;
-    const std::vector<double>& lidarTimestamps() const;
-    const std::vector<double>& cascadeCubeTimestamps() const;
-    const std::vector<double>& cascadeTimestamps() const;
+    const std::vector<double>& poseTimestamps() const { return poseTimestamps_; }
+    const std::vector<double>& imuTimestamps() const { return imuTimestamps_; }
+    const std::vector<double>& lidarTimestamps() const { return lidarTimestamps_; }
+    const std::vector<double>& cascadeCubeTimestamps() const { return cascadeCubeTimestamps_; }
+    const std::vector<double>& cascadeTimestamps() const { return cascadeTimestamps_; }
 
     template<PoseType PoseT> std::vector<PoseT> getPoses() const;
-
 
     std::vector<int16_t> getCascadeDatacube(const int cubeIdx) const;
     std::vector<float> getCascadeHeatmap(const int hmIdx) const;
@@ -87,6 +86,6 @@ public:
 
 }
 
-// #include "h5_hpp/coloradar_run.hpp"
+#include "h5/coloradar_run.hpp"
 
 #endif

@@ -9,6 +9,28 @@ namespace coloradar {
 
 class H5Dataset {
 protected:
+    // CONSTANTS
+    inline static constexpr std::string_view poseTimestampsContentName = "base_timestamps";
+    inline static constexpr std::string_view imuTimestampsContentName = "imu_timestamps";
+    inline static constexpr std::string_view lidarTimestampsContentName = "lidar_timestamps";
+    inline static constexpr std::string_view cascadeCubeTimestampsContentName = "cascade_cube_timestamps";
+    inline static constexpr std::string_view cascadeTimestampsContentName = "cascade_timestamps";
+
+    inline static constexpr std::string_view posesContentName = "base_poses";
+
+    inline static constexpr std::string_view lidarCloudsContentName = "lidar_clouds";
+    inline static constexpr std::string_view lidarMapContentName = "lidar_map";
+    inline static constexpr std::string_view lidarMapSamplesContentName = "lidar_map_samples";
+
+    inline static constexpr std::string_view cascadeDatacubesContentName = "cascade_datacubes";
+    inline static constexpr std::string_view cascadeHeatmapsContentName = "cascade_heatmaps"; 
+    inline static constexpr std::string_view cascadeCloudsContentName = "cascade_clouds";
+
+    // const std::string imuPosesContentName = "imu_poses";
+    // const std::string posesContentName = "cascade_poses";
+    // const std::string lidarPosesContentName = "lidar_poses";
+
+
     // ATTRIBUTES
     std::filesystem::path h5SourceFilePath_;
 
@@ -30,6 +52,10 @@ protected:
     H5Dataset() = default;
     void init(const std::filesystem::path& pathToH5File);
     void postInit();
+
+    const std::string getExportArrayName(const std::string_view contentName, const std::string_view runName) const { 
+        return std::string(contentName) + "_" + std::string(runName); 
+    }
 
 public:
     // dataset/h5_init.cpp

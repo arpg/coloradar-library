@@ -193,4 +193,142 @@ void saveHeatmapsToHDF5(const std::string& name, const H5::H5File& file, const s
 }
 
 
+std::vector<double> readH5Timestamps(const H5::H5File& file, const std::string& datasetName) {
+    return readH5Vector1D<double>(file, datasetName);
+}
+
+std::vector<Eigen::Affine3f> readH5Poses(const H5::H5File& file, const std::string& datasetName) {
+    size_t rows=0, cols=0;
+    auto flat = readH5Matrix2D<float>(file, datasetName, rows, cols);
+    if (cols != 7) {
+        throw std::runtime_error(datasetName + ": expected pose rows of length 7 [x y z qx qy qz qw]");
+    }
+    std::vector<Eigen::Affine3f> out;
+    out.reserve(rows);
+    for (size_t i = 0; i < rows; ++i) {
+        const float* p = &flat[i * 7];
+        Eigen::Quaternionf q(p[6], p[3], p[4], p[5]); // (w, x, y, z)
+        Eigen::Affine3f A = Eigen::Affine3f::Identity();
+        A.linear() = q.normalized().toRotationMatrix();
+        A.translation() = Eigen::Vector3f(p[0], p[1], p[2]);
+        out.push_back(A);
+    }
+    return out;
+}
+
+std::vector<std::shared_ptr<std::vector<int16_t>>>
+readH5Datacubes(const H5::H5File& file, const std::string& datasetName) {
+    size_t rows=0, cols=0;
+    // Writer used INT16 data with a FLOAT declared type; HDF5 will convert on read.
+    auto flat = readH5Matrix2D<int16_t>(file, datasetName, rows, cols);
+    std::vector<std::shared_ptr<std::vector<int16_t>>> frames;
+    frames.reserve(rows);
+    for (size_t i = 0; i < rows; ++i) {
+        auto vec = std::make_shared<std::vector<int16_t>>(cols);
+        std::copy_n(flat.data() + i*cols, cols, vec->data());
+        frames.push_back(std::move(vec));
+    }
+    return frames;
+}
+
+static inline std::pair<std::vector<float>, std::vector<hsize_t>>
+readAllDimsFloat(const H5::H5File& file, const std::string& name) {
+    H5::DataSet ds = file.openDataSet(name);
+    H5::DataSpace sp = ds.getSpace();
+
+    int rank = sp.getSimpleExtentNdims();
+    if (rank < 1) throw std::runtime_error(name + ": expected rank >= 1");
+
+    std::vector<hsize_t> dims(static_cast<size_t>(rank));
+    sp.getSimpleExtentDims(dims.data());
+
+    size_t total = 1;
+    for (auto d : dims) total *= static_cast<size_t>(d);
+
+    std::vector<float> flat(total);
+    if (total) ds.read(flat.data(), H5::PredType::NATIVE_FLOAT);
+    return {std::move(flat), std::move(dims)};
+}
+
+std::vector<std::shared_ptr<std::vector<float>>>
+readH5Heatmaps(const H5::H5File& file, const std::string& datasetName) {
+    auto [flat, dims] = readAllDimsFloat(file, datasetName);
+    if (dims.empty()) return {};
+
+    const size_t numFrames = static_cast<size_t>(dims[0]);
+    size_t perFrame = 1;
+    for (size_t i = 1; i < dims.size(); ++i) perFrame *= static_cast<size_t>(dims[i]);
+
+    if (perFrame == 0) return {};
+
+    std::vector<std::shared_ptr<std::vector<float>>> frames;
+    frames.reserve(numFrames);
+    for (size_t i = 0; i < numFrames; ++i) {
+        auto vec = std::make_shared<std::vector<float>>(perFrame);
+        std::copy_n(flat.data() + i*perFrame, perFrame, vec->data());
+        frames.push_back(std::move(vec));
+    }
+    return frames;
+}
+
+static inline std::vector<hsize_t>
+readSizes1D(const H5::H5File& file, const std::string& name) {
+    return readH5Vector1D<hsize_t>(file, name);
+}
+
+std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr>
+readH5LidarClouds(const H5::H5File& file, const std::string& baseName) {
+    size_t rows=0, D=0;
+    auto flat = readH5Matrix2D<float>(file, baseName, rows, D);
+    if (!(D == 3 || D == 4)) {
+        throw std::runtime_error(baseName + ": expected 3 or 4 columns (XYZ or XYZ+I)");
+    }
+    auto sizes = readSizes1D(file, baseName + "_sizes");
+    size_t totalPoints = std::accumulate(sizes.begin(), sizes.end(), static_cast<size_t>(0));
+    if (totalPoints != rows) {
+        throw std::runtime_error(baseName + ": total points mismatch with sizes array");
+    }
+
+    std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> out;
+    out.reserve(sizes.size());
+
+    size_t off = 0;
+    for (hsize_t n : sizes) {
+        auto cloud = std::make_shared<pcl::PointCloud<pcl::PointXYZI>>();
+        cloud->resize(static_cast<size_t>(n));
+        for (size_t k = 0; k < static_cast<size_t>(n); ++k) {
+            pcl::PointXYZI p{};
+            p.x = flat[(off+k)*D + 0];
+            p.y = flat[(off+k)*D + 1];
+            p.z = (D >= 3) ? flat[(off+k)*D + 2] : 0.f;
+            p.intensity = (D >= 4) ? flat[(off+k)*D + 3] : 0.f;
+            (*cloud)[k] = p;
+        }
+        off += static_cast<size_t>(n);
+        out.push_back(std::move(cloud));
+    }
+    return out;
+}
+
+pcl::PointCloud<pcl::PointXYZI>::Ptr
+readH5SingleCloud(const H5::H5File& file, const std::string& datasetName) {
+    size_t rows=0, D=0;
+    auto flat = readH5Matrix2D<float>(file, datasetName, rows, D);
+    if (!(D == 3 || D == 4)) {
+        throw std::runtime_error(datasetName + ": expected 3 or 4 columns (XYZ or XYZ+I)");
+    }
+    auto cloud = std::make_shared<pcl::PointCloud<pcl::PointXYZI>>();
+    cloud->resize(rows);
+    for (size_t i = 0; i < rows; ++i) {
+        pcl::PointXYZI p{};
+        p.x = flat[i*D + 0];
+        p.y = flat[i*D + 1];
+        p.z = (D >= 3) ? flat[i*D + 2] : 0.f;
+        p.intensity = (D >= 4) ? flat[i*D + 3] : 0.f;
+        (*cloud)[i] = p;
+    }
+    return cloud;
+}
+
+
 }

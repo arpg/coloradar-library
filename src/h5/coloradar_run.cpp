@@ -7,7 +7,7 @@ H5Run::H5Run(
     std::string name,
     std::shared_ptr<RadarConfig> cascadeRadarConfig,
     std::vector<double> poseTimestamps,
-    std::vector<std::shared_ptr<Eigen::Affine3f>> poses,
+    std::vector<Eigen::Affine3f> poses,
     std::vector<double> imuTimestamps,
     std::vector<double> lidarTimestamps,
     std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> lidarPointclouds,
