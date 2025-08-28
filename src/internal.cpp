@@ -115,6 +115,23 @@ void saveVectorToHDF5(const std::string& name, const H5::H5File& file, const std
     H5::DataSet dataset = file.createDataSet(name, H5::PredType::NATIVE_DOUBLE, dataspace);
 }
 
+void savePoseToHDF5(const std::string& name, const H5::H5File& file, const Eigen::Affine3f& pose) {
+    hsize_t dims[1] = { 7 };
+    H5::DataSpace dataspace(1, dims);
+    H5::DataSet dataset = file.createDataSet(name, H5::PredType::NATIVE_DOUBLE, dataspace);
+    std::vector<float> poseData;
+    poseData.reserve(7);
+    poseData.push_back(pose.translation().x());
+    poseData.push_back(pose.translation().y());
+    poseData.push_back(pose.translation().z());
+    Eigen::Quaternionf rot(pose.rotation());
+    poseData.push_back(rot.x());
+    poseData.push_back(rot.y());
+    poseData.push_back(rot.z());
+    poseData.push_back(rot.w());
+    dataset.write(poseData.data(), H5::PredType::NATIVE_FLOAT);
+}
+
 void savePosesToHDF5(const std::string& name, const H5::H5File& file, const std::vector<Eigen::Affine3f>& poses) {
     hsize_t dims[2] = { poses.size(), 7 };
     H5::DataSpace dataspace(2, dims);
@@ -197,6 +214,20 @@ std::vector<double> readH5Timestamps(const H5::H5File& file, const std::string& 
     return readH5Vector1D<double>(file, datasetName);
 }
 
+Eigen::Affine3f readH5Pose(const H5::H5File& file, const std::string& datasetName) {
+    size_t rows=0, cols=0;
+    auto flat = readH5Matrix2D<float>(file, datasetName, rows, cols);
+    if (cols != 7) {
+        throw std::runtime_error(datasetName + ": expected pose rows of length 7 [x y z qx qy qz qw]");
+    }
+    if (rows != 1) {
+        throw std::runtime_error(datasetName + ": expected exactly one pose");
+    }
+    Eigen::Vector3f translation(flat[0], flat[1], flat[2]);
+    Eigen::Quaternionf rotation(flat[6], flat[3], flat[4], flat[5]);
+    return Eigen::Translation3f(translation) * rotation;
+}
+
 std::vector<Eigen::Affine3f> readH5Poses(const H5::H5File& file, const std::string& datasetName) {
     size_t rows=0, cols=0;
     auto flat = readH5Matrix2D<float>(file, datasetName, rows, cols);
@@ -207,11 +238,10 @@ std::vector<Eigen::Affine3f> readH5Poses(const H5::H5File& file, const std::stri
     out.reserve(rows);
     for (size_t i = 0; i < rows; ++i) {
         const float* p = &flat[i * 7];
-        Eigen::Quaternionf q(p[6], p[3], p[4], p[5]); // (w, x, y, z)
-        Eigen::Affine3f A = Eigen::Affine3f::Identity();
-        A.linear() = q.normalized().toRotationMatrix();
-        A.translation() = Eigen::Vector3f(p[0], p[1], p[2]);
-        out.push_back(A);
+        Eigen::Vector3f translation(p[0], p[1], p[2]);
+        Eigen::Quaternionf rotation(p[6], p[3], p[4], p[5]);
+        Eigen::Affine3f pose = Eigen::Translation3f(translation) * rotation;
+        out.push_back(pose);
     }
     return out;
 }

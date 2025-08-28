@@ -46,7 +46,7 @@ void ColoradarPlusDataset::init(const std::filesystem::path& pathToRunsDir, cons
     imu_ = std::make_unique<ImuDevice>();
     lidar_ = std::make_unique<LidarDevice>();
     cascade_ = std::make_unique<CascadeDevice>();
-    cascadeConfig_ = new coloradar::CascadeConfig(calibDirPath_);
+    cascadeConfig_ = std::make_shared<coloradar::CascadeConfig>(calibDirPath_);
 }
 
 void ColoradarPlusDataset::postInit() {

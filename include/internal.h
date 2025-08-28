@@ -53,6 +53,7 @@ namespace coloradar::internal {
     template<coloradar::PclCloudType CloudT> std::vector<float> flattenRadarCloud(const std::shared_ptr<CloudT>& cloud, const int numElevationBins, const bool hasDoppler);
 
     void saveVectorToHDF5(const std::string& name, const H5::H5File& file, const std::vector<double>& vec);
+    void savePoseToHDF5(const std::string& name, const H5::H5File& file, const Eigen::Affine3f& pose);
     void savePosesToHDF5(const std::string& name, const H5::H5File& file, const std::vector<Eigen::Affine3f>& poses);
     void saveCloudToHDF5(const std::string& name, const H5::H5File& file, const std::vector<float>& flatCloud, const hsize_t& numDims);
     void saveCloudsToHDF5(const std::string& name, const H5::H5File& file, const std::vector<float>& flatClouds, const hsize_t& numFrames, const std::vector<hsize_t>& cloudSizes, const hsize_t& numDims);
@@ -60,6 +61,7 @@ namespace coloradar::internal {
     void saveHeatmapsToHDF5(const std::string& name, const H5::H5File& file, const std::vector<float>& flatHeatmaps, const hsize_t& numFrames, const int numAzimuthBins, const int numRangeBins, const int numElevationBins, const bool hasDoppler);
 
     std::vector<double> readH5Timestamps(const H5::H5File& file, const std::string& datasetName);
+    Eigen::Affine3f readH5Pose(const H5::H5File& file, const std::string& datasetName);
     std::vector<Eigen::Affine3f> readH5Poses(const H5::H5File& file, const std::string& datasetName);
     std::vector<std::shared_ptr<std::vector<int16_t>>> readH5Datacubes(const H5::H5File& file, const std::string& datasetName);
     std::vector<std::shared_ptr<std::vector<float>>> readH5Heatmaps(const H5::H5File& file, const std::string& datasetName);

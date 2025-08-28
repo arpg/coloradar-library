@@ -1,13 +1,13 @@
-#ifndef H5_DATASET_H
-#define H5_DATASET_H
+#ifndef BASE_DATASET_H
+#define BASE_DATASET_H
 
-#include "h5/coloradar_run.h"
+#include "run/base_run.h"
 
 
 namespace coloradar {
 
 
-class H5Dataset {
+class Dataset {
 protected:
     // CONSTANTS
     inline static constexpr std::string_view poseTimestampsContentName = "base_timestamps";
@@ -15,6 +15,10 @@ protected:
     inline static constexpr std::string_view lidarTimestampsContentName = "lidar_timestamps";
     inline static constexpr std::string_view cascadeCubeTimestampsContentName = "cascade_cube_timestamps";
     inline static constexpr std::string_view cascadeTimestampsContentName = "cascade_timestamps";
+ 
+    inline static constexpr std::string_view transformBaseToCascadeContentName = "transform_base_to_cascade";
+    inline static constexpr std::string_view transformBaseToLidarContentName = "transform_base_to_lidar";
+    inline static constexpr std::string_view transformBaseToImuContentName = "transform_base_to_imu";
 
     inline static constexpr std::string_view posesContentName = "base_poses";
 
@@ -26,14 +30,7 @@ protected:
     inline static constexpr std::string_view cascadeHeatmapsContentName = "cascade_heatmaps"; 
     inline static constexpr std::string_view cascadeCloudsContentName = "cascade_clouds";
 
-    // const std::string imuPosesContentName = "imu_poses";
-    // const std::string posesContentName = "cascade_poses";
-    // const std::string lidarPosesContentName = "lidar_poses";
-
-
     // ATTRIBUTES
-    std::filesystem::path h5SourceFilePath_;
-
     Eigen::Affine3f imuTransform_;
     Eigen::Affine3f lidarTransform_;
     Eigen::Affine3f cascadeTransform_;
@@ -45,35 +42,31 @@ protected:
     std::unique_ptr<CascadeDevice> cascade_;
     std::unique_ptr<LidarDevice> lidar_;
 
-    std::unordered_map<std::string, std::shared_ptr<H5Run>> runs_;
+    std::unordered_map<std::string, std::shared_ptr<Run>> runs_;
     
 
-    // dataset/h5_init.cpp
-    H5Dataset() = default;
-    void init(const std::filesystem::path& pathToH5File);
-    void postInit();
-
+    // METHODS
     const std::string getExportArrayName(const std::string_view contentName, const std::string_view runName) const { 
         return std::string(contentName) + "_" + std::string(runName); 
     }
 
 public:
-    // dataset/h5_init.cpp
-    explicit H5Dataset(const std::filesystem::path& pathToH5File);
-    H5Dataset(const H5Dataset&) = delete;
-    H5Dataset& operator=(const H5Dataset&) = delete;
-    H5Dataset(H5Dataset&&) noexcept = default;
-    H5Dataset& operator=(H5Dataset&&) noexcept = default;
+    Dataset() = default;
+    Dataset(const Dataset&) = delete;
+    Dataset& operator=(const Dataset&) = delete;
+    Dataset(Dataset&&) noexcept = default;
+    Dataset& operator=(Dataset&&) noexcept = default;
+    virtual ~Dataset() = default;
 
-    // dataset/h5_data.cpp
-    const Eigen::Affine3f& imuTransform() const;
-    const Eigen::Affine3f& lidarTransform() const;
-    const Eigen::Affine3f& cascadeTransform() const;
-    const RadarConfig* cascadeConfig() const;
-
-    std::vector<std::string> listRuns();
-    std::vector<std::shared_ptr<H5Run>> getRuns();
-    std::shared_ptr<H5Run> getRun(const std::string& runName);
+    const std::shared_ptr<RadarConfig> cascadeConfig() const { return cascadeConfig_; }
+    const Eigen::Affine3f& imuTransform() const { return imuTransform_; }
+    const Eigen::Affine3f& lidarTransform() const { return lidarTransform_; }
+    const Eigen::Affine3f& cascadeTransform() const { return cascadeTransform_; }
+    
+    // dataset/base_dataset.cpp
+    std::vector<std::string> listRuns() const;
+    std::vector<std::shared_ptr<Run>> getRuns() const;
+    std::shared_ptr<Run> getRun(const std::string& runName) const;
 };
 
 }

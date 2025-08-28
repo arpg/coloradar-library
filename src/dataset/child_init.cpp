@@ -23,7 +23,7 @@ void ColoradarDataset::postInit() {
     singleChipTransform_ = loadTransform(transformsDirPath_ / "base_to_single_chip.txt");
 
     single_chip_ = std::make_unique<SingleChipDevice>();
-    singleChipConfig_ = new coloradar::SingleChipConfig(calibDirPath_);
+    singleChipConfig_ = std::make_shared<coloradar::SingleChipConfig>(calibDirPath_);
 }
 
 }

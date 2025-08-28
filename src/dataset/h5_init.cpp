@@ -1,4 +1,4 @@
-#include "h5/dataset.h"
+#include "dataset/h5_dataset.h"
 
 
 namespace coloradar {
@@ -59,6 +59,18 @@ H5Dataset::H5Dataset(const std::filesystem::path& pathToH5File) {
         cascadeConfig_ = std::make_shared<coloradar::CascadeConfig>(root["radar_config"]);
     }
 
+    // read transforms
+    if (configDataContent.find(transformBaseToCascadeContentName) != configDataContent.end()) {
+        cascadeTransform_ = coloradar::internal::readH5Pose(file, std::string(transformBaseToCascadeContentName));
+    }
+    if (configDataContent.find(transformBaseToLidarContentName) != configDataContent.end()) {
+        lidarTransform_ = coloradar::internal::readH5Pose(file, std::string(transformBaseToLidarContentName));
+    }
+    if (configDataContent.find(transformBaseToImuContentName) != configDataContent.end()) {
+        imuTransform_ = coloradar::internal::readH5Pose(file, std::string(transformBaseToImuContentName));
+    }
+ 
+    // read run data
     for (const auto& run : configRuns) {
         std::vector<double> poseTimestamps = {}, imuTimestamps = {}, lidarTimestamps = {}, cascadeCubeTimestamps = {}, cascadeTimestamps = {};
         std::vector<Eigen::Affine3f> poses = {};
@@ -90,26 +102,28 @@ H5Dataset::H5Dataset(const std::filesystem::path& pathToH5File) {
         if (configDataContent.find(lidarCloudsContentName) != configDataContent.end()) {
             lidarPointclouds = coloradar::internal::readH5LidarClouds(file, getExportArrayName(lidarCloudsContentName, run));
         }
-        runs_[run] = std::make_shared<H5Run>(
-            run, cascadeConfig_, 
-            poseTimestamps, poses,
-            imuTimestamps, lidarTimestamps, lidarPointclouds,
-            cascadeCubeTimestamps, cascadeDatacubes,
-            cascadeTimestamps, cascadeHeatmaps, cascadePointclouds
+        auto runObj = std::make_shared<H5Run>(run, cascadeConfig_);
+        runObj->setData(
+            poseTimestamps, imuTimestamps, lidarTimestamps, cascadeCubeTimestamps, cascadeTimestamps, 
+            poses, 
+            lidarPointclouds, 
+            cascadeDatacubes, cascadeHeatmaps, cascadePointclouds
         );
+        runs_[run] = runObj;
     }
+}
 
-    // print info
-    std::cout << "data_content: ";
-    for (const auto& c : configDataContent) std::cout << c << " ";
-    std::cout << std::endl;
+void H5Dataset::summary() const {
+    // std::cout << "data_content: ";
+    // for (const auto& c : configDataContent) std::cout << c << " ";
+    // std::cout << std::endl;
 
-    if (cascadeConfig_) {
-        std::cout << "cascade nRangeBins = " << cascadeConfig_->nRangeBins() << std::endl;
-    }
+    // if (cascadeConfig_) {
+    //     std::cout << "cascade nRangeBins = " << cascadeConfig_->nRangeBins() << std::endl;
+    // }
 
     // Print timestamp array lengths for each run
-    std::cout << "\nRun details:" << std::endl;
+    std::cout << "\nTotal runs: " << runs_.size() << std::endl;
     for (const auto& [name, run] : runs_) {
         std::cout << "Run " << name << ": poses=" << run->poseTimestamps().size() 
                 // << " (" << run->getPoses<Eigen::Affine3f>().size() << " poses)"

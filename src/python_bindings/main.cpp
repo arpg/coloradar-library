@@ -352,7 +352,7 @@ PYBIND11_MODULE(coloradar_dataset_lib, m) {
 
     // ColoradarPlusRun
     py::class_<coloradar::ColoradarPlusRun>(m, "ColoradarPlusRun")
-        .def(py::init<const std::filesystem::path&, coloradar::RadarConfig*>())
+        .def(py::init<const std::filesystem::path&, std::shared_ptr<coloradar::RadarConfig>>())
         .def_readonly("name", &coloradar::ColoradarPlusRun::name)
         .def("pose_timestamps", [](coloradar::ColoradarPlusRun& self) { return vectorToNumpy(self.poseTimestamps()); })
         .def("imu_timestamps", [](coloradar::ColoradarPlusRun& self) { return vectorToNumpy(self.imuTimestamps()); })
@@ -419,7 +419,7 @@ PYBIND11_MODULE(coloradar_dataset_lib, m) {
 
     // ColoradarRun
     py::class_<coloradar::ColoradarRun, coloradar::ColoradarPlusRun>(m, "ColoradarRun")
-        .def(py::init<const std::filesystem::path&, coloradar::RadarConfig*, coloradar::RadarConfig*>())
+        .def(py::init<const std::filesystem::path&, std::shared_ptr<coloradar::RadarConfig>, std::shared_ptr<coloradar::RadarConfig>>())
         .def("single_chip_cube_timestamps", [](coloradar::ColoradarRun& self) { return vectorToNumpy(self.singleChipCubeTimestamps()); })
         .def("single_chip_timestamps", [](coloradar::ColoradarRun& self) { return vectorToNumpy(self.singleChipTimestamps()); })
         .def("get_single_chip_datacube", [](coloradar::ColoradarRun& self, const std::filesystem::path& binFilePath) { return vectorToNumpy(self.getSingleChipDatacube(binFilePath)); })
@@ -440,8 +440,8 @@ PYBIND11_MODULE(coloradar_dataset_lib, m) {
         .def(py::init<const std::filesystem::path&>(), py::arg("h5_path"))
         .def(py::init([](const std::string& h5_path) {
             return std::make_shared<coloradar::H5Dataset>(std::filesystem::path(h5_path));
-        }), py::arg("h5_path"));
-
+        }), py::arg("h5_path"))
+        .def("summary", &coloradar::H5Dataset::summary);
 
     // ColoradarPlusDataset
     py::class_<coloradar::ColoradarPlusDataset, std::shared_ptr<coloradar::ColoradarPlusDataset>>(m, "ColoradarPlusDataset")

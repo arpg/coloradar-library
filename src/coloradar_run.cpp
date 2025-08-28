@@ -1,7 +1,7 @@
 #include "coloradar_run.h"
 
 
-coloradar::ColoradarPlusRun::ColoradarPlusRun(const std::filesystem::path& runPath, coloradar::RadarConfig* cascadeRadarConfig) : runDirPath_(runPath), name(runDirPath_.filename()), cascadeConfig_(cascadeRadarConfig) {
+coloradar::ColoradarPlusRun::ColoradarPlusRun(const std::filesystem::path& runPath, coloradar::std::shared_ptr<RadarConfig> cascadeRadarConfig) : runDirPath_(runPath), name(runDirPath_.filename()), cascadeConfig_(cascadeRadarConfig) {
     coloradar::internal::checkPathExists(runDirPath_);
     posesDirPath_ = runDirPath_ / "groundtruth";
     coloradar::internal::checkPathExists(posesDirPath_);
@@ -46,7 +46,7 @@ const std::vector<double>& coloradar::ColoradarPlusRun::lidarTimestamps() const 
 const std::vector<double>& coloradar::ColoradarPlusRun::cascadeCubeTimestamps() const { return cascadeCubeTimestamps_; }
 const std::vector<double>& coloradar::ColoradarPlusRun::cascadeTimestamps() const { return cascadeTimestamps_; }
 
-std::vector<int16_t> coloradar::ColoradarPlusRun::getDatacube(const std::filesystem::path& binFilePath, coloradar::RadarConfig* config) const {
+std::vector<int16_t> coloradar::ColoradarPlusRun::getDatacube(const std::filesystem::path& binFilePath, coloradar::std::shared_ptr<RadarConfig> config) const {
     coloradar::internal::checkPathExists(binFilePath);
     std::ifstream file(binFilePath, std::ios::binary);
     if (!file.is_open()) {
@@ -62,7 +62,7 @@ std::vector<int16_t> coloradar::ColoradarPlusRun::getDatacube(const std::filesys
     return frameBytes;
 }
 
-std::vector<float> coloradar::ColoradarPlusRun::getHeatmap(const std::filesystem::path& binFilePath, coloradar::RadarConfig* config) const {
+std::vector<float> coloradar::ColoradarPlusRun::getHeatmap(const std::filesystem::path& binFilePath, coloradar::std::shared_ptr<RadarConfig> config) const {
     coloradar::internal::checkPathExists(binFilePath);
     std::ifstream file(binFilePath, std::ios::binary);
     if (!file.is_open()) {
@@ -79,7 +79,7 @@ std::vector<float> coloradar::ColoradarPlusRun::getHeatmap(const std::filesystem
 }
 
 
-void coloradar::ColoradarPlusRun::createRadarPointclouds(coloradar::RadarConfig* config, const std::filesystem::path& heatmapDirPath, const std::filesystem::path& pointcloudDirPath, const double intensityThreshold) {
+void coloradar::ColoradarPlusRun::createRadarPointclouds(coloradar::std::shared_ptr<RadarConfig> config, const std::filesystem::path& heatmapDirPath, const std::filesystem::path& pointcloudDirPath, const double intensityThreshold) {
     coloradar::internal::createDirectoryIfNotExists(pointcloudDirPath);
     coloradar::internal::createDirectoryIfNotExists(pointcloudDirPath / "data");
     for (auto const& entry : std::filesystem::directory_iterator(heatmapDirPath / "data")) {
@@ -108,7 +108,7 @@ void coloradar::ColoradarPlusRun::createRadarPointclouds(coloradar::RadarConfig*
 }
 
 
-pcl::PointCloud<coloradar::RadarPoint>::Ptr coloradar::ColoradarPlusRun::getRadarPointcloud(const std::filesystem::path& binFilePath, RadarConfig* config, const double intensityThreshold) {
+pcl::PointCloud<coloradar::RadarPoint>::Ptr coloradar::ColoradarPlusRun::getRadarPointcloud(const std::filesystem::path& binFilePath, std::shared_ptr<RadarConfig> config, const double intensityThreshold) {
     pcl::PointCloud<coloradar::RadarPoint>::Ptr cloud(new pcl::PointCloud<coloradar::RadarPoint>());
     std::ifstream file(binFilePath, std::ios::in | std::ios::binary);
     if (!file.is_open()) {
@@ -319,7 +319,7 @@ std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> coloradar::ColoradarPlusRun::r
 }
 
 
-coloradar::ColoradarRun::ColoradarRun(const std::filesystem::path& runPath, coloradar::RadarConfig* cascadeRadarConfig, coloradar::RadarConfig* singleChipRadarConfig) : coloradar::ColoradarPlusRun(runPath, cascadeRadarConfig), singleChipConfig_(singleChipRadarConfig) {
+coloradar::ColoradarRun::ColoradarRun(const std::filesystem::path& runPath, coloradar::std::shared_ptr<RadarConfig> cascadeRadarConfig, coloradar::std::shared_ptr<RadarConfig> singleChipRadarConfig) : coloradar::ColoradarPlusRun(runPath, cascadeRadarConfig), singleChipConfig_(singleChipRadarConfig) {
     singleChipScansDirPath_ = runDirPath_ / "cascade";
     coloradar::internal::checkPathExists(singleChipScansDirPath_);
     singleChipCubesDirPath_ = singleChipScansDirPath_ / "adc_samples";
@@ -331,9 +331,6 @@ coloradar::ColoradarRun::ColoradarRun(const std::filesystem::path& runPath, colo
     singleChipCubeTimestamps_ = readTimestamps(singleChipCubesDirPath_ / "timestamps.txt");
     singleChipTimestamps_ = readTimestamps(singleChipHeatmapsDirPath_ / "timestamps.txt");
 }
-
-const std::vector<double>& coloradar::ColoradarRun::singleChipCubeTimestamps() const { return singleChipCubeTimestamps_; }
-const std::vector<double>& coloradar::ColoradarRun::singleChipTimestamps() const { return singleChipTimestamps_; }
 
 std::vector<int16_t> coloradar::ColoradarRun::getSingleChipDatacube(const std::filesystem::path& binFilePath) {
     return getDatacube(binFilePath, singleChipConfig_);
@@ -353,6 +350,3 @@ pcl::PointCloud<coloradar::RadarPoint>::Ptr coloradar::ColoradarRun::getSingleCh
 pcl::PointCloud<coloradar::RadarPoint>::Ptr coloradar::ColoradarRun::getSingleChipPointcloud(const int& cloudIdx, const float& intensityThreshold) {
     return getSingleChipPointcloud(singleChipCloudsDirPath_ / "data" / ("radar_pointcloud_" + std::to_string(cloudIdx) + ".bin"), intensityThreshold);
 }
-//void coloradar::ColoradarRun::createSingleChipPointclouds(const float& intensityThreshold) {
-//    createRadarPointclouds(singleChipConfig_, singleChipHeatmapsDirPath_, singleChipCloudsDirPath_, intensityThreshold);
-//}

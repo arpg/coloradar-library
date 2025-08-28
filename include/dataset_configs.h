@@ -10,7 +10,7 @@ class DatasetExportConfig {
 protected:
     std::filesystem::path destinationFilePath_ = "dataset.h5";
     std::vector<std::string> runs_ = {};
-    bool exportTransforms_ = false;
+    bool exportTransforms_ = true;
     std::span<const std::unique_ptr<BaseDevice>> devices_;
 
     RadarExportConfig        cascadeCfg_;
@@ -32,7 +32,7 @@ public:
     DatasetExportConfig(
         const std::filesystem::path &destinationFilePath = "dataset.h5",
         const std::vector<std::string> &runs = {},
-        bool exportTransforms = false,
+        bool exportTransforms = true,
         const RadarExportConfig &cascadeCfg = RadarExportConfig(),
         const LidarExportConfig &lidarCfg = LidarExportConfig(),
         const BaseExportConfig &baseCfg = BaseExportConfig(),

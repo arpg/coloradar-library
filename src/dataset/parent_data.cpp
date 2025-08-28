@@ -8,7 +8,7 @@ namespace coloradar {
 const Eigen::Affine3f& ColoradarPlusDataset::imuTransform() const { return imuTransform_; }
 const Eigen::Affine3f& ColoradarPlusDataset::lidarTransform() const { return lidarTransform_; }
 const Eigen::Affine3f& ColoradarPlusDataset::cascadeTransform() const { return cascadeTransform_; }
-const RadarConfig* ColoradarPlusDataset::cascadeConfig() const { return cascadeConfig_; }
+const std::shared_ptr<RadarConfig> ColoradarPlusDataset::cascadeConfig() const { return cascadeConfig_; }
 
 std::vector<std::string> ColoradarPlusDataset::listRuns() {
     std::vector<std::string> runs;

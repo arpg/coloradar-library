@@ -27,11 +27,11 @@ protected:
     std::vector<double> cascadeTimestamps_;
     std::vector<double> readTimestamps(const std::filesystem::path& path);
 
-    RadarConfig* cascadeConfig_;
-    std::vector<int16_t> getDatacube(const std::filesystem::path& binFilePath, RadarConfig* config) const;
-    std::vector<float> getHeatmap(const std::filesystem::path& binFilePath, RadarConfig* config) const;
-    void createRadarPointclouds(RadarConfig* config, const std::filesystem::path& heatmapDirPath, const std::filesystem::path& pointcloudDirPath, const double intensityThreshold = 0.0);
-    pcl::PointCloud<RadarPoint>::Ptr getRadarPointcloud(const std::filesystem::path& binFilePath, RadarConfig* config, const double intensityThreshold = 0.0);
+    std::shared_ptr<RadarConfig> cascadeConfig_;
+    std::vector<int16_t> getDatacube(const std::filesystem::path& binFilePath, std::shared_ptr<RadarConfig> config) const;
+    std::vector<float> getHeatmap(const std::filesystem::path& binFilePath, std::shared_ptr<RadarConfig> config) const;
+    void createRadarPointclouds(std::shared_ptr<RadarConfig> config, const std::filesystem::path& heatmapDirPath, const std::filesystem::path& pointcloudDirPath, const double intensityThreshold = 0.0);
+    pcl::PointCloud<RadarPoint>::Ptr getRadarPointcloud(const std::filesystem::path& binFilePath, std::shared_ptr<RadarConfig> config, const double intensityThreshold = 0.0);
 
     void saveVectorToHDF5(const std::string& name, H5::H5File& file, const std::vector<double>& vec);
     void savePosesToHDF5(const std::string& name, H5::H5File& file, const std::vector<Eigen::Affine3f>& poses);
@@ -42,7 +42,7 @@ protected:
 public:
     const std::string name;
 
-    ColoradarPlusRun(const std::filesystem::path& runPath, RadarConfig* cascadeRadarConfig);
+    ColoradarPlusRun(const std::filesystem::path& runPath, std::shared_ptr<RadarConfig> cascadeRadarConfig);
 
     const std::vector<double>& poseTimestamps() const;
     const std::vector<double>& imuTimestamps() const;
@@ -114,13 +114,14 @@ protected:
     std::vector<double> singleChipCubeTimestamps_;
     std::vector<double> singleChipTimestamps_;
 
-    RadarConfig* singleChipConfig_;
+    std::shared_ptr<RadarConfig> singleChipConfig_;
 
 public:
-    ColoradarRun(const std::filesystem::path& runPath, RadarConfig* cascadeRadarConfig, RadarConfig* singleChipRadarConfig);
+    ColoradarRun(const std::filesystem::path& runPath, std::shared_ptr<RadarConfig> cascadeRadarConfig, std::shared_ptr<RadarConfig> singleChipRadarConfig);
 
-    const std::vector<double>& singleChipCubeTimestamps() const;
-    const std::vector<double>& singleChipTimestamps() const;
+    const std::shared_ptr<RadarConfig> singleChipConfig() const { return singleChipConfig_; }
+    const std::vector<double>& singleChipCubeTimestamps() const { return singleChipCubeTimestamps_; }
+    const std::vector<double>& singleChipTimestamps() const { return singleChipTimestamps_; }
 
     std::vector<int16_t> getSingleChipDatacube(const std::filesystem::path& binFilePath);
     std::vector<int16_t> getSingleChipDatacube(const int& cubeIdx);

@@ -211,10 +211,10 @@ add_library(coloradar_lib SHARED
     src/device.cpp
     src/dataset_configs.cpp
 
-    src/h5/coloradar_run.cpp
-    src/coloradar_run.cpp
+    src/run/h5_data.cpp
    
-    src/h5/dataset_init.cpp
+    src/dataset/base_dataset.cpp
+    src/dataset/h5_init.cpp
     src/dataset/parent_init.cpp
     src/dataset/parent_data.cpp
     src/dataset/parent_export.cpp

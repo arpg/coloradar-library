@@ -38,6 +38,16 @@ std::filesystem::path ColoradarPlusDataset::exportToFile(DatasetExportConfig& ex
             finalConfig["data_content"].append(content);
         }
     }
+
+    if (exportConfig.exportTransforms()) {
+        coloradar::internal::savePoseToHDF5(std::string(transformBaseToCascadeContentName), datasetFile, cascadeTransform_);
+        coloradar::internal::savePoseToHDF5(std::string(transformBaseToLidarContentName), datasetFile, lidarTransform_);
+        coloradar::internal::savePoseToHDF5(std::string(transformBaseToImuContentName), datasetFile, imuTransform_);
+        finalConfig["data_content"].append(std::string(transformBaseToCascadeContentName));
+        finalConfig["data_content"].append(std::string(transformBaseToLidarContentName));
+        finalConfig["data_content"].append(std::string(transformBaseToImuContentName));
+    }
+
     std::string configString = Json::writeString(Json::StreamWriterBuilder(), finalConfig);
     H5::StrType strType(H5::PredType::C_S1, H5T_VARIABLE);
     H5::DataSpace dataspace(H5S_SCALAR);
@@ -193,7 +203,7 @@ std::vector<std::string> ColoradarPlusDataset::exportCascade(const RadarExportCo
         
         // heatmaps
         if (config.exportHeatmaps()) {
-            CascadeConfig* heatmapConfig = new CascadeConfig(*dynamic_cast<CascadeConfig*>(cascadeConfig_));
+            auto heatmapConfig = std::make_shared<CascadeConfig>(*static_cast<CascadeConfig*>(cascadeConfig_.get()));
             std::vector<float> heatmapsFlat;
             for (size_t i = 0; i < numFrames; ++i) {
                 auto heatmap = run->getCascadeHeatmap(i);

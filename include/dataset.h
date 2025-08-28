@@ -1,30 +1,19 @@
 #ifndef DATASET_H
 #define DATASET_H
 
+#include "dataset/base_dataset.h"
 #include "coloradar_run.h"
 
 
 namespace coloradar {
 
-class ColoradarPlusDataset {
+class ColoradarPlusDataset : public Dataset {
 protected:
-    // FIELDS
+    // ATTRIBUTES
     std::filesystem::path datasetDirPath_;
     std::filesystem::path calibDirPath_;
     std::filesystem::path transformsDirPath_;
     std::filesystem::path runsDirPath_;
-
-    Eigen::Affine3f imuTransform_;
-    Eigen::Affine3f lidarTransform_;
-    Eigen::Affine3f cascadeTransform_;
-
-    RadarConfig* cascadeConfig_;
-
-    std::unique_ptr<BaseDevice> base_device_;
-    std::unique_ptr<ImuDevice> imu_;
-    std::unique_ptr<CascadeDevice> cascade_;
-    std::unique_ptr<LidarDevice> lidar_;
-    std::vector<std::unique_ptr<BaseDevice>> devices_;
 
 
     // dataset/parent_init.cpp
@@ -55,7 +44,7 @@ public:
     const Eigen::Affine3f& imuTransform() const;
     const Eigen::Affine3f& lidarTransform() const;
     const Eigen::Affine3f& cascadeTransform() const;
-    const RadarConfig* cascadeConfig() const;
+    const std::shared_ptr<RadarConfig> cascadeConfig() const;
     std::vector<std::string> listRuns();
     std::vector<ColoradarPlusRun*> getRuns();
     virtual ColoradarPlusRun* getRun(const std::string& runName);
@@ -67,9 +56,9 @@ public:
 
 class ColoradarDataset : public ColoradarPlusDataset {
 protected:
-    // FIELDS
+    // ATTRIBUTES
     Eigen::Affine3f singleChipTransform_;
-    RadarConfig* singleChipConfig_;
+    std::shared_ptr<RadarConfig> singleChipConfig_;
     std::unique_ptr<SingleChipDevice> single_chip_;
 
     // dataset/child_init.cpp
@@ -80,9 +69,10 @@ public:
     ColoradarDataset(const std::filesystem::path& pathToDataset);
     ColoradarDataset(const std::filesystem::path& pathToRunsDir, const std::filesystem::path& pathToCalibDir);
 
+    const Eigen::Affine3f& singleChipTransform() const { return singleChipTransform_; }
+    const std::shared_ptr<RadarConfig> singleChipConfig() const { return singleChipConfig_; }
+
     // dataset/child_data.cpp
-    const Eigen::Affine3f& singleChipTransform() const;
-    const RadarConfig* singleChipConfig() const;
     virtual ColoradarPlusRun* getRun(const std::string& runName) override;
 };
 

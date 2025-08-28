@@ -1,7 +1,7 @@
 global:
   runs: all
   destination_file: dataset.h5
-  export_transforms: False
+  export_transforms: True
 
 
 devices:
