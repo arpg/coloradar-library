@@ -42,9 +42,9 @@ const int RadarConfig::heatmapSize() const {
 }
 
 
-pcl::PointCloud<RadarPoint>::Ptr RadarConfig::heatmapToPointcloud(const std::vector<float>& heatmap, const double intensityThreshold) const {
+pcl::PointCloud<RadarPoint>::Ptr RadarConfig::heatmapToPointcloud(const std::shared_ptr<std::vector<float>>& heatmap, const double intensityThreshold) const {
     const size_t expectedCloudSize = numElevationBins * numAzimuthBins * nRangeBins();
-    if (heatmap.size() != heatmapSize()) throw std::runtime_error("Heatmap size mismatch. Expected: " + std::to_string(heatmapSize()) + ", got: " + std::to_string(heatmap.size()));
+    if (heatmap->size() != heatmapSize()) throw std::runtime_error("Heatmap size mismatch. Expected: " + std::to_string(heatmapSize()) + ", got: " + std::to_string(heatmap->size()));
     if (!pointcloudTemplate || pointcloudTemplate->size() != expectedCloudSize) throw std::runtime_error("Pointcloud template size mismatch. Expected: " + std::to_string(expectedCloudSize) + ", got: " + std::to_string(pointcloudTemplate->size()));
 
     pcl::PointCloud<RadarPoint>::Ptr outputCloud(new pcl::PointCloud<RadarPoint>);
@@ -52,8 +52,8 @@ pcl::PointCloud<RadarPoint>::Ptr RadarConfig::heatmapToPointcloud(const std::vec
     size_t heatmapIdx = 0;
 
     for (size_t pointIdx = 0; pointIdx < pointcloudTemplate->size(); ++pointIdx) {
-        const float intensity = heatmap[heatmapIdx++];
-        const float doppler   = heatmap[heatmapIdx++];
+        const float intensity = heatmap->at(heatmapIdx++);
+        const float doppler   = heatmap->at(heatmapIdx++);
         if (intensity >= intensityThreshold) {
             RadarPoint point = (*pointcloudTemplate)[pointIdx];
             point.intensity = intensity;

@@ -1,14 +1,14 @@
 #ifndef COLORADAR_RUN_H
 #define COLORADAR_RUN_H
 
-#include "radar_configs.h"
-#include "dataset_configs.h"
+#include "run/base_run.h"
 
 
 namespace coloradar {
 
-class ColoradarPlusRun {
+class ColoradarPlusRun : public Run {
 protected:
+    // ATTRIBUTES
     std::filesystem::path runDirPath_;
     std::filesystem::path posesDirPath_;
     std::filesystem::path imuDirPath_;
@@ -19,56 +19,46 @@ protected:
     std::filesystem::path cascadeCubesDirPath_;
     std::filesystem::path cascadeHeatmapsDirPath_;
     std::filesystem::path cascadeCloudsDirPath_;
+    
 
-    std::vector<double> poseTimestamps_;
-    std::vector<double> imuTimestamps_;
-    std::vector<double> lidarTimestamps_;
-    std::vector<double> cascadeCubeTimestamps_;
-    std::vector<double> cascadeTimestamps_;
-    std::vector<double> readTimestamps(const std::filesystem::path& path);
-
-    std::shared_ptr<RadarConfig> cascadeConfig_;
-    std::vector<int16_t> getDatacube(const std::filesystem::path& binFilePath, std::shared_ptr<RadarConfig> config) const;
-    std::vector<float> getHeatmap(const std::filesystem::path& binFilePath, std::shared_ptr<RadarConfig> config) const;
-    void createRadarPointclouds(std::shared_ptr<RadarConfig> config, const std::filesystem::path& heatmapDirPath, const std::filesystem::path& pointcloudDirPath, const double intensityThreshold = 0.0);
-    pcl::PointCloud<RadarPoint>::Ptr getRadarPointcloud(const std::filesystem::path& binFilePath, std::shared_ptr<RadarConfig> config, const double intensityThreshold = 0.0);
-
-    void saveVectorToHDF5(const std::string& name, H5::H5File& file, const std::vector<double>& vec);
-    void savePosesToHDF5(const std::string& name, H5::H5File& file, const std::vector<Eigen::Affine3f>& poses);
-    void saveHeatmapToHDF5(const int& idx, H5::H5File& file, const std::vector<float>& heatmap, const int& numAzimuthBins, const int& numElevationBins, const int& numRangeBins, const int& numDims);
-    void saveRadarCloudToHDF5(const int& idx, H5::H5File& file, const pcl::PointCloud<coloradar::RadarPoint>& cloud, bool collapseElevation = false);
-    void saveLidarCloudToHDF5(const std::string& name, H5::H5File& file, const pcl::PointCloud<pcl::PointXYZI>& cloud, bool includeIntensity = false, bool collapseElevation = false);
-
+    // run/coloradar_run_init.cpp
+    std::vector<double> readTimestamps(const std::filesystem::path& path) const;
+    std::vector<Eigen::Affine3f> readPoses(const std::filesystem::path& path) const;
+    
+    // run/coloradar_run_data.cpp
+    std::shared_ptr<std::vector<int16_t>> readDatacube(const std::filesystem::path& binFilePath, const std::shared_ptr<RadarConfig>& config) const;
+    std::shared_ptr<std::vector<float>> readHeatmap(const std::filesystem::path& binFilePath, const std::shared_ptr<RadarConfig>& config) const;
+    pcl::PointCloud<RadarPoint>::Ptr readRadarPointcloud(
+        std::shared_ptr<RadarConfig> config,
+        const std::filesystem::path& binFilePath,
+        const double intensityThreshold = 0.0
+    ) const;
+    void createRadarPointclouds(
+        const std::shared_ptr<RadarConfig>& config, 
+        const std::filesystem::path& heatmapDirPath, 
+        const std::filesystem::path& pointcloudDirPath, 
+        const double intensityThreshold = 0.0
+    );
+    
 public:
-    const std::string name;
+    // run/coloradar_run_init.cpp
+    ColoradarPlusRun(const std::filesystem::path& runPath, std::shared_ptr<RadarConfig> cascadeRadarConfig = nullptr);
+    virtual ~ColoradarPlusRun() = default;
 
-    ColoradarPlusRun(const std::filesystem::path& runPath, std::shared_ptr<RadarConfig> cascadeRadarConfig);
+    // run/coloradar_run_data.cpp
+    virtual std::shared_ptr<pcl::PointCloud<pcl::PointXYZI>> getRadarPointCloud(const int cloudIdx) const override;
+    virtual std::shared_ptr<std::vector<int16_t>> getCascadeDatacube(const int cubeIdx) const override;
+    virtual std::shared_ptr<std::vector<float>> getCascadeHeatmap(const int hmIdx) const override;
+    virtual pcl::PointCloud<RadarPoint>::Ptr getCascadePointcloud(const int cloudIdx, const double intensityThreshold = 0.0) const override;
 
-    const std::vector<double>& poseTimestamps() const;
-    const std::vector<double>& imuTimestamps() const;
-    const std::vector<double>& lidarTimestamps() const;
-    const std::vector<double>& cascadeCubeTimestamps() const;
-    const std::vector<double>& cascadeTimestamps() const;
-
-    template<PoseType PoseT> std::vector<PoseT> getPoses() const;
-
-    // cascade frame
     std::vector<int16_t> getCascadeDatacube(const std::filesystem::path& binFilePath) const;
-    std::vector<int16_t> getCascadeDatacube(const int cubeIdx) const;
     std::vector<float> getCascadeHeatmap(const std::filesystem::path& binFilePath) const;
-    std::vector<float> getCascadeHeatmap(const int hmIdx) const;
-
-    // cascade frame
+    pcl::PointCloud<RadarPoint>::Ptr getCascadePointcloud(const std::filesystem::path& binFilePath, const double intensityThreshold = 0.0) const;
     void createCascadePointclouds(const double intensityThreshold = 0.0);
-    pcl::PointCloud<RadarPoint>::Ptr getCascadePointcloud(const std::filesystem::path& binFilePath, const double intensityThreshold = 0.0);
-    pcl::PointCloud<RadarPoint>::Ptr getCascadePointcloud(const int& cloudIdx, const double intensityThreshold = 0.0);
+    
+    // template<PclCloudType CloudT> std::shared_ptr<CloudT> getLidarPointCloud(const std::filesystem::path& binPath) const;
+    // template<OctomapCloudType CloudT> std::shared_ptr<CloudT> getLidarPointCloud(const std::filesystem::path& binPath) const;
 
-    // lidar frame
-    template<PclCloudType CloudT> std::shared_ptr<CloudT> getLidarPointCloud(const std::filesystem::path& binPath) const;
-    template<OctomapCloudType CloudT> std::shared_ptr<CloudT> getLidarPointCloud(const std::filesystem::path& binPath) const;
-    template<CloudType CloudT> std::shared_ptr<CloudT> getLidarPointCloud(const int cloudIdx) const;
-
-    // map frame
     octomap::OcTree buildLidarOctomap(
         const double& mapResolution,
         const float& lidarTotalHorizontalFov,
@@ -85,7 +75,6 @@ public:
         const float& lidarMaxRange,
         Eigen::Affine3f baseToLidarTransform = Eigen::Affine3f::Identity()
     );
-
     pcl::PointCloud<pcl::PointXYZI>::Ptr readMapSample(const int& sampleIdx) const;
     std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> readMapSamples(const int& numSamples = -1) const;
     pcl::PointCloud<pcl::PointXYZI>::Ptr sampleMapFrame(const float& horizontalFov, const float& verticalFov, const float& range, const Eigen::Affine3f& mapFramePose, const pcl::PointCloud<pcl::PointXYZI>::Ptr& mapCloud);
@@ -99,8 +88,6 @@ public:
         const std::vector<double>& sensorTimestamps = {},
         const Eigen::Affine3f& baseToSensorTransform = Eigen::Affine3f::Identity()
     );
-
-    virtual ~ColoradarPlusRun() = default;
 };
 
 
@@ -134,6 +121,6 @@ public:
 
 }
 
-#include "hpp/coloradar_run.hpp"
+#include "run/coloradar_run.hpp"
 
 #endif

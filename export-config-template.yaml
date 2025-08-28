@@ -37,7 +37,7 @@ devices:
 
     # - point clouds
     export_clouds: False
-    # relative intensity per frame
+    # absolute intensity value per frame
     intensity_threshold: 0
     # False for ego-centric clouds
     clouds_in_global_frame: True
@@ -80,7 +80,7 @@ devices:
     force_resample: False
     # True to save the samples on disk. Will overwrite any existing samples
     save_samples: False
-    # sampling perspective options: base, lidar, cascade
+    # sampling perspective options: base, lidar, cascade_radar
     center_sensor: cascade_radar
     map_sample_fov:
       horizontal_degrees_total: 360
@@ -94,12 +94,14 @@ devices:
 
 
   imu:
-    export_data: False
     export_poses: False
     export_timestamps: False
 
+    # TBD
+    export_data: False
 
-  # WARNING: only present in dataset v1
+
+  # WARNING: TBD, only for dataset v1
   single_chip_radar:
     export_poses: False
     export_timestamps: False

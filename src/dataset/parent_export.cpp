@@ -138,7 +138,6 @@ std::vector<std::string> ColoradarPlusDataset::exportImu(const ImuExportConfig &
 std::vector<std::string> ColoradarPlusDataset::exportCascade(const RadarExportConfig &config, std::vector<ColoradarPlusRun*> runs, const H5::H5File &datasetFile) {
     std::vector<std::string> content;
     if (!config.exportTimestamps() && !config.exportPoses() && !config.exportDatacubes() && !config.exportHeatmaps() && !config.exportClouds()) return content;
-    std::cout << "Exporting cascade data..." << std::endl;
 
     // Constants
     const std::string datacubeContentName = "cascade_datacubes",
@@ -196,7 +195,7 @@ std::vector<std::string> ColoradarPlusDataset::exportCascade(const RadarExportCo
             std::vector<int16_t> datacubesFlat;
             for (size_t i = 0; i < numFrames; ++i) {
                 auto datacube = run->getCascadeDatacube(i);
-                std::copy(datacube.begin(), datacube.end(), datacubesFlat.begin() + i * datacube.size());
+                datacubesFlat.insert(datacubesFlat.end(), datacube.begin(), datacube.end());
             }
             coloradar::internal::saveDatacubesToHDF5(datacubeContentName + "_" + run->name, datasetFile, datacubesFlat, numFrames, datacubeSize);
         }

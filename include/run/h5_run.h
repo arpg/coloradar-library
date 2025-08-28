@@ -20,7 +20,7 @@ public:
     H5Run(std::string name, std::shared_ptr<RadarConfig> cascadeRadarConfig = nullptr) : Run(std::move(name), std::move(cascadeRadarConfig)) {}
     virtual ~H5Run() = default;
 
-    // run/h5_data.cpp
+    // run/h5_run_data.cpp
     void setData(
         std::vector<double> poseTimestamps = {},
         std::vector<double> imuTimestamps = {},

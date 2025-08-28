@@ -100,7 +100,7 @@ public:
     std::vector<float> collapseHeatmapElevation(const std::vector<float>& image, const float& elevationMinMeters = -100.0, const float& elevationMaxMeters = 100.0, bool updateConfig = true);
     std::vector<float> removeDoppler(const std::vector<float>& image, bool updateConfig = true);
     std::vector<float> swapHeatmapDimensions(const std::vector<float>& heatmap);
-    pcl::PointCloud<RadarPoint>::Ptr heatmapToPointcloud(const std::vector<float>& heatmap, const double intensityThreshold = 0.0) const;
+    pcl::PointCloud<RadarPoint>::Ptr heatmapToPointcloud(const std::shared_ptr<std::vector<float>>& heatmap, const double intensityThreshold = 0.0) const;
     void precomputePointcloudTemplate();  // call for correct point cloud conversion if config parameters changed
 };
 
