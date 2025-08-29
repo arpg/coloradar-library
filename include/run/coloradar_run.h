@@ -46,19 +46,22 @@ public:
     virtual ~ColoradarPlusRun() = default;
 
     // run/coloradar_run_data.cpp
-    virtual std::shared_ptr<pcl::PointCloud<pcl::PointXYZI>> getRadarPointCloud(const int cloudIdx) const override;
+    virtual pcl::PointCloud<pcl::PointXYZI>::Ptr getLidarPointCloud(const int cloudIdx) const override;
     virtual std::shared_ptr<std::vector<int16_t>> getCascadeDatacube(const int cubeIdx) const override;
     virtual std::shared_ptr<std::vector<float>> getCascadeHeatmap(const int hmIdx) const override;
     virtual pcl::PointCloud<RadarPoint>::Ptr getCascadePointcloud(const int cloudIdx, const double intensityThreshold = 0.0) const override;
+    virtual pcl::PointCloud<pcl::PointXYZI>::Ptr getLidarOctomap() const override;
 
-    std::vector<int16_t> getCascadeDatacube(const std::filesystem::path& binFilePath) const;
-    std::vector<float> getCascadeHeatmap(const std::filesystem::path& binFilePath) const;
+    template<CloudType CloudT> std::shared_ptr<CloudT> getLidarPointCloud(const int cloudIdx) const;
+    template<PclCloudType CloudT> std::shared_ptr<CloudT> getLidarPointCloud(const std::filesystem::path& binPath) const;
+    template<OctomapCloudType CloudT> std::shared_ptr<CloudT> getLidarPointCloud(const std::filesystem::path& binPath) const;
+    
+    // pcl::PointCloud<pcl::PointXYZI>::Ptr getLidarPointCloud(const std::filesystem::path& binFilePath) const;
+    std::shared_ptr<std::vector<int16_t>> getCascadeDatacube(const std::filesystem::path& binFilePath) const;
+    std::shared_ptr<std::vector<float>> getCascadeHeatmap(const std::filesystem::path& binFilePath) const;
     pcl::PointCloud<RadarPoint>::Ptr getCascadePointcloud(const std::filesystem::path& binFilePath, const double intensityThreshold = 0.0) const;
     void createCascadePointclouds(const double intensityThreshold = 0.0);
     
-    // template<PclCloudType CloudT> std::shared_ptr<CloudT> getLidarPointCloud(const std::filesystem::path& binPath) const;
-    // template<OctomapCloudType CloudT> std::shared_ptr<CloudT> getLidarPointCloud(const std::filesystem::path& binPath) const;
-
     octomap::OcTree buildLidarOctomap(
         const double& mapResolution,
         const float& lidarTotalHorizontalFov,
@@ -67,7 +70,6 @@ public:
         Eigen::Affine3f baseToLidarTransform = Eigen::Affine3f::Identity()
     );
     void saveLidarOctomap(const octomap::OcTree& tree);
-    pcl::PointCloud<pcl::PointXYZI>::Ptr readLidarOctomap() const;
     void createLidarOctomap(
         const double& mapResolution,
         const float& lidarTotalHorizontalFov,
@@ -110,12 +112,12 @@ public:
     const std::vector<double>& singleChipCubeTimestamps() const { return singleChipCubeTimestamps_; }
     const std::vector<double>& singleChipTimestamps() const { return singleChipTimestamps_; }
 
-    std::vector<int16_t> getSingleChipDatacube(const std::filesystem::path& binFilePath);
-    std::vector<int16_t> getSingleChipDatacube(const int& cubeIdx);
-    std::vector<float> getSingleChipHeatmap(const std::filesystem::path& binFilePath);
-    std::vector<float> getSingleChipHeatmap(const int& hmIdx);
-    pcl::PointCloud<RadarPoint>::Ptr getSingleChipPointcloud(const std::filesystem::path& binFilePath, const float& intensityThreshold = 0.0);
-    pcl::PointCloud<RadarPoint>::Ptr getSingleChipPointcloud(const int& cloudIdx, const float& intensityThreshold = 0.0);
+    std::shared_ptr<std::vector<int16_t>> getSingleChipDatacube(const std::filesystem::path& binFilePath);
+    std::shared_ptr<std::vector<int16_t>> getSingleChipDatacube(const int& cubeIdx);
+    std::shared_ptr<std::vector<float>> getSingleChipHeatmap(const std::filesystem::path& binFilePath);
+    std::shared_ptr<std::vector<float>> getSingleChipHeatmap(const int& hmIdx);
+    pcl::PointCloud<RadarPoint>::Ptr getSingleChipPointcloud(const std::filesystem::path& binFilePath, const double intensityThreshold = 0.0);
+    pcl::PointCloud<RadarPoint>::Ptr getSingleChipPointcloud(const int& cloudIdx, const double intensityThreshold = 0.0);
     // void createSingleChipPointclouds(const float& intensityThreshold = 0.0);
 };
 

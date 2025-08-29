@@ -38,7 +38,7 @@ ColoradarPlusRun::ColoradarPlusRun(
 }
 
 
-std::vector<double> ColoradarPlusRun::readTimestamps(const std::filesystem::path& path) {
+std::vector<double> ColoradarPlusRun::readTimestamps(const std::filesystem::path& path) const {
     coloradar::internal::checkPathExists(path);
     std::vector<double> timestamps;
     std::ifstream infile(path);

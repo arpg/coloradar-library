@@ -1,7 +1,7 @@
 #ifndef VISUALIZER_H
 #define VISUALIZER_H
 
-#include "coloradar_run.h"
+#include "run/base_run.h"
 
 
 namespace coloradar {
@@ -11,8 +11,8 @@ class DatasetVisualizer {
 
 protected:
     // constructor parameters
-    CascadeConfig cascadeRadarConfig;
-    CascadeConfig clippedCascadeRadarConfig;
+    std::shared_ptr<CascadeConfig> cascadeRadarConfig;
+    std::shared_ptr<CascadeConfig> clippedCascadeRadarConfig;
     const Eigen::Affine3f baseToLidarTransform;
     const Eigen::Affine3f baseToCascadeTransform;
     int frameIncrement;
@@ -29,7 +29,7 @@ protected:
     vtkSmartPointer<vtkImageActor> imageActor;
     
     // dynamic variables, vary per run
-    const ColoradarPlusRun* run;
+    std::shared_ptr<Run> run;
     std::vector<Eigen::Affine3f> basePoses;
     std::vector<Eigen::Affine3f> lidarPoses;
     std::vector<Eigen::Affine3f> cascadePoses;
@@ -56,7 +56,7 @@ protected:
 
 public:
     DatasetVisualizer(
-        const CascadeConfig cascadeRadarConfig,
+        const std::shared_ptr<CascadeConfig> cascadeRadarConfig,
         const Eigen::Affine3f baseToLidarTransform,
         const Eigen::Affine3f baseToCascadeTransform,
         const int frameIncrement = 1, 
@@ -65,7 +65,7 @@ public:
     );
     virtual ~DatasetVisualizer() = default;
 
-    void visualize(const ColoradarPlusRun* run, const bool usePrebuiltMap = false);
+    void visualize(const std::shared_ptr<Run> run, const bool usePrebuiltMap = false);
 };
 
 }

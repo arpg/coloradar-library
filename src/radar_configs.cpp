@@ -65,6 +65,127 @@ pcl::PointCloud<RadarPoint>::Ptr RadarConfig::heatmapToPointcloud(const std::sha
 }
 
 
+std::shared_ptr<std::vector<float>> RadarConfig::clipHeatmap(
+    const std::shared_ptr<std::vector<float>>& heatmap,
+    int azimuthMaxBin, int elevationMaxBin, int rangeMaxBin, bool updateConfig)
+{
+    azimuthMaxBin   = clipAzimuthMaxBin(azimuthMaxBin);
+    elevationMaxBin = clipElevationMaxBin(elevationMaxBin);
+    rangeMaxBin     = clipRangeMaxBin(rangeMaxBin);
+    if (azimuthMaxBin == numAzimuthBins / 2 && elevationMaxBin == numElevationBins / 2 && rangeMaxBin == nRangeBins() - 1) return heatmap;
+
+    int azimuthBinLimit   = numAzimuthBins / 2 - 1;
+    int azimuthLeftBin    = azimuthBinLimit - azimuthMaxBin;
+    int azimuthRightBin   = azimuthBinLimit + azimuthMaxBin + 1;
+
+    int elevationBinLimit = numElevationBins / 2 - 1;
+    int elevationLeftBin  = elevationBinLimit - elevationMaxBin;
+    int elevationRightBin = elevationBinLimit + elevationMaxBin + 1;
+
+    auto clipped = std::make_shared<std::vector<float>>();
+    clipped->reserve((elevationRightBin - elevationLeftBin + 1) * (azimuthRightBin - azimuthLeftBin + 1) * (rangeMaxBin + 1) * 2);
+
+    for (int e = elevationLeftBin; e <= elevationRightBin; ++e) {
+        for (int a = azimuthLeftBin; a <= azimuthRightBin; ++a) {
+            for (int r = 0; r <= rangeMaxBin; ++r) {
+                for (int n = 0; n < 2; ++n) {
+                    int index = (((e * numAzimuthBins + a) * nRangeBins() + r) * 2) + n;
+                    clipped->push_back((*heatmap)[index]);
+                }
+            }
+        }
+    }
+    if (updateConfig) {
+        numAzimuthBins = azimuthRightBin - azimuthLeftBin + 1;
+        numElevationBins = elevationRightBin - elevationLeftBin + 1;
+        setNumRangeBins(rangeMaxBin + 1);
+        azimuthBins = std::vector<float>(azimuthBins.begin() + azimuthLeftBin,   azimuthBins.begin() + azimuthRightBin);
+        elevationBins = std::vector<float>(elevationBins.begin() + elevationLeftBin, elevationBins.begin() + elevationRightBin);
+    }
+
+    return clipped;
+}
+
+std::shared_ptr<std::vector<float>> RadarConfig::clipHeatmap(
+    const std::shared_ptr<std::vector<float>>& heatmap,
+    float horizontalFov, float verticalFov, float range, bool updateConfig)
+{
+    int azMaxBin = horizontalFovToAzimuthIdx(horizontalFov);
+    int elMaxBin = verticalFovToElevationIdx(verticalFov);
+    int rangeMaxBin = rangeToRangeIdx(range);
+    return clipHeatmap(heatmap, azMaxBin, elMaxBin, rangeMaxBin, updateConfig);
+}
+
+
+std::shared_ptr<std::vector<float>> RadarConfig::collapseHeatmapElevation(
+    const std::shared_ptr<std::vector<float>>& image,
+    const float& elevationMinMeters, const float& elevationMaxMeters, bool updateConfig)
+{
+    if (elevationMaxMeters < elevationMinMeters) throw std::out_of_range("elevationMaxMeters must be greater or equal to elevationMinMeters.");
+    auto collapsedHeatmap = std::make_shared<std::vector<float>>(numAzimuthBins * nRangeBins() * 2);
+
+    for (int a = 0; a < numAzimuthBins; ++a) {
+        for (int r = 0; r < nRangeBins(); ++r) {
+            float maxIntensity = -std::numeric_limits<float>::infinity();
+            float maxDoppler   = 0.0f;
+            for (int e = 0; e < elevationBins.size(); ++e) {
+                float z = r * std::sin(elevationBins[e]);
+                if (z >= elevationMinMeters && z <= elevationMaxMeters) {
+                    int index = (((e * numAzimuthBins + a) * nRangeBins() + r) * 2);
+                    if ((*image)[index] > maxIntensity) {
+                        maxIntensity = (*image)[index];
+                        maxDoppler   = (*image)[index + 1];
+                    }
+                }
+            }
+            collapsedHeatmap->push_back(maxIntensity);
+            collapsedHeatmap->push_back(maxDoppler);
+        }
+    }
+    if (updateConfig) {
+        numElevationBins = 0;
+        elevationBins = {};
+    }
+    return collapsedHeatmap;
+}
+
+std::shared_ptr<std::vector<float>> RadarConfig::removeDoppler(const std::shared_ptr<std::vector<float>>& image, bool updateConfig) {
+    auto intensityImage = std::make_shared<std::vector<float>>(image->size() / 2);
+    for (size_t i = 0; i < image->size(); i += 2) {
+        (*intensityImage)[i] = (*image)[i];
+    }
+    if (updateConfig) {
+        hasDoppler = false;
+    }
+    return intensityImage;
+}
+
+std::shared_ptr<std::vector<float>> RadarConfig::swapHeatmapDimensions(const std::shared_ptr<std::vector<float>>& heatmap) {
+    const size_t numDims = hasDoppler ? 2 : 1;
+    const size_t expectedSize = numElevationBins * numAzimuthBins * nRangeBins() * numDims;
+    if (heatmap->size() != expectedSize) {
+        throw std::runtime_error(
+            "RadarConfig::swapHeatmapDimensions(): heatmap size does not match the expected dimensions. Expected size: " +
+            std::to_string(expectedSize) + ", Actual size: " + std::to_string(heatmap->size())
+        );
+    }
+
+    auto reorganizedHeatmap = std::make_shared<std::vector<float>>(expectedSize);
+    for (int el = 0; el < numElevationBins; ++el) {
+        for (int az = 0; az < numAzimuthBins; ++az) {
+            for (int r = 0; r < nRangeBins(); ++r) {
+                for (int d = 0; d < numDims; ++d) {
+                    size_t originalIndex    = (((el * numAzimuthBins + az) * nRangeBins()) + r) * numDims + d;
+                    size_t reorganizedIndex = (((az * nRangeBins() + r) * numElevationBins) + el) * numDims + d;
+                    (*reorganizedHeatmap)[reorganizedIndex] = (*heatmap)[originalIndex];
+                }
+            }
+        }
+    }
+    return reorganizedHeatmap;
+}
+
+
 Json::Value RadarConfig::toJson() const {
     Json::Value jsonConfig;
 
@@ -871,115 +992,7 @@ int coloradar::RadarConfig::verticalFovToElevationIdx(const float& verticalFov) 
 }
 int coloradar::RadarConfig::rangeToRangeIdx(const float& range) {
     if (range <= 0) {
-        throw std::runtime_error("Invalid max range value: expected R > 0, got " + std::to_string(range));
+        throw std::runtime_error("RadarConfig::rangeToRangeIdx(): Invalid max range value: expected R > 0, got " + std::to_string(range));
     }
     return static_cast<int>(std::ceil(range / rangeBinWidth) - 1);
-}
-
-
-std::vector<float> coloradar::RadarConfig::clipHeatmap(const std::vector<float>& heatmap, int azimuthMaxBin, int elevationMaxBin, int rangeMaxBin, bool updateConfig) {
-    azimuthMaxBin = clipAzimuthMaxBin(azimuthMaxBin);
-    elevationMaxBin = clipElevationMaxBin(elevationMaxBin);
-    rangeMaxBin = clipRangeMaxBin(rangeMaxBin);
-    if (azimuthMaxBin == numAzimuthBins / 2 && elevationMaxBin == numElevationBins / 2 && rangeMaxBin == nRangeBins() - 1) {
-        return heatmap;
-    }
-
-    int azimuthBinLimit = numAzimuthBins / 2 - 1;
-    int azimuthLeftBin = azimuthBinLimit - azimuthMaxBin;
-    int azimuthRightBin = azimuthBinLimit + azimuthMaxBin + 1;
-    
-    int elevationBinLimit = numElevationBins / 2 - 1;
-    int elevationLeftBin = elevationBinLimit - elevationMaxBin;
-    int elevationRightBin = elevationBinLimit + elevationMaxBin + 1;
-    
-    std::vector<float> clipped;
-    for (int e = elevationLeftBin; e <= elevationRightBin; ++e) {
-        for (int a = azimuthLeftBin; a <= azimuthRightBin; ++a) {
-            for (int r = 0; r <= rangeMaxBin; ++r) {
-                for (int n = 0; n < 2; ++n) {
-                    int index = (((e * numAzimuthBins + a) * nRangeBins() + r) * 2) + n;
-                    clipped.push_back(heatmap[index]);
-                }
-            }
-        }
-    }
-    if (updateConfig) {
-        numAzimuthBins = azimuthRightBin - azimuthLeftBin + 1;
-        numElevationBins = elevationRightBin - elevationLeftBin + 1;
-        setNumRangeBins(rangeMaxBin + 1);
-        azimuthBins = std::vector<float>(azimuthBins.begin() + azimuthLeftBin, azimuthBins.begin() + azimuthRightBin);
-        elevationBins = std::vector<float>(elevationBins.begin() + elevationLeftBin, elevationBins.begin() + elevationRightBin);
-    }
-    return clipped;
-}
-std::vector<float> coloradar::RadarConfig::clipHeatmap(const std::vector<float>& heatmap, float horizontalFov, float verticalFov, float range, bool updateConfig) {
-    int azMaxBin = horizontalFovToAzimuthIdx(horizontalFov);
-    int elMaxBin = verticalFovToElevationIdx(verticalFov);
-    int rangeMaxBin = rangeToRangeIdx(range);
-    return clipHeatmap(heatmap, azMaxBin, elMaxBin, rangeMaxBin, updateConfig);
-}
-
-std::vector<float> coloradar::RadarConfig::collapseHeatmapElevation(const std::vector<float>& image, const float& elevationMinMeters, const float& elevationMaxMeters, bool updateConfig) {
-    if (elevationMaxMeters < elevationMinMeters) {
-        throw std::out_of_range("elevationMaxMeters must be greater or equal to elevationMinMeters.");
-    }
-    std::vector<float> collapsedHeatmap;
-    collapsedHeatmap.reserve(numAzimuthBins * nRangeBins() * 2);
-    for (int a = 0; a < numAzimuthBins; ++a) {
-        for (int r = 0; r < nRangeBins(); ++r) {
-            float maxIntensity = -std::numeric_limits<float>::infinity();
-            float maxDoppler = 0.0f;
-            for (int e = 0; e < elevationBins.size(); ++e) {
-                float z = r * std::sin(elevationBins[e]);
-                if (z >= elevationMinMeters && z <= elevationMaxMeters) {
-                    int index = (((e * numAzimuthBins + a) * nRangeBins() + r) * 2);
-                    if (image[index] > maxIntensity) {
-                        maxIntensity = image[index];
-                        maxDoppler = image[index + 1];
-                    }
-                }
-            }
-            collapsedHeatmap.push_back(maxIntensity);
-            collapsedHeatmap.push_back(maxDoppler);
-        }
-    }
-    if (updateConfig) {
-        numElevationBins = 0;
-        elevationBins = {};
-    }
-    return collapsedHeatmap;
-}
-
-std::vector<float> coloradar::RadarConfig::removeDoppler(const std::vector<float>& image, bool updateConfig) {
-    std::vector<float> intensityImage;
-    intensityImage.reserve(image.size() / 2);
-    for (size_t i = 0; i < image.size(); i += 2) {
-        intensityImage.push_back(image[i]);
-    }
-    if (updateConfig) {
-        hasDoppler = false;
-    }
-    return intensityImage;
-}
-
-std::vector<float> coloradar::RadarConfig::swapHeatmapDimensions(const std::vector<float>& heatmap) {
-    const size_t numDims = hasDoppler ? 2 : 1;
-    const size_t expectedSize = numElevationBins * numAzimuthBins * nRangeBins() * numDims;
-    if (heatmap.size() != expectedSize) {
-        throw std::runtime_error("Heatmap size does not match the expected dimensions. Expected size: " + std::to_string(expectedSize) + ", Actual size: " + std::to_string(heatmap.size()));
-    }
-    std::vector<float> reorganizedHeatmap(expectedSize);
-    for (int el = 0; el < numElevationBins; ++el) {
-        for (int az = 0; az < numAzimuthBins; ++az) {
-            for (int r = 0; r < nRangeBins(); ++r) {
-                for (int d = 0; d < numDims; ++d) {
-                    size_t originalIndex = (((el * numAzimuthBins + az) * nRangeBins()) + r) * numDims + d;
-                    size_t reorganizedIndex = (((az * nRangeBins() + r) * numElevationBins) + el) * numDims + d;
-                    reorganizedHeatmap[reorganizedIndex] = heatmap[originalIndex];
-                }
-            }
-        }
-    }
-    return reorganizedHeatmap;
 }

@@ -9,14 +9,15 @@ namespace coloradar {
 
 
 DatasetVisualizer::DatasetVisualizer(
-    const CascadeConfig cascadeRadarConfig,
+    const std::shared_ptr<CascadeConfig> cascadeRadarConfig,
     const Eigen::Affine3f baseToLidarTransform,
     const Eigen::Affine3f baseToCascadeTransform,
     const int frameIncrement, 
     const double cascadeRadarIntensityThreshold,
     const std::string cameraConfigPath
 ) :  
-    cascadeRadarConfig(cascadeRadarConfig),
+    cascadeRadarConfig(std::make_shared<CascadeConfig>(*cascadeRadarConfig)),
+    clippedCascadeRadarConfig(std::make_shared<CascadeConfig>(*cascadeRadarConfig)),
     baseToLidarTransform(baseToLidarTransform),
     baseToCascadeTransform(baseToCascadeTransform),
     frameIncrement(frameIncrement),
@@ -29,10 +30,10 @@ DatasetVisualizer::DatasetVisualizer(
     reset();
     
     // init radar config
-    std::vector<float> sampleHeatmap(cascadeRadarConfig.heatmapSize(), 0.0f);
-    clippedCascadeRadarConfig = CascadeConfig(cascadeRadarConfig); // copy config
-    clippedCascadeRadarConfig.clipHeatmap(sampleHeatmap, cascadeRadarConfig.numAzimuthBins, 0, static_cast<int>(cascadeRadarConfig.nRangeBins() * 0.75), true); // clip sample heatmap to modify the config
-    clippedCascadeRadarConfig.precomputePointcloudTemplate(); // update cloud template
+    auto sampleHeatmap = std::make_shared<std::vector<float>>(cascadeRadarConfig->heatmapSize(), 0.0f);
+    clippedCascadeRadarConfig = std::make_shared<CascadeConfig>(*cascadeRadarConfig); // copy config
+    clippedCascadeRadarConfig->clipHeatmap(sampleHeatmap, cascadeRadarConfig->numAzimuthBins, 0, static_cast<int>(cascadeRadarConfig->nRangeBins() * 0.75), true); // clip sample heatmap to modify the config
+    clippedCascadeRadarConfig->precomputePointcloudTemplate(); // update cloud template
 }
 
 
@@ -56,7 +57,7 @@ void DatasetVisualizer::reset() {
 }
 
 
-void DatasetVisualizer::visualize(const ColoradarPlusRun* run, const bool usePrebuiltMap) {
+void DatasetVisualizer::visualize(const std::shared_ptr<Run> run, const bool usePrebuiltMap) {
     reset();
     this->run = run;
 
@@ -78,7 +79,7 @@ void DatasetVisualizer::visualize(const ColoradarPlusRun* run, const bool usePre
     numSteps = baseToLidarFrameIndices.size();
     mapIsPrebuilt = usePrebuiltMap;
     if (usePrebuiltMap) {
-        lidarMapCloud = run->readLidarOctomap();
+        lidarMapCloud = run->getLidarOctomap();
         filterOccupancy(lidarMapCloud, 0, true);
         renderLidarMap();
     }
@@ -154,8 +155,8 @@ void DatasetVisualizer::updateLidarMap(const int step) {
 
 pcl::PointCloud<RadarPoint>::Ptr DatasetVisualizer::readCascadeCloud(const int scanIdx) {
     auto cascadeHeatmap = run->getCascadeHeatmap(scanIdx);
-    cascadeHeatmap = cascadeRadarConfig.clipHeatmap(cascadeHeatmap, cascadeRadarConfig.numAzimuthBins, 0, static_cast<int>(cascadeRadarConfig.nRangeBins() * 0.75), false); // use initial config to clip without config update
-    auto cascadeCloud = clippedCascadeRadarConfig.heatmapToPointcloud(cascadeHeatmap, cascadeRadarIntensityThreshold); // use clipped config to convert heatmap to pointcloud
+    cascadeHeatmap = cascadeRadarConfig->clipHeatmap(cascadeHeatmap, cascadeRadarConfig->numAzimuthBins, 0, static_cast<int>(cascadeRadarConfig->nRangeBins() * 0.75), false); // use initial config to clip without config update
+    auto cascadeCloud = clippedCascadeRadarConfig->heatmapToPointcloud(cascadeHeatmap, cascadeRadarIntensityThreshold); // use clipped config to convert heatmap to pointcloud
     // cascadeCloud = extractTopNIntensity(cascadeCloud, 500);
     cascadeCloud = normalizeRadarCloudIntensity(cascadeCloud);
 
@@ -167,10 +168,10 @@ pcl::PointCloud<RadarPoint>::Ptr DatasetVisualizer::readCascadeCloud(const int s
 
 
 pcl::PointCloud<pcl::PointXYZI>::Ptr DatasetVisualizer::readLidarCloud(const int scanIdx) {
-    auto lidarCloud = run->getLidarPointCloud<pcl::PointCloud<pcl::PointXYZI>>(scanIdx);  // lidar frame
-    auto lidarPose = lidarPoses[scanIdx];                                             // base frame, lidar timestamp
+    auto lidarCloud = run->getLidarPointCloud(scanIdx);                  // lidar frame
+    auto lidarPose = lidarPoses[scanIdx];                                // base frame, lidar timestamp
     auto lidarToMapT = lidarPose * baseToLidarTransform;
-    pcl::transformPointCloud(*lidarCloud, *lidarCloud, lidarToMapT);                      // map frame
+    pcl::transformPointCloud(*lidarCloud, *lidarCloud, lidarToMapT);     // map frame
     return lidarCloud;
 }
 

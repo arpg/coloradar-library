@@ -37,11 +37,11 @@ public:
     template<PoseType PoseT> std::vector<PoseT> getPoses() const;
 
     // abstract methods
-    virtual std::shared_ptr<pcl::PointCloud<pcl::PointXYZI>> getRadarPointCloud(const int cloudIdx) const = 0;
+    virtual pcl::PointCloud<pcl::PointXYZI>::Ptr getLidarPointCloud(const int cloudIdx) const = 0;
     virtual std::shared_ptr<std::vector<int16_t>> getCascadeDatacube(const int cubeIdx) const = 0;
     virtual std::shared_ptr<std::vector<float>> getCascadeHeatmap(const int hmIdx) const = 0;
     virtual pcl::PointCloud<RadarPoint>::Ptr getCascadePointcloud(const int cloudIdx, const double intensityThreshold = 0.0) const = 0;
-    // template<CloudType CloudT> virtual std::shared_ptr<CloudT> getLidarPointCloud(const int cloudIdx) const = 0;
+    virtual pcl::PointCloud<pcl::PointXYZI>::Ptr getLidarOctomap() const = 0;
 };
 
 

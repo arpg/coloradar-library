@@ -13,7 +13,7 @@ protected:
     std::vector<std::shared_ptr<std::vector<float>>> cascadeHeatmaps_;
     std::vector<pcl::PointCloud<RadarPoint>::Ptr> cascadePointclouds_;
     std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> lidarPointclouds_;
-    std::shared_ptr<octomap::OcTree> lidarOctomap_;
+    pcl::PointCloud<pcl::PointXYZI>::Ptr lidarOctomap_;
     std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> mapSamples_;
 
 public:
@@ -33,10 +33,14 @@ public:
         std::vector<std::shared_ptr<std::vector<float>>> cascadeHeatmaps = {},
         std::vector<pcl::PointCloud<RadarPoint>::Ptr> cascadePointclouds = {}
     );
-    std::vector<int16_t> getCascadeDatacube(const int cubeIdx) const override;
-    std::vector<float> getCascadeHeatmap(const int hmIdx) const override;
-    pcl::PointCloud<RadarPoint>::Ptr getCascadePointcloud(const int cloudIdx, const double intensityThreshold = 0.0) override;
+    virtual std::shared_ptr<pcl::PointCloud<pcl::PointXYZI>> getLidarPointCloud(const int cloudIdx) const override;
+    virtual std::shared_ptr<std::vector<int16_t>> getCascadeDatacube(const int cubeIdx) const override;
+    virtual std::shared_ptr<std::vector<float>> getCascadeHeatmap(const int hmIdx) const override;
+    virtual pcl::PointCloud<RadarPoint>::Ptr getCascadePointcloud(const int cloudIdx, const double intensityThreshold = 0.0) const override;
+    virtual pcl::PointCloud<pcl::PointXYZI>::Ptr getLidarOctomap() const override;
 
+    template<CloudType CloudT> std::shared_ptr<CloudT> getLidarPointCloud(const int cloudIdx) const;
+    
     // run/h5_run.hpp
     // template<CloudType CloudT> std::shared_ptr<CloudT> getLidarPointCloud(const int cloudIdx) const override;
 };

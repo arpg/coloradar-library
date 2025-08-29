@@ -84,14 +84,14 @@ std::vector<std::string> ColoradarPlusDataset::exportBaseDevice(const BaseExport
 
         // timestamps
         if (config.exportTimestamps()) {
-            coloradar::internal::saveVectorToHDF5(timestampsContentName + "_" + run->name, datasetFile, timestamps);
+            coloradar::internal::saveVectorToHDF5(timestampsContentName + "_" + run->name(), datasetFile, timestamps);
         }
 
         // poses
         if (config.exportPoses()) {
-            coloradar::internal::savePosesToHDF5(posesContentName + "_" + run->name, datasetFile, basePoses);
+            coloradar::internal::savePosesToHDF5(posesContentName + "_" + run->name(), datasetFile, basePoses);
         }
-        std::cout << run->name << " ";
+        std::cout << run->name() << " ";
     }
     std::cout << std::endl;
     return content;
@@ -120,16 +120,16 @@ std::vector<std::string> ColoradarPlusDataset::exportImu(const ImuExportConfig &
 
         // timestamps
         if (config.exportTimestamps()) {
-            coloradar::internal::saveVectorToHDF5(timestampsContentName + "_" + run->name, datasetFile, timestamps);
+            coloradar::internal::saveVectorToHDF5(timestampsContentName + "_" + run->name(), datasetFile, timestamps);
         }
 
         // poses
         if (config.exportPoses()) {
-            coloradar::internal::savePosesToHDF5(posesContentName + "_" + run->name, datasetFile, sensorPoses);
+            coloradar::internal::savePosesToHDF5(posesContentName + "_" + run->name(), datasetFile, sensorPoses);
         }
 
         // data: TBD
-        std::cout << run->name << " ";
+        std::cout << run->name() << " ";
     }
     std::cout << std::endl;
     return content;
@@ -181,12 +181,12 @@ std::vector<std::string> ColoradarPlusDataset::exportCascade(const RadarExportCo
 
         // timestamps
         if (config.exportTimestamps()) {
-            coloradar::internal::saveVectorToHDF5(timestampsContentName + "_" + run->name, datasetFile, timestamps);
+            coloradar::internal::saveVectorToHDF5(timestampsContentName + "_" + run->name(), datasetFile, timestamps);
         }
 
         // poses
         if (config.exportPoses()) {
-            coloradar::internal::savePosesToHDF5(posesContentName + "_" + run->name, datasetFile, sensorPoses);
+            coloradar::internal::savePosesToHDF5(posesContentName + "_" + run->name(), datasetFile, sensorPoses);
         }
 
         // datacubes
@@ -195,9 +195,9 @@ std::vector<std::string> ColoradarPlusDataset::exportCascade(const RadarExportCo
             std::vector<int16_t> datacubesFlat;
             for (size_t i = 0; i < numFrames; ++i) {
                 auto datacube = run->getCascadeDatacube(i);
-                datacubesFlat.insert(datacubesFlat.end(), datacube.begin(), datacube.end());
+                datacubesFlat.insert(datacubesFlat.end(), datacube->begin(), datacube->end());
             }
-            coloradar::internal::saveDatacubesToHDF5(datacubeContentName + "_" + run->name, datasetFile, datacubesFlat, numFrames, datacubeSize);
+            coloradar::internal::saveDatacubesToHDF5(datacubeContentName + "_" + run->name(), datasetFile, datacubesFlat, numFrames, datacubeSize);
         }
         
         // heatmaps
@@ -213,9 +213,9 @@ std::vector<std::string> ColoradarPlusDataset::exportCascade(const RadarExportCo
                 if (config.removeDopplerDim()) {
                     heatmap = heatmapConfig->removeDoppler(heatmap);
                 }
-                heatmapsFlat.insert(heatmapsFlat.end(), heatmap.begin(), heatmap.end());
+                heatmapsFlat.insert(heatmapsFlat.end(), heatmap->begin(), heatmap->end());
             }
-            coloradar::internal::saveHeatmapsToHDF5(heatmapContentName + "_" + run->name, datasetFile, heatmapsFlat, numFrames, heatmapConfig->numAzimuthBins, heatmapConfig->nRangeBins(), heatmapConfig->numElevationBins, heatmapConfig->hasDoppler);
+            coloradar::internal::saveHeatmapsToHDF5(heatmapContentName + "_" + run->name(), datasetFile, heatmapsFlat, numFrames, heatmapConfig->numAzimuthBins, heatmapConfig->nRangeBins(), heatmapConfig->numElevationBins, heatmapConfig->hasDoppler);
             heatmapsFlat.clear();
         }
 
@@ -251,9 +251,9 @@ std::vector<std::string> ColoradarPlusDataset::exportCascade(const RadarExportCo
                 std::vector<float> cloudFlat = coloradar::internal::flattenRadarCloud(cloud, cascadeConfig_->numElevationBins, cascadeConfig_->hasDoppler);
                 cloudsFlat.insert(cloudsFlat.end(), cloudFlat.begin(), cloudFlat.end());
             }
-            coloradar::internal::saveCloudsToHDF5(cloudContentName + "_" + run->name, datasetFile, cloudsFlat, numFrames, cloudSizes, numDims);
+            coloradar::internal::saveCloudsToHDF5(cloudContentName + "_" + run->name(), datasetFile, cloudsFlat, numFrames, cloudSizes, numDims);
         }
-        std::cout << run->name << " ";
+        std::cout << run->name() << " ";
     }
     std::cout << std::endl;
     return content;
@@ -291,12 +291,12 @@ std::vector<std::string> ColoradarPlusDataset::exportLidar(const LidarExportConf
 
         // timestamps
         if (config.exportTimestamps()) {
-            coloradar::internal::saveVectorToHDF5(timestampsContentName + "_" + run->name, datasetFile, timestamps);
+            coloradar::internal::saveVectorToHDF5(timestampsContentName + "_" + run->name(), datasetFile, timestamps);
         }
 
         // poses
         if (config.exportPoses()) {
-            coloradar::internal::savePosesToHDF5(posesContentName + "_" + run->name, datasetFile, sensorPoses);
+            coloradar::internal::savePosesToHDF5(posesContentName + "_" + run->name(), datasetFile, sensorPoses);
         }
 
         // clouds
@@ -321,12 +321,12 @@ std::vector<std::string> ColoradarPlusDataset::exportLidar(const LidarExportConf
                 std::vector<float> cloudFlat = coloradar::internal::flattenLidarCloud(cloud, config.collapseElevation(), config.removeIntensityDim());
                 cloudsFlat.insert(cloudsFlat.end(), cloudFlat.begin(), cloudFlat.end());
             }
-            coloradar::internal::saveCloudsToHDF5(cloudContentName + "_" + run->name, datasetFile, cloudsFlat, numFrames, cloudSizes, numDims);
+            coloradar::internal::saveCloudsToHDF5(cloudContentName + "_" + run->name(), datasetFile, cloudsFlat, numFrames, cloudSizes, numDims);
         }
         
         // map and samples
         if (config.exportMap() || config.exportMapSamples()) {
-            pcl::PointCloud<pcl::PointXYZI>::Ptr map = run->readLidarOctomap();
+            auto map = run->getLidarOctomap();
             hsize_t numDims = config.collapseElevation() ? 3 : 4;  // x, y, (z), occupancy
             if (config.removeOccupancyDim()) numDims -= 1;
 
@@ -337,7 +337,7 @@ std::vector<std::string> ColoradarPlusDataset::exportLidar(const LidarExportConf
 
             if (config.exportMap()) {
                 std::vector<float> mapFlat = coloradar::internal::flattenLidarCloud(map, config.collapseElevation(), config.removeOccupancyDim());
-                coloradar::internal::saveCloudToHDF5(mapContentName + "_" + run->name, datasetFile, mapFlat, numDims);
+                coloradar::internal::saveCloudToHDF5(mapContentName + "_" + run->name(), datasetFile, mapFlat, numDims);
             }
 
             if (config.exportMapSamples()) {
@@ -370,7 +370,7 @@ std::vector<std::string> ColoradarPlusDataset::exportLidar(const LidarExportConf
                     try {
                         auto sample = run->readMapSample(0);
                     } catch (const std::filesystem::filesystem_error& e) {
-                        std::cout << run->name << ": map samples not found, resampling... " << std::endl;
+                        std::cout << run->name() << ": map samples not found, resampling... " << std::endl;
                         resample = true;
                     }
                 }
@@ -397,10 +397,10 @@ std::vector<std::string> ColoradarPlusDataset::exportLidar(const LidarExportConf
                     auto sampleFlat = coloradar::internal::flattenLidarCloud(sample, config.collapseElevation(), config.removeOccupancyDim());
                     samplesFlat.insert(samplesFlat.end(), sampleFlat.begin(), sampleFlat.end());
                 }
-                coloradar::internal::saveCloudsToHDF5(mapSampleContentName + "_" + run->name, datasetFile, samplesFlat, numSamples, sampleSizes, numDims);
+                coloradar::internal::saveCloudsToHDF5(mapSampleContentName + "_" + run->name(), datasetFile, samplesFlat, numSamples, sampleSizes, numDims);
             }
         }
-        std::cout << run->name << " ";
+        std::cout << run->name() << " ";
     }
     std::cout << std::endl;
     return content;

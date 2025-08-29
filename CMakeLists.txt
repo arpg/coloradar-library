@@ -210,9 +210,10 @@ add_library(coloradar_lib SHARED
     src/radar_configs.cpp
     src/device.cpp
     src/dataset_configs.cpp
-
+    
     src/run/h5_run_data.cpp
     src/run/coloradar_run_init.cpp
+    src/run/coloradar_run_data.cpp
    
     src/dataset/base_dataset.cpp
     src/dataset/h5_init.cpp

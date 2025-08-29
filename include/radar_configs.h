@@ -95,13 +95,13 @@ public:
     int verticalFovToElevationIdx(const float& verticalFov);
     int rangeToRangeIdx(const float& range);
 
-    std::vector<float> clipHeatmap(const std::vector<float>& heatmap, int azimuthMaxBin, int elevationMaxBin, int rangeMaxBin, bool updateConfig = true);
-    std::vector<float> clipHeatmap(const std::vector<float>& heatmap, float horizontalFov, float verticalFov, float range, bool updateConfig = true);
-    std::vector<float> collapseHeatmapElevation(const std::vector<float>& image, const float& elevationMinMeters = -100.0, const float& elevationMaxMeters = 100.0, bool updateConfig = true);
-    std::vector<float> removeDoppler(const std::vector<float>& image, bool updateConfig = true);
-    std::vector<float> swapHeatmapDimensions(const std::vector<float>& heatmap);
+    std::shared_ptr<std::vector<float>> clipHeatmap(const std::shared_ptr<std::vector<float>>& heatmap, int azimuthMaxBin, int elevationMaxBin, int rangeMaxBin, bool updateConfig = true);
+    std::shared_ptr<std::vector<float>> clipHeatmap(const std::shared_ptr<std::vector<float>>& heatmap, float horizontalFov, float verticalFov, float range, bool updateConfig = true);
+    std::shared_ptr<std::vector<float>> collapseHeatmapElevation(const std::shared_ptr<std::vector<float>>& image, const float& elevationMinMeters = -100.0, const float& elevationMaxMeters = 100.0, bool updateConfig = true);
+    std::shared_ptr<std::vector<float>> removeDoppler(const std::shared_ptr<std::vector<float>>& image, bool updateConfig = true);
+    std::shared_ptr<std::vector<float>> swapHeatmapDimensions(const std::shared_ptr<std::vector<float>>& heatmap);
     pcl::PointCloud<RadarPoint>::Ptr heatmapToPointcloud(const std::shared_ptr<std::vector<float>>& heatmap, const double intensityThreshold = 0.0) const;
-    void precomputePointcloudTemplate();  // call for correct point cloud conversion if config parameters changed
+    void precomputePointcloudTemplate();  // call to ensure correct heatmap->pointcloud conversion if config parameters change
 };
 
 

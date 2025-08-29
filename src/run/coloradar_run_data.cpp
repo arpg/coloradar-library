@@ -43,19 +43,22 @@ pcl::PointCloud<RadarPoint>::Ptr ColoradarPlusRun::readRadarPointcloud(
         throw std::filesystem::filesystem_error("Failed to open file: " + binFilePath.string(), std::make_error_code(std::errc::no_such_file_or_directory));
     }
     auto cloud = pcl::PointCloud<RadarPoint>::Ptr(new pcl::PointCloud<RadarPoint>());
-    std::vector<RadarPoint> points;
 
+    float x, y, z, i, d;
     while (true) {
-        RadarPoint p{};
-        if (!file.read(reinterpret_cast<char*>(&p.x), sizeof(float))) break;
-        if (!file.read(reinterpret_cast<char*>(&p.y), sizeof(float))) break;
-        if (!file.read(reinterpret_cast<char*>(&p.z), sizeof(float))) break;
-        if (!file.read(reinterpret_cast<char*>(&p.intensity), sizeof(float))) break;
-        if (!file.read(reinterpret_cast<char*>(&p.doppler), sizeof(float))) break;
-        if (p.intensity >= intensityThreshold) points.push_back(p);
+        if (!file.read(reinterpret_cast<char*>(&x), sizeof(float))) break;
+        if (!file.read(reinterpret_cast<char*>(&y), sizeof(float))) break;
+        if (!file.read(reinterpret_cast<char*>(&z), sizeof(float))) break;
+        if (!file.read(reinterpret_cast<char*>(&i), sizeof(float))) break;
+        if (!file.read(reinterpret_cast<char*>(&d), sizeof(float))) break;
+        if (i < intensityThreshold) continue;
+        cloud->points.emplace_back();
+        RadarPoint& pt = cloud->points.back();
+        pt.x = x; pt.y = y; pt.z = z;
+        pt.intensity = i;
+        pt.doppler   = d;
     }
-    cloud->points = std::move(points);
-    cloud->width  = static_cast<uint32_t>(cloud->points.size());
+    cloud->width  = static_cast<uint32_t>(cloud->size());
     return cloud;
 }
 
@@ -94,33 +97,52 @@ void ColoradarPlusRun::createRadarPointclouds(
     }
 }
 
-    
+
 // PUBLIC METHODS
 
-std::vector<int16_t> coloradar::ColoradarPlusRun::getCascadeDatacube(const std::filesystem::path& binFilePath) const {
-    return getDatacube(binFilePath, cascadeConfig_);
+pcl::PointCloud<pcl::PointXYZI>::Ptr ColoradarPlusRun::getLidarPointCloud(const int cloudIdx) const {
+    return getLidarPointCloud<pcl::PointCloud<pcl::PointXYZI>>(cloudIdx);
 }
-std::vector<int16_t> coloradar::ColoradarPlusRun::getCascadeDatacube(const int cubeIdx) const {
+
+std::shared_ptr<std::vector<int16_t>> ColoradarPlusRun::getCascadeDatacube(const int cubeIdx) const {
     return getCascadeDatacube(cascadeCubesDirPath_ / "data" / ("frame_" + std::to_string(cubeIdx) + ".bin"));
 }
-std::vector<float> coloradar::ColoradarPlusRun::getCascadeHeatmap(const std::filesystem::path& binFilePath) const {
-    return getHeatmap(binFilePath, cascadeConfig_);
-}
-std::vector<float> coloradar::ColoradarPlusRun::getCascadeHeatmap(const int hmIdx) const {
+
+std::shared_ptr<std::vector<float>> ColoradarPlusRun::getCascadeHeatmap(const int hmIdx) const {
     return getCascadeHeatmap(cascadeHeatmapsDirPath_ / "data" / ("heatmap_" + std::to_string(hmIdx) + ".bin"));
 }
-void coloradar::ColoradarPlusRun::createCascadePointclouds(const double intensityThreshold) {
-    createRadarPointclouds(cascadeConfig_, cascadeHeatmapsDirPath_, cascadeCloudsDirPath_, intensityThreshold);
-}
-pcl::PointCloud<coloradar::RadarPoint>::Ptr coloradar::ColoradarPlusRun::getCascadePointcloud(const std::filesystem::path& binFilePath, const double intensityThreshold) {
-    return getRadarPointcloud(binFilePath, cascadeConfig_, intensityThreshold);
-}
-pcl::PointCloud<coloradar::RadarPoint>::Ptr coloradar::ColoradarPlusRun::getCascadePointcloud(const int& cloudIdx, const double intensityThreshold) {
+
+pcl::PointCloud<RadarPoint>::Ptr ColoradarPlusRun::getCascadePointcloud(const int cloudIdx, const double intensityThreshold) const {
     return getCascadePointcloud(cascadeCloudsDirPath_ / "data" / ("radar_pointcloud_" + std::to_string(cloudIdx) + ".bin"), intensityThreshold);
 }
 
+pcl::PointCloud<pcl::PointXYZI>::Ptr ColoradarPlusRun::getLidarOctomap() const {
+    auto cloud = pcl::PointCloud<pcl::PointXYZI>::Ptr(new pcl::PointCloud<pcl::PointXYZI>());
+    std::filesystem::path mapFilePath = lidarMapsDirPath_ / "map.pcd";
+    coloradar::internal::checkPathExists(mapFilePath);
+    pcl::io::loadPCDFile<pcl::PointXYZI>(mapFilePath.string(), *cloud);
+    return cloud;
+}
 
-octomap::OcTree coloradar::ColoradarPlusRun::buildLidarOctomap(
+
+std::shared_ptr<std::vector<int16_t>> ColoradarPlusRun::getCascadeDatacube(const std::filesystem::path& binFilePath) const {
+    return readDatacube(binFilePath, cascadeConfig_);
+}
+
+std::shared_ptr<std::vector<float>> ColoradarPlusRun::getCascadeHeatmap(const std::filesystem::path& binFilePath) const {
+    return readHeatmap(binFilePath, cascadeConfig_);
+}
+
+pcl::PointCloud<RadarPoint>::Ptr ColoradarPlusRun::getCascadePointcloud(const std::filesystem::path& binFilePath, const double intensityThreshold) const {
+    return readRadarPointcloud(cascadeConfig_, binFilePath, intensityThreshold);
+}
+
+void ColoradarPlusRun::createCascadePointclouds(const double intensityThreshold) {
+    createRadarPointclouds(cascadeConfig_, cascadeHeatmapsDirPath_, cascadeCloudsDirPath_, intensityThreshold);
+}
+
+
+octomap::OcTree ColoradarPlusRun::buildLidarOctomap(
     const double& mapResolution,
     const float& lidarTotalHorizontalFov,
     const float& lidarTotalVerticalFov,
@@ -143,7 +165,7 @@ octomap::OcTree coloradar::ColoradarPlusRun::buildLidarOctomap(
     return tree;
 }
 
-void coloradar::ColoradarPlusRun::saveLidarOctomap(const octomap::OcTree& tree) {
+void ColoradarPlusRun::saveLidarOctomap(const octomap::OcTree& tree) {
     std::shared_ptr<pcl::PointCloud<pcl::PointXYZI>> treePcl = std::make_shared<pcl::PointCloud<pcl::PointXYZI>>();
     coloradar::octreeToPcl(tree, treePcl);
     coloradar::internal::createDirectoryIfNotExists(lidarMapsDirPath_);
@@ -155,15 +177,7 @@ void coloradar::ColoradarPlusRun::saveLidarOctomap(const octomap::OcTree& tree) 
     pcl::io::savePCDFile(outputMapFile, *treePcl);
 }
 
-pcl::PointCloud<pcl::PointXYZI>::Ptr coloradar::ColoradarPlusRun::readLidarOctomap() const {
-    auto cloud = std::make_shared<pcl::PointCloud<pcl::PointXYZI>>();
-    std::filesystem::path mapFilePath = lidarMapsDirPath_ / "map.pcd";
-    coloradar::internal::checkPathExists(mapFilePath);
-    pcl::io::loadPCDFile<pcl::PointXYZI>(mapFilePath.string(), *cloud);
-    return cloud;
-}
-
-void coloradar::ColoradarPlusRun::createLidarOctomap(
+void ColoradarPlusRun::createLidarOctomap(
     const double& mapResolution,
     const float& lidarTotalHorizontalFov,
     const float& lidarTotalVerticalFov,
@@ -175,7 +189,7 @@ void coloradar::ColoradarPlusRun::createLidarOctomap(
 }
 
 
-pcl::PointCloud<pcl::PointXYZI>::Ptr coloradar::ColoradarPlusRun::sampleMapFrame(
+pcl::PointCloud<pcl::PointXYZI>::Ptr ColoradarPlusRun::sampleMapFrame(
     const float& horizontalFov,
     const float& verticalFov,
     const float& range,
@@ -190,14 +204,14 @@ pcl::PointCloud<pcl::PointXYZI>::Ptr coloradar::ColoradarPlusRun::sampleMapFrame
 }
 
 
-std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> coloradar::ColoradarPlusRun::sampleMapFrames(
+std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> ColoradarPlusRun::sampleMapFrames(
     const float& horizontalFov,
     const float& verticalFov,
     const float& range,
     const std::vector<Eigen::Affine3f>& mapFramePoses
 ) {
     if (mapFramePoses.empty()) throw std::runtime_error("Empty sampling poses.");
-    auto mapCloud = readLidarOctomap();
+    auto mapCloud = getLidarOctomap();
     std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> samples;
     samples.reserve(mapFramePoses.size());
 
@@ -206,19 +220,19 @@ std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> coloradar::ColoradarPlusRun::s
         samples.push_back(sampleMapFrame(horizontalFov, verticalFov, range, pose, mapCloud));
     }
     double elapsedTime = std::chrono::duration<double>(std::chrono::high_resolution_clock::now() - startT).count();
-    std::cout << std::fixed << std::setprecision(2)  << name << ": sampled " << mapFramePoses.size() << " map frames in " << elapsedTime << " seconds." << std::endl;
+    std::cout << std::fixed << std::setprecision(2)  << name_ << ": sampled " << mapFramePoses.size() << " map frames in " << elapsedTime << " seconds." << std::endl;
 
     return samples;
 }
 
 
-void coloradar::ColoradarPlusRun::saveMapSample(const pcl::PointCloud<pcl::PointXYZI>::Ptr& sample, const int& sampleIdx) {
+void ColoradarPlusRun::saveMapSample(const pcl::PointCloud<pcl::PointXYZI>::Ptr& sample, const int& sampleIdx) {
     std::filesystem::path frameFilePath = lidarMapsDirPath_ / ("frame_" + std::to_string(sampleIdx) + ".pcd");
     pcl::io::savePCDFile(frameFilePath, *sample);
 }
 
 
-void coloradar::ColoradarPlusRun::saveMapSamples(const std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr>& samples) {
+void ColoradarPlusRun::saveMapSamples(const std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr>& samples) {
     if (samples.empty()) throw std::runtime_error("Empty frames.");
     for (const auto& entry : std::filesystem::directory_iterator(lidarMapsDirPath_)) {
         if (entry.is_regular_file() && entry.path().filename() != "map.pcd") {
@@ -231,7 +245,7 @@ void coloradar::ColoradarPlusRun::saveMapSamples(const std::vector<pcl::PointClo
 }
 
 
-void coloradar::ColoradarPlusRun::createMapSamples(
+void ColoradarPlusRun::createMapSamples(
     const float& horizontalFov,
     const float& verticalFov,
     const float& range,
@@ -245,7 +259,7 @@ void coloradar::ColoradarPlusRun::createMapSamples(
     }
     std::vector<Eigen::Affine3f> basePoses = getPoses<Eigen::Affine3f>();
     if (!sensorTimestamps.empty()) basePoses = interpolatePoses(basePoses, poseTimestamps_, sensorTimestamps);
-    auto mapCloud = readLidarOctomap();
+    auto mapCloud = getLidarOctomap();
 
     auto startT = std::chrono::high_resolution_clock::now();
     for (size_t i = 0; i < basePoses.size(); ++i) {
@@ -254,11 +268,11 @@ void coloradar::ColoradarPlusRun::createMapSamples(
         saveMapSample(sample, i);
     }
     double elapsedTime = std::chrono::duration<double>(std::chrono::high_resolution_clock::now() - startT).count();
-    std::cout << std::fixed << std::setprecision(2) << name << ": sampled " << basePoses.size() << " map frames in " << elapsedTime << " seconds." << std::endl;
+    std::cout << std::fixed << std::setprecision(2) << name_ << ": sampled " << basePoses.size() << " map frames in " << elapsedTime << " seconds." << std::endl;
 }
 
 
-pcl::PointCloud<pcl::PointXYZI>::Ptr coloradar::ColoradarPlusRun::readMapSample(const int& sampleIdx) const {
+pcl::PointCloud<pcl::PointXYZI>::Ptr ColoradarPlusRun::readMapSample(const int& sampleIdx) const {
     auto cloud = std::make_shared<pcl::PointCloud<pcl::PointXYZI>>();
     std::filesystem::path frameFilePath = lidarMapsDirPath_ / ("frame_" + std::to_string(sampleIdx) + ".pcd");
     if (pcl::io::loadPCDFile<pcl::PointXYZI>(frameFilePath.string(), *cloud) == -1) throw std::runtime_error("Failed to load PCD file: " + frameFilePath.string());
@@ -266,7 +280,7 @@ pcl::PointCloud<pcl::PointXYZI>::Ptr coloradar::ColoradarPlusRun::readMapSample(
 }
 
 
-std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> coloradar::ColoradarPlusRun::readMapSamples(const int& numSamples) const {
+std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> ColoradarPlusRun::readMapSamples(const int& numSamples) const {
     std::vector<std::filesystem::path> samplePaths = coloradar::internal::readArrayDirectory(lidarMapsDirPath_, "frame_", ".pcd", numSamples);
     std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> samples;
     samples.reserve(samplePaths.size());
@@ -282,7 +296,7 @@ std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> coloradar::ColoradarPlusRun::r
 }
 
 
-coloradar::ColoradarRun::ColoradarRun(const std::filesystem::path& runPath, std::shared_ptr<coloradar::RadarConfig> cascadeRadarConfig, std::shared_ptr<coloradar::RadarConfig> singleChipRadarConfig) : coloradar::ColoradarPlusRun(runPath, cascadeRadarConfig), singleChipConfig_(singleChipRadarConfig) {
+ColoradarRun::ColoradarRun(const std::filesystem::path& runPath, std::shared_ptr<RadarConfig> cascadeRadarConfig, std::shared_ptr<RadarConfig> singleChipRadarConfig) : ColoradarPlusRun(runPath, cascadeRadarConfig), singleChipConfig_(singleChipRadarConfig) {
     singleChipScansDirPath_ = runDirPath_ / "cascade";
     coloradar::internal::checkPathExists(singleChipScansDirPath_);
     singleChipCubesDirPath_ = singleChipScansDirPath_ / "adc_samples";
@@ -295,24 +309,25 @@ coloradar::ColoradarRun::ColoradarRun(const std::filesystem::path& runPath, std:
     singleChipTimestamps_ = readTimestamps(singleChipHeatmapsDirPath_ / "timestamps.txt");
 }
 
-std::vector<int16_t> coloradar::ColoradarRun::getSingleChipDatacube(const std::filesystem::path& binFilePath) {
-    return getDatacube(binFilePath, singleChipConfig_);
+std::shared_ptr<std::vector<int16_t>> ColoradarRun::getSingleChipDatacube(const std::filesystem::path& binFilePath) {
+    return readDatacube(binFilePath, singleChipConfig_);
 }
-std::vector<int16_t> coloradar::ColoradarRun::getSingleChipDatacube(const int& cubeIdx) {
+std::shared_ptr<std::vector<int16_t>> ColoradarRun::getSingleChipDatacube(const int& cubeIdx) {
     return getSingleChipDatacube(singleChipCubesDirPath_ / "data" / ("frame_" + std::to_string(cubeIdx) + ".bin"));
 }
-std::vector<float> coloradar::ColoradarRun::getSingleChipHeatmap(const std::filesystem::path& binFilePath) {
-    return getHeatmap(binFilePath, singleChipConfig_);
+std::shared_ptr<std::vector<float>> ColoradarRun::getSingleChipHeatmap(const std::filesystem::path& binFilePath) {
+    return readHeatmap(binFilePath, singleChipConfig_);
 }
-std::vector<float> coloradar::ColoradarRun::getSingleChipHeatmap(const int& hmIdx) {
+std::shared_ptr<std::vector<float>> ColoradarRun::getSingleChipHeatmap(const int& hmIdx) {
     return getSingleChipHeatmap(singleChipHeatmapsDirPath_ / "data" / ("heatmap_" + std::to_string(hmIdx) + ".bin"));
 }
 
-pcl::PointCloud<coloradar::RadarPoint>::Ptr coloradar::ColoradarRun::getSingleChipPointcloud(const std::filesystem::path& binFilePath, const float& intensityThreshold) {
-    return getRadarPointcloud(binFilePath, singleChipConfig_, intensityThreshold);
+pcl::PointCloud<RadarPoint>::Ptr ColoradarRun::getSingleChipPointcloud(const std::filesystem::path& binFilePath, const double intensityThreshold) {
+    return readRadarPointcloud(singleChipConfig_, binFilePath, intensityThreshold);
 }
-pcl::PointCloud<coloradar::RadarPoint>::Ptr coloradar::ColoradarRun::getSingleChipPointcloud(const int& cloudIdx, const float& intensityThreshold) {
+pcl::PointCloud<RadarPoint>::Ptr ColoradarRun::getSingleChipPointcloud(const int& cloudIdx, const double intensityThreshold) {
     return getSingleChipPointcloud(singleChipCloudsDirPath_ / "data" / ("radar_pointcloud_" + std::to_string(cloudIdx) + ".bin"), intensityThreshold);
 }
+
 
 }

@@ -38,7 +38,6 @@ namespace {
 
 }
 
-
 template<coloradar::Pcl4dPointType PointT>
 PointT coloradar::internal::makePoint(const float& x, const float& y, const float& z, const float& i) { return PointT(x, y, z, i); }
 
@@ -118,7 +117,7 @@ void coloradar::internal::filterFov(std::shared_ptr<CloudT>& cloud, const float&
         throw std::runtime_error("Invalid vertical FOV value: expected 0 < FOV <= 180, got " + std::to_string(verticalFov));
     }
     if (range <= 0) {
-        throw std::runtime_error("Invalid max range value: expected R > 0, got " + std::to_string(range));
+        throw std::runtime_error("internal::filterFov(): Invalid max range value: expected R > 0, got " + std::to_string(range));
     }
     float horizontalHalfFovRad = horizontalFov / 2 * M_PI / 180.0f;
     float verticalHalfFovRad = verticalFov / 2 * M_PI / 180.0f;

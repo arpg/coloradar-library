@@ -69,21 +69,28 @@ void H5Run::setData(
 }
 
 
-std::vector<int16_t> H5Run::getCascadeDatacube(const int cubeIdx) const {
+pcl::PointCloud<pcl::PointXYZI>::Ptr H5Run::getLidarPointCloud(const int cloudIdx) const {
+    if (lidarPointclouds_.empty()) throw std::runtime_error("No lidar pointclouds found in run " + name_);
+    if (cloudIdx < 0 || cloudIdx >= lidarPointclouds_.size()) throw std::invalid_argument("H5Run: 'cloudIdx' out of bounds [0, " + std::to_string(lidarPointclouds_.size()) + ")");
+    return lidarPointclouds_[cloudIdx];
+}
+
+
+std::shared_ptr<std::vector<int16_t>> H5Run::getCascadeDatacube(const int cubeIdx) const {
     if (cascadeDatacubes_.empty()) throw std::runtime_error("No cascade datacubes found in run " + name_);
     if (cubeIdx < 0 || cubeIdx >= cascadeDatacubes_.size()) throw std::invalid_argument("H5Run: 'cubeIdx' out of bounds [0, " + std::to_string(cascadeDatacubes_.size()) + ")");
-    return *cascadeDatacubes_[cubeIdx];
+    return cascadeDatacubes_[cubeIdx];
 }
 
 
-std::vector<float> H5Run::getCascadeHeatmap(const int hmIdx) const {
+std::shared_ptr<std::vector<float>> H5Run::getCascadeHeatmap(const int hmIdx) const {
     if (cascadeHeatmaps_.empty()) throw std::runtime_error("No cascade heatmaps found in run " + name_);
     if (hmIdx < 0 || hmIdx >= cascadeHeatmaps_.size()) throw std::invalid_argument("H5Run: 'hmIdx' out of bounds [0, " + std::to_string(cascadeHeatmaps_.size()) + ")");
-    return *cascadeHeatmaps_[hmIdx];
+    return cascadeHeatmaps_[hmIdx];
 }
 
 
-pcl::PointCloud<RadarPoint>::Ptr H5Run::getCascadePointcloud(const int cloudIdx, const double intensityThreshold) {
+pcl::PointCloud<RadarPoint>::Ptr H5Run::getCascadePointcloud(const int cloudIdx, const double intensityThreshold) const {
     if (cascadePointclouds_.empty()) throw std::runtime_error("No cascade pointclouds found in run " + name_);
     if (cloudIdx < 0 || cloudIdx >= cascadePointclouds_.size()) throw std::invalid_argument("H5Run: 'cloudIdx' out of bounds [0, " + std::to_string(cascadePointclouds_.size()) + ")");
     if (intensityThreshold < 0.0) throw std::invalid_argument("H5Run: 'intensityThreshold' must be non-negative");
@@ -99,5 +106,10 @@ pcl::PointCloud<RadarPoint>::Ptr H5Run::getCascadePointcloud(const int cloudIdx,
     return cascadePointclouds_[cloudIdx];
 }
 
+
+pcl::PointCloud<pcl::PointXYZI>::Ptr H5Run::getLidarOctomap() const {
+    if (!lidarOctomap_) throw std::runtime_error("No lidar octomap found in run " + name_);
+    return lidarOctomap_;
+}
 
 }
