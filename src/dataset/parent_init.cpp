@@ -51,7 +51,8 @@ void ColoradarPlusDataset::init(const std::filesystem::path& pathToRunsDir, cons
     for (const auto& entry : std::filesystem::directory_iterator(runsDirPath_)) {
         std::string entryName = entry.path().filename().string();
         if (entry.is_directory() && coloradar::internal::toLower(entryName).find("run") != std::string::npos) {
-            runs_[entryName] = std::make_shared<ColoradarPlusRun>(runsDirPath_ / entryName, cascadeConfig_);
+            runs_.push_back(std::make_shared<ColoradarPlusRun>(runsDirPath_ / entryName, cascadeConfig_));
+            runNames_.push_back(entryName);
         }
     }
 }

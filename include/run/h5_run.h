@@ -20,7 +20,7 @@ public:
     H5Run(std::string name, std::shared_ptr<RadarConfig> cascadeRadarConfig = nullptr) : Run(std::move(name), std::move(cascadeRadarConfig)) {}
     virtual ~H5Run() = default;
 
-    // run/h5_run_data.cpp
+    // src/run/h5_run.cpp
     void setData(
         std::vector<double> poseTimestamps = {},
         std::vector<double> imuTimestamps = {},
@@ -42,11 +42,9 @@ public:
     virtual pcl::PointCloud<pcl::PointXYZI>::Ptr getLidarOctomap() const override;
     virtual pcl::PointCloud<pcl::PointXYZI>::Ptr getMapSample(const int sampleIdx) const override;
     virtual void saveMapSample(const int sampleIdx, const pcl::PointCloud<pcl::PointXYZI>::Ptr sample) override;
-
-    template<CloudType CloudT> std::shared_ptr<CloudT> getLidarPointCloud(const int cloudIdx) const;
     
-    // run/h5_run.hpp
-    // template<CloudType CloudT> std::shared_ptr<CloudT> getLidarPointCloud(const int cloudIdx) const override;
+    // include/run/h5_run.hpp
+    template<CloudType CloudT> std::shared_ptr<CloudT> getLidarPointCloud(const int cloudIdx) const;
 };
 
 

@@ -349,7 +349,7 @@ PYBIND11_MODULE(coloradar_dataset_lib, m) {
         }), py::arg("json_string"));
 
     // Run
-    py::class_<coloradar::Run>(m, "Run")
+    py::class_<coloradar::Run, std::shared_ptr<coloradar::Run>>(m, "Run")
         .def("name", &coloradar::Run::name)
         .def("pose_timestamps", [](coloradar::Run& self) { return vectorToNumpy(self.poseTimestamps()); })
         .def("imu_timestamps", [](coloradar::Run& self) { return vectorToNumpy(self.imuTimestamps()); })
@@ -382,12 +382,12 @@ PYBIND11_MODULE(coloradar_dataset_lib, m) {
     ;
         
     // H5Run
-    py::class_<coloradar::H5Run, coloradar::Run>(m, "H5Run")
+    py::class_<coloradar::H5Run, coloradar::Run, std::shared_ptr<coloradar::H5Run>>(m, "H5Run")
     .def(py::init<const std::filesystem::path&>())
     ;
 
     // ColoradarPlusRun
-    py::class_<coloradar::ColoradarPlusRun, coloradar::Run>(m, "ColoradarPlusRun")
+    py::class_<coloradar::ColoradarPlusRun, coloradar::Run, std::shared_ptr<coloradar::ColoradarPlusRun>>(m, "ColoradarPlusRun")
         .def(py::init<const std::filesystem::path&, std::shared_ptr<coloradar::RadarConfig>>())
         .def("get_lidar_pointcloud",
             static_cast<std::shared_ptr<pcl::PointCloud<pcl::PointXYZI>> (coloradar::ColoradarPlusRun::*)(const std::filesystem::path&) const>
@@ -420,7 +420,7 @@ PYBIND11_MODULE(coloradar_dataset_lib, m) {
         ;
 
     // ColoradarRun
-    py::class_<coloradar::ColoradarRun, coloradar::ColoradarPlusRun>(m, "ColoradarRun")
+    py::class_<coloradar::ColoradarRun, coloradar::ColoradarPlusRun, std::shared_ptr<coloradar::ColoradarRun>>(m, "ColoradarRun")
         .def(py::init<const std::filesystem::path&, std::shared_ptr<coloradar::RadarConfig>, std::shared_ptr<coloradar::RadarConfig>>())
         .def("single_chip_cube_timestamps", [](coloradar::ColoradarRun& self) { return vectorToNumpy(self.singleChipCubeTimestamps()); })
         .def("single_chip_timestamps", [](coloradar::ColoradarRun& self) { return vectorToNumpy(self.singleChipTimestamps()); })

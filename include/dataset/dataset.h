@@ -79,4 +79,6 @@ public:
 
 }
 
+#include "dataset/base_dataset.hpp"
+
 #endif

@@ -27,14 +27,21 @@ public:
 
     const std::string& name() const noexcept { return name_; }
     std::shared_ptr<RadarConfig> cascadeConfig() const noexcept { return cascadeConfig_; }
-
     const std::vector<double>& poseTimestamps() const { return poseTimestamps_; }
     const std::vector<double>& imuTimestamps() const { return imuTimestamps_; }
     const std::vector<double>& lidarTimestamps() const { return lidarTimestamps_; }
     const std::vector<double>& cascadeCubeTimestamps() const { return cascadeCubeTimestamps_; }
     const std::vector<double>& cascadeTimestamps() const { return cascadeTimestamps_; }
-
+    
+    // include/run/base_run.hpp
     template<PoseType PoseT> std::vector<PoseT> getPoses() const;
+
+    // src/run/base_run.cpp
+    pcl::PointCloud<pcl::PointXYZI>::Ptr sampleMapFrame(
+        const float horizontalFov, const float verticalFov, const float range, 
+        const Eigen::Affine3f& mapFramePose, 
+        const pcl::PointCloud<pcl::PointXYZI>::Ptr mapCloud
+    );
 
     // abstract methods
     virtual pcl::PointCloud<pcl::PointXYZI>::Ptr getLidarPointCloud(const int cloudIdx) const = 0;
@@ -43,14 +50,7 @@ public:
     virtual pcl::PointCloud<RadarPoint>::Ptr getCascadePointcloud(const int cloudIdx, const double intensityThreshold = 0.0) const = 0;
     virtual pcl::PointCloud<pcl::PointXYZI>::Ptr getLidarOctomap() const = 0;
     virtual pcl::PointCloud<pcl::PointXYZI>::Ptr getMapSample(const int sampleIdx) const = 0;
-    virtual void saveMapSample(const int sampleIdx, const pcl::PointCloud<pcl::PointXYZI>::Ptr sample) = 0;
-    
-    // run/base_run_data.cpp
-    pcl::PointCloud<pcl::PointXYZI>::Ptr sampleMapFrame(
-        const float horizontalFov, const float verticalFov, const float range, 
-        const Eigen::Affine3f& mapFramePose, 
-        const pcl::PointCloud<pcl::PointXYZI>::Ptr mapCloud
-    );
+    virtual void saveMapSample(const int sampleIdx, const pcl::PointCloud<pcl::PointXYZI>::Ptr sample) = 0;  
 };
 
 

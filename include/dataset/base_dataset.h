@@ -9,6 +9,7 @@ namespace coloradar {
 
 class Dataset {
 protected:
+    // CONSTANTS
     inline static const std::string poseTimestampsContentName        = "base_timestamps";
     inline static const std::string imuTimestampsContentName         = "imu_timestamps";
     inline static const std::string lidarTimestampsContentName       = "lidar_timestamps";
@@ -44,14 +45,13 @@ protected:
     std::unique_ptr<ImuDevice> imu_;
     std::unique_ptr<CascadeDevice> cascade_;
     std::unique_ptr<LidarDevice> lidar_;
-
-    std::unordered_map<std::string, std::shared_ptr<Run>> runs_;
+ 
+    std::vector<std::string> runNames_;
+    std::vector<std::shared_ptr<Run>> runs_;
     
 
     // METHODS
-    const std::string getExportArrayName(const std::string contentName, const std::string runName) const { 
-        return contentName + "_" + runName; 
-    }
+    const std::string getExportArrayName(const std::string contentName, const std::string runName) const { return contentName + "_" + runName; }
 
 public:
     Dataset() = default;
@@ -66,10 +66,13 @@ public:
     const Eigen::Affine3f& lidarTransform() const { return lidarTransform_; }
     const Eigen::Affine3f& cascadeTransform() const { return cascadeTransform_; }
     
-    // dataset/base_dataset.cpp
-    std::vector<std::string> listRuns() const;
-    std::vector<std::shared_ptr<Run>> getRuns() const;
-    std::shared_ptr<Run> getRun(const std::string& runName) const;
+    std::vector<std::string> listRuns() const { return runNames_; }
+    std::vector<std::shared_ptr<Run>> getRuns() const { return runs_; }
+    std::shared_ptr<Run> getRun(const std::string& runName) const { 
+        auto it = std::find(runNames_.begin(), runNames_.end(), runName);
+        if (it == runNames_.end()) throw std::invalid_argument("Run '" + runName + "' not found in dataset.");
+        return runs_[std::distance(runNames_.begin(), it)];
+    }
 };
 
 }

@@ -129,7 +129,8 @@ H5Dataset::H5Dataset(const std::filesystem::path& pathToH5File) {
             cascadeDatacubes, cascadeHeatmaps, cascadePointclouds,
             lidarOctomap, mapSamples
         );
-        runs_[run] = runObj;
+        runs_.push_back(runObj);
+        runNames_.push_back(run);
     }
 }
 
@@ -144,8 +145,8 @@ void H5Dataset::summary() const {
 
     // Print timestamp array lengths for each run
     std::cout << "\nTotal runs: " << runs_.size() << std::endl;
-    for (const auto& [name, run] : runs_) {
-        std::cout << "Run " << name << ": poses=" << run->poseTimestamps().size() 
+    for (const auto& run : runs_) {
+        std::cout << "Run " << run->name() << ": poses=" << run->poseTimestamps().size() 
                  << " (" << run->getPoses<Eigen::Affine3f>().size() << " poses)"
                  << ", imu=" << run->imuTimestamps().size()
                  << ", lidar=" << run->lidarTimestamps().size()
