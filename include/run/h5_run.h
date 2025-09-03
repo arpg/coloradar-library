@@ -31,13 +31,17 @@ public:
         std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> lidarPointclouds = {},
         std::vector<std::shared_ptr<std::vector<int16_t>>> cascadeDatacubes = {},
         std::vector<std::shared_ptr<std::vector<float>>> cascadeHeatmaps = {},
-        std::vector<pcl::PointCloud<RadarPoint>::Ptr> cascadePointclouds = {}
+        std::vector<pcl::PointCloud<RadarPoint>::Ptr> cascadePointclouds = {},
+        pcl::PointCloud<pcl::PointXYZI>::Ptr lidarOctomap = {},
+        std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> mapSamples = {}
     );
     virtual std::shared_ptr<pcl::PointCloud<pcl::PointXYZI>> getLidarPointCloud(const int cloudIdx) const override;
     virtual std::shared_ptr<std::vector<int16_t>> getCascadeDatacube(const int cubeIdx) const override;
     virtual std::shared_ptr<std::vector<float>> getCascadeHeatmap(const int hmIdx) const override;
     virtual pcl::PointCloud<RadarPoint>::Ptr getCascadePointcloud(const int cloudIdx, const double intensityThreshold = 0.0) const override;
     virtual pcl::PointCloud<pcl::PointXYZI>::Ptr getLidarOctomap() const override;
+    virtual pcl::PointCloud<pcl::PointXYZI>::Ptr getMapSample(const int sampleIdx) const override;
+    virtual void saveMapSample(const int sampleIdx, const pcl::PointCloud<pcl::PointXYZI>::Ptr sample) override;
 
     template<CloudType CloudT> std::shared_ptr<CloudT> getLidarPointCloud(const int cloudIdx) const;
     

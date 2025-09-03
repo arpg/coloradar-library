@@ -51,12 +51,13 @@ public:
     virtual std::shared_ptr<std::vector<float>> getCascadeHeatmap(const int hmIdx) const override;
     virtual pcl::PointCloud<RadarPoint>::Ptr getCascadePointcloud(const int cloudIdx, const double intensityThreshold = 0.0) const override;
     virtual pcl::PointCloud<pcl::PointXYZI>::Ptr getLidarOctomap() const override;
+    virtual pcl::PointCloud<pcl::PointXYZI>::Ptr getMapSample(const int sampleIdx) const override;
+    virtual void saveMapSample(const int sampleIdx, const pcl::PointCloud<pcl::PointXYZI>::Ptr sample) override;
 
     template<CloudType CloudT> std::shared_ptr<CloudT> getLidarPointCloud(const int cloudIdx) const;
     template<PclCloudType CloudT> std::shared_ptr<CloudT> getLidarPointCloud(const std::filesystem::path& binPath) const;
     template<OctomapCloudType CloudT> std::shared_ptr<CloudT> getLidarPointCloud(const std::filesystem::path& binPath) const;
     
-    // pcl::PointCloud<pcl::PointXYZI>::Ptr getLidarPointCloud(const std::filesystem::path& binFilePath) const;
     std::shared_ptr<std::vector<int16_t>> getCascadeDatacube(const std::filesystem::path& binFilePath) const;
     std::shared_ptr<std::vector<float>> getCascadeHeatmap(const std::filesystem::path& binFilePath) const;
     pcl::PointCloud<RadarPoint>::Ptr getCascadePointcloud(const std::filesystem::path& binFilePath, const double intensityThreshold = 0.0) const;
@@ -77,17 +78,15 @@ public:
         const float& lidarMaxRange,
         Eigen::Affine3f baseToLidarTransform = Eigen::Affine3f::Identity()
     );
-    pcl::PointCloud<pcl::PointXYZI>::Ptr readMapSample(const int& sampleIdx) const;
-    std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> readMapSamples(const int& numSamples = -1) const;
-    pcl::PointCloud<pcl::PointXYZI>::Ptr sampleMapFrame(const float& horizontalFov, const float& verticalFov, const float& range, const Eigen::Affine3f& mapFramePose, const pcl::PointCloud<pcl::PointXYZI>::Ptr& mapCloud);
-    std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> sampleMapFrames(const float& horizontalFov, const float& verticalFov, const float& range, const std::vector<Eigen::Affine3f>& mapFramePoses);
-    void saveMapSample(const pcl::PointCloud<pcl::PointXYZI>::Ptr& sample, const int& sampleIdx);
+    pcl::PointCloud<pcl::PointXYZI>::Ptr readMapSample(const int sampleIdx) const;
+    std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> readMapSamples(const int numSamples = -1) const;
+    std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> sampleMapFrames(const float horizontalFov, const float verticalFov, const float range, const std::vector<Eigen::Affine3f>& mapFramePoses);
     void saveMapSamples(const std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr>& samples);
     void createMapSamples(
-        const float& horizontalFov,
-        const float& verticalFov,
-        const float& range,
-        const std::vector<double>& sensorTimestamps = {},
+        const float horizontalFov,
+        const float verticalFov,
+        const float range,
+        const std::vector<double> sensorTimestamps = {},
         const Eigen::Affine3f& baseToSensorTransform = Eigen::Affine3f::Identity()
     );
 };

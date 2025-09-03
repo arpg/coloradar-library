@@ -5,8 +5,8 @@
 namespace coloradar {
 
 
-template <coloradar::Pcl4dPointType PointT, template <coloradar::PclCloudType> class CloudT>
-void coloradar::octreeToPcl(const octomap::OcTree& tree, std::shared_ptr<CloudT<PointT>>& cloud) {
+template <Pcl4dPointType PointT, template <PclCloudType> class CloudT>
+void octreeToPcl(const octomap::OcTree& tree, std::shared_ptr<CloudT<PointT>>& cloud) {
     cloud->clear();
     for (auto it = tree.begin_leafs(), end = tree.end_leafs(); it != end; ++it) {
         PointT point;
@@ -20,8 +20,8 @@ void coloradar::octreeToPcl(const octomap::OcTree& tree, std::shared_ptr<CloudT<
 }
 
 
-template <coloradar::PclPointType PointT, template <coloradar::PclCloudType> class CloudT>
-void coloradar::filterFov(std::shared_ptr<CloudT<PointT>>& cloud, const float& horizontalFov, const float& verticalFov, const float& range) {
+template <PclPointType PointT, template <PclCloudType> class CloudT>
+void filterFov(std::shared_ptr<CloudT<PointT>>& cloud, const float& horizontalFov, const float& verticalFov, const float& range) {
     coloradar::internal::filterFov<PointT, CloudT<PointT>>(cloud, horizontalFov, verticalFov, range);
 }
 
@@ -48,8 +48,8 @@ struct PointKeyHash {
 };
 
 
-template <coloradar::Pcl4dPointType PointT, template <typename> class CloudT>
-void coloradar::collapseElevation(std::shared_ptr<CloudT<PointT>>& cloud, const float& elevationMinMeters, const float& elevationMaxMeters) {
+template <Pcl4dPointType PointT, template <typename> class CloudT>
+void collapseElevation(std::shared_ptr<CloudT<PointT>>& cloud, const float& elevationMinMeters, const float& elevationMaxMeters) {
     const int precision = 4;
     if (elevationMinMeters > elevationMaxMeters)
         throw std::invalid_argument("Invalid elevation range: elevationMin must be less or equal to elevationMax.");
@@ -74,8 +74,8 @@ void coloradar::collapseElevation(std::shared_ptr<CloudT<PointT>>& cloud, const 
 }
 
 
-template <coloradar::PclPointType PointT, template <typename> class CloudT>
-void coloradar::collapseElevation(std::shared_ptr<CloudT<PointT>>& cloud) {
+template <PclPointType PointT, template <typename> class CloudT>
+void collapseElevation(std::shared_ptr<CloudT<PointT>>& cloud) {
     const int precision = 4;
     std::unordered_map<PointKey, PointT, PointKeyHash> uniquePointsMap;
     uniquePointsMap.reserve(cloud->size());
@@ -95,8 +95,8 @@ void coloradar::collapseElevation(std::shared_ptr<CloudT<PointT>>& cloud) {
 }
 
 
-template <coloradar::Pcl4dPointType PointT, template <typename> class CloudT>
-void coloradar::filterOccupancy(std::shared_ptr<CloudT<PointT>>& cloud, const float& probabilityThreshold, const bool& saveProbabilities) {
+template <Pcl4dPointType PointT, template <typename> class CloudT>
+void filterOccupancy(std::shared_ptr<CloudT<PointT>>& cloud, const float& probabilityThreshold, const bool& saveProbabilities) {
     if (probabilityThreshold < 0.0f || probabilityThreshold > 1.0f) {
         throw std::out_of_range("Invalid probability threshold: expected value from 0 to 1, got " + std::to_string(probabilityThreshold));
     }
@@ -116,7 +116,7 @@ void coloradar::filterOccupancy(std::shared_ptr<CloudT<PointT>>& cloud, const fl
 }
 
 
-template<coloradar::PoseType PoseT>
+template<PoseType PoseT>
 std::vector<PoseT> interpolatePoses(const std::vector<PoseT>& poses, const std::vector<double>& poseTimestamps, const std::vector<double>& targetTimestamps) {
     if (poses.empty()) throw std::runtime_error("Cannot interpolate empty poses.");
     if (poseTimestamps.empty()) throw std::runtime_error("Cannot interpolate over empty pose timestamps.");
@@ -144,17 +144,38 @@ std::vector<PoseT> interpolatePoses(const std::vector<PoseT>& poses, const std::
         Eigen::Vector3f t1 = coloradar::internal::toEigenTrans(poses[tsIdx]);
         Eigen::Vector3f t2 = coloradar::internal::toEigenTrans(poses[tsIdx + 1]);
         Eigen::Vector3f interpolatedTransEig = (1.0f - ratio) * t1 + ratio * t2;
-        auto interpolatedTrans = coloradar::internal::fromEigenTrans<typename coloradar::PoseTraits<PoseT>::TranslationType>(interpolatedTransEig);
+        auto interpolatedTrans = coloradar::internal::fromEigenTrans<typename PoseTraits<PoseT>::TranslationType>(interpolatedTransEig);
 
         Eigen::Quaternionf q1 = coloradar::internal::toEigenQuat(poses[tsIdx]);
         Eigen::Quaternionf q2 = coloradar::internal::toEigenQuat(poses[tsIdx + 1]);
         Eigen::Quaternionf interpolatedRotEig = q1.slerp(ratio, q2);
-        auto interpolatedRot = coloradar::internal::fromEigenQuat<typename coloradar::PoseTraits<PoseT>::RotationType>(interpolatedRotEig);
+        auto interpolatedRot = coloradar::internal::fromEigenQuat<typename PoseTraits<PoseT>::RotationType>(interpolatedRotEig);
 
         PoseT interpolatedPose = coloradar::internal::makePose<PoseT>(interpolatedTrans, interpolatedRot);
         interpolatedPoses.push_back(interpolatedPose);
     }
     return interpolatedPoses;
+}
+
+
+template <typename PointT, template <typename> class CloudT> 
+pcl::PointCloud<RadarPoint>::Ptr toRadarCloud(const std::shared_ptr<CloudT<PointT>> cloud) {
+    auto radarCloud = pcl::PointCloud<RadarPoint>::Ptr(new pcl::PointCloud<RadarPoint>());
+    radarCloud->header = cloud->header;
+    radarCloud->width = cloud->width;
+    radarCloud->height = cloud->height;
+    radarCloud->is_dense = cloud->is_dense;
+    radarCloud->points.resize(cloud->size());
+    for (std::size_t i = 0; i < cloud->size(); ++i) {
+        const auto& s = (*cloud)[i];
+        auto& d = radarCloud->points[i];
+        d.x = s.x; 
+        d.y = s.y; 
+        d.z = s.z;
+        d.intensity = s.intensity;
+        d.doppler = 0;
+    }
+    return radarCloud;
 }
 
 

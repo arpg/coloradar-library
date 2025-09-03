@@ -273,9 +273,9 @@ void RadarConfig::fromJson(const std::string& jsonString) {
     Json::Value root;
     std::string errs;
     const char* begin = jsonString.data();
-    const char* end   = begin + jsonString.size();
+    const char* end = begin + jsonString.size();
     if (!reader->parse(begin, end, &root, &errs)) {
-        throw std::invalid_argument(std::string("RadarConfig::fromJson: parse error: ") + errs);
+        throw std::invalid_argument("RadarConfig::fromJson: parse error: " + errs);
     }
     fromJson(root);
 }

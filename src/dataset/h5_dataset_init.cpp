@@ -21,7 +21,7 @@ H5Dataset::H5Dataset(const std::filesystem::path& pathToH5File) {
     const char* begin = configStr.data();
     const char* end   = begin + configStr.size();
     if (!reader->parse(begin, end, &root, &errs)) {
-        throw std::runtime_error(std::string("Failed to parse JSON from HDF5 'config': ") + errs);
+        throw std::runtime_error("Failed to parse JSON from HDF5 'config': " + errs);
     }
     if (!root.isObject()) {
         throw std::runtime_error("Invalid config JSON: expected an object at top level.");
@@ -61,13 +61,13 @@ H5Dataset::H5Dataset(const std::filesystem::path& pathToH5File) {
 
     // read transforms
     if (configDataContent.find(transformBaseToCascadeContentName) != configDataContent.end()) {
-        cascadeTransform_ = coloradar::internal::readH5Pose(file, std::string(transformBaseToCascadeContentName));
+        cascadeTransform_ = coloradar::internal::readH5Pose(file, transformBaseToCascadeContentName);
     }
     if (configDataContent.find(transformBaseToLidarContentName) != configDataContent.end()) {
-        lidarTransform_ = coloradar::internal::readH5Pose(file, std::string(transformBaseToLidarContentName));
+        lidarTransform_ = coloradar::internal::readH5Pose(file, transformBaseToLidarContentName);
     }
     if (configDataContent.find(transformBaseToImuContentName) != configDataContent.end()) {
-        imuTransform_ = coloradar::internal::readH5Pose(file, std::string(transformBaseToImuContentName));
+        imuTransform_ = coloradar::internal::readH5Pose(file, transformBaseToImuContentName);
     }
  
     // read run data
@@ -78,7 +78,7 @@ H5Dataset::H5Dataset(const std::filesystem::path& pathToH5File) {
         std::vector<std::shared_ptr<std::vector<float>>> cascadeHeatmaps = {};
         std::vector<pcl::PointCloud<RadarPoint>::Ptr> cascadePointclouds = {};
         std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> lidarPointclouds = {};
-        std::shared_ptr<octomap::OcTree> lidarOctomap = {};
+        pcl::PointCloud<pcl::PointXYZI>::Ptr lidarOctomap = {};
         std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> mapSamples = {};
 
         if (configDataContent.find(poseTimestampsContentName) != configDataContent.end()) {
@@ -102,12 +102,32 @@ H5Dataset::H5Dataset(const std::filesystem::path& pathToH5File) {
         if (configDataContent.find(lidarCloudsContentName) != configDataContent.end()) {
             lidarPointclouds = coloradar::internal::readH5LidarClouds(file, getExportArrayName(lidarCloudsContentName, run));
         }
+        if (configDataContent.find(lidarMapContentName) != configDataContent.end()) {
+            lidarOctomap = coloradar::internal::readH5SingleCloud(file, getExportArrayName(lidarMapContentName, run));
+        }
+        if (configDataContent.find(lidarMapSamplesContentName) != configDataContent.end()) {
+            mapSamples = coloradar::internal::readH5LidarClouds(file, getExportArrayName(lidarMapSamplesContentName, run));
+        }
+        if (configDataContent.find(cascadeDatacubesContentName) != configDataContent.end()) {
+            cascadeDatacubes = coloradar::internal::readH5Datacubes(file, getExportArrayName(cascadeDatacubesContentName, run));
+        }
+        if (configDataContent.find(cascadeHeatmapsContentName) != configDataContent.end()) {
+            cascadeHeatmaps = coloradar::internal::readH5Heatmaps(file, getExportArrayName(cascadeHeatmapsContentName, run));
+            if (configDataContent.find(cascadeCloudsContentName) != configDataContent.end()) {
+                auto rawCascadePointclouds = coloradar::internal::readH5LidarClouds(file, getExportArrayName(cascadeCloudsContentName, run));
+                cascadePointclouds.reserve(rawCascadePointclouds.size());
+                for (const auto& cloud : rawCascadePointclouds) {
+                    cascadePointclouds.push_back(toRadarCloud(cloud));
+                }
+            }
+        }
         auto runObj = std::make_shared<H5Run>(run, cascadeConfig_);
         runObj->setData(
             poseTimestamps, imuTimestamps, lidarTimestamps, cascadeCubeTimestamps, cascadeTimestamps, 
             poses, 
             lidarPointclouds, 
-            cascadeDatacubes, cascadeHeatmaps, cascadePointclouds
+            cascadeDatacubes, cascadeHeatmaps, cascadePointclouds,
+            lidarOctomap, mapSamples
         );
         runs_[run] = runObj;
     }
@@ -126,11 +146,16 @@ void H5Dataset::summary() const {
     std::cout << "\nTotal runs: " << runs_.size() << std::endl;
     for (const auto& [name, run] : runs_) {
         std::cout << "Run " << name << ": poses=" << run->poseTimestamps().size() 
-                // << " (" << run->getPoses<Eigen::Affine3f>().size() << " poses)"
+                 << " (" << run->getPoses<Eigen::Affine3f>().size() << " poses)"
                  << ", imu=" << run->imuTimestamps().size()
                  << ", lidar=" << run->lidarTimestamps().size()
-                 // << " (" << run->getLidarPointCloud<pcl::PointCloud<pcl::PointXYZI>>(0)->size() << " clouds)"
+                 // << " (" << run->getLidarPointCloud(0)->size() << " clouds)"
                  << ", cascade_cubes=" << run->cascadeCubeTimestamps().size()
+                 // << " (" << run->getCascadeDatacube(0)->size() << " cubes)"
+                 // << ", cascade_heatmaps=" << run->cascadeHeatmaps().size()
+                 // << " (" << run->getCascadeHeatmap(0)->size() << " heatmaps)"
+                 // << ", cascade_clouds=" << run->cascadePointclouds().size()
+                 // << " (" << run->getCascadePointcloud(0)->size() << " clouds)"
                  << ", cascade=" << run->cascadeTimestamps().size() << std::endl;
     }
 }

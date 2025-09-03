@@ -26,10 +26,10 @@ protected:
     Eigen::Affine3f loadTransform(const std::filesystem::path& filePath);
     
     // dataset/parent_export.cpp
-    std::vector<std::string> exportBaseDevice(const BaseExportConfig &config, std::vector<ColoradarPlusRun*> runs, const H5::H5File &datasetFile);
-    std::vector<std::string> exportImu(const ImuExportConfig &config, std::vector<ColoradarPlusRun*> runs, const H5::H5File &datasetFile);
-    std::vector<std::string> exportCascade(const RadarExportConfig &config, std::vector<ColoradarPlusRun*> runs, const H5::H5File &datasetFile);
-    std::vector<std::string> exportLidar(const LidarExportConfig &config, std::vector<ColoradarPlusRun*> runs, const H5::H5File &datasetFile);
+    std::vector<std::string> exportBaseDevice(const BaseExportConfig &config, std::vector<std::shared_ptr<Run>> runs, const H5::H5File &datasetFile);
+    std::vector<std::string> exportImu(const ImuExportConfig &config, std::vector<std::shared_ptr<Run>> runs, const H5::H5File &datasetFile);
+    std::vector<std::string> exportCascade(const RadarExportConfig &config, std::vector<std::shared_ptr<Run>> runs, const H5::H5File &datasetFile);
+    std::vector<std::string> exportLidar(const LidarExportConfig &config, std::vector<std::shared_ptr<Run>> runs, const H5::H5File &datasetFile);
 
 public:
     // dataset/parent_init.cpp
@@ -41,13 +41,13 @@ public:
     ColoradarPlusDataset& operator=(ColoradarPlusDataset&&) noexcept = default;
 
     // dataset/parent_data.cpp
-    const Eigen::Affine3f& imuTransform() const;
-    const Eigen::Affine3f& lidarTransform() const;
-    const Eigen::Affine3f& cascadeTransform() const;
-    const std::shared_ptr<RadarConfig> cascadeConfig() const;
-    std::vector<std::string> listRuns();
-    std::vector<ColoradarPlusRun*> getRuns();
-    virtual ColoradarPlusRun* getRun(const std::string& runName);
+    // const Eigen::Affine3f& imuTransform() const;
+    // const Eigen::Affine3f& lidarTransform() const;
+    // const Eigen::Affine3f& cascadeTransform() const;
+    // const std::shared_ptr<RadarConfig> cascadeConfig() const;
+    // std::vector<std::string> listRuns();
+    // std::vector<ColoradarPlusRun*> getRuns();
+    // virtual ColoradarPlusRun* getRun(const std::string& runName);
 
     // dataset/parent_export.cpp
     std::filesystem::path exportToFile(DatasetExportConfig& exportConfig);
@@ -73,7 +73,7 @@ public:
     const std::shared_ptr<RadarConfig> singleChipConfig() const { return singleChipConfig_; }
 
     // dataset/child_data.cpp
-    virtual ColoradarPlusRun* getRun(const std::string& runName) override;
+    // virtual ColoradarPlusRun* getRun(const std::string& runName) override;
 };
 
 

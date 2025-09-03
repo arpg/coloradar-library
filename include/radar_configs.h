@@ -75,6 +75,7 @@ public:
 
     RadarConfig(const int& nAzimuthBeams = 1, const int& nElevationBeams = 1) : numAzimuthBeams(nAzimuthBeams), numElevationBeams(nElevationBeams) {};
     RadarConfig(const RadarConfig& other) = default;
+    virtual ~RadarConfig() = default;
 
     Json::Value toJson() const;
     void fromJson(const Json::Value& root);          

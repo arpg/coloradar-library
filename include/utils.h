@@ -26,7 +26,7 @@ template <Pcl4dPointType PointT, template <typename> class CloudT> void collapse
 template <PclPointType PointT, template <typename> class CloudT> void collapseElevation(std::shared_ptr<CloudT<PointT>>& cloud);
 template <Pcl4dPointType PointT, template <PclCloudType> class CloudT> void octreeToPcl(const octomap::OcTree& tree, std::shared_ptr<CloudT<PointT>>& cloud);
 template <Pcl4dPointType PointT, template <typename> class CloudT> void filterOccupancy(std::shared_ptr<CloudT<PointT>>& cloud, const float& probabilityThreshold = 0.0, const bool& saveProbabilities = false);
-
+template <typename PointT, template <typename> class CloudT> pcl::PointCloud<RadarPoint>::Ptr toRadarCloud(const std::shared_ptr<CloudT<PointT>> cloud);
 
 class OctoPointcloud : public octomap::Pointcloud, public std::enable_shared_from_this<OctoPointcloud> {
 public:

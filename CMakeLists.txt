@@ -216,7 +216,7 @@ add_library(coloradar_lib SHARED
     src/run/coloradar_run_data.cpp
    
     src/dataset/base_dataset.cpp
-    src/dataset/h5_init.cpp
+    src/dataset/h5_dataset_init.cpp
     src/dataset/parent_init.cpp
     src/dataset/parent_data.cpp
     src/dataset/parent_export.cpp

@@ -214,18 +214,23 @@ std::vector<double> readH5Timestamps(const H5::H5File& file, const std::string& 
     return readH5Vector1D<double>(file, datasetName);
 }
 
+
 Eigen::Affine3f readH5Pose(const H5::H5File& file, const std::string& datasetName) {
-    size_t rows=0, cols=0;
-    auto flat = readH5Matrix2D<float>(file, datasetName, rows, cols);
-    if (cols != 7) {
-        throw std::runtime_error(datasetName + ": expected pose rows of length 7 [x y z qx qy qz qw]");
-    }
-    if (rows != 1) {
-        throw std::runtime_error(datasetName + ": expected exactly one pose");
-    }
-    Eigen::Vector3f translation(flat[0], flat[1], flat[2]);
-    Eigen::Quaternionf rotation(flat[6], flat[3], flat[4], flat[5]);
-    return Eigen::Translation3f(translation) * rotation;
+    H5::DataSet ds = file.openDataSet(datasetName);
+    H5::DataSpace sp = ds.getSpace();
+    int rank = sp.getSimpleExtentNdims();
+    if (rank != 1) throw std::runtime_error(datasetName + ": expected rank-1 dataset (length 7).");
+
+    hsize_t dim = 0;
+    sp.getSimpleExtentDims(&dim, nullptr);
+    if (dim != 7) throw std::runtime_error(datasetName + ": expected 7 elements [x y z qx qy qz qw], got " + std::to_string(dim));
+
+    std::array<float, 7> poseData{};
+    ds.read(poseData.data(), H5::PredType::NATIVE_FLOAT);
+    Eigen::Vector3f translation(poseData[0], poseData[1], poseData[2]);
+    Eigen::Quaternionf rotation(poseData[6], poseData[3], poseData[4], poseData[5]); // (w, x, y, z)
+    Eigen::Affine3f pose = Eigen::Translation3f(translation) * rotation;
+    return pose;
 }
 
 std::vector<Eigen::Affine3f> readH5Poses(const H5::H5File& file, const std::string& datasetName) {
@@ -306,23 +311,19 @@ readSizes1D(const H5::H5File& file, const std::string& name) {
     return readH5Vector1D<hsize_t>(file, name);
 }
 
-std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr>
-readH5LidarClouds(const H5::H5File& file, const std::string& baseName) {
+std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> readH5LidarClouds(const H5::H5File& file, const std::string& baseName) {
     size_t rows=0, D=0;
     auto flat = readH5Matrix2D<float>(file, baseName, rows, D);
-    if (!(D == 3 || D == 4)) {
-        throw std::runtime_error(baseName + ": expected 3 or 4 columns (XYZ or XYZ+I)");
-    }
+    if (!(D == 3 || D == 4)) throw std::runtime_error(baseName + ": expected 3 or 4 columns (XYZ or XYZ+I)");
+
     auto sizes = readSizes1D(file, baseName + "_sizes");
     size_t totalPoints = std::accumulate(sizes.begin(), sizes.end(), static_cast<size_t>(0));
-    if (totalPoints != rows) {
-        throw std::runtime_error(baseName + ": total points mismatch with sizes array");
-    }
+    if (totalPoints != rows) throw std::runtime_error(baseName + ": total points mismatch with sizes array");
 
     std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> out;
     out.reserve(sizes.size());
-
     size_t off = 0;
+
     for (hsize_t n : sizes) {
         auto cloud = std::make_shared<pcl::PointCloud<pcl::PointXYZI>>();
         cloud->resize(static_cast<size_t>(n));
@@ -335,18 +336,15 @@ readH5LidarClouds(const H5::H5File& file, const std::string& baseName) {
             (*cloud)[k] = p;
         }
         off += static_cast<size_t>(n);
-        out.push_back(std::move(cloud));
+        out.push_back(cloud);
     }
     return out;
 }
 
-pcl::PointCloud<pcl::PointXYZI>::Ptr
-readH5SingleCloud(const H5::H5File& file, const std::string& datasetName) {
+pcl::PointCloud<pcl::PointXYZI>::Ptr readH5SingleCloud(const H5::H5File& file, const std::string& datasetName) {
     size_t rows=0, D=0;
     auto flat = readH5Matrix2D<float>(file, datasetName, rows, D);
-    if (!(D == 3 || D == 4)) {
-        throw std::runtime_error(datasetName + ": expected 3 or 4 columns (XYZ or XYZ+I)");
-    }
+    if (!(D == 3 || D == 4)) throw std::runtime_error(datasetName + ": expected 3 or 4 columns (XYZ or XYZ+I)");
     auto cloud = std::make_shared<pcl::PointCloud<pcl::PointXYZI>>();
     cloud->resize(rows);
     for (size_t i = 0; i < rows; ++i) {
@@ -360,5 +358,35 @@ readH5SingleCloud(const H5::H5File& file, const std::string& datasetName) {
     return cloud;
 }
 
+// std::vector<pcl::PointCloud<RadarPoint>::Ptr> readH5RadarClouds(const H5::H5File& file, const std::string& datasetName) {
+//     size_t rows=0, D=0;
+//     auto flat = readH5Matrix2D<float>(file, datasetName, rows, D);
+//     if (D!=3 && D != 4 && D != 5) throw std::runtime_error(datasetName + ": expected 3, 4, or 5 columns (XYZ, XYZ+I, or XYZ+I+D)");
+
+//     auto sizes = readSizes1D(file, datasetName + "_sizes");
+//     size_t totalPoints = std::accumulate(sizes.begin(), sizes.end(), static_cast<size_t>(0));
+//     if (totalPoints != rows) throw std::runtime_error(datasetName + ": total points mismatch with sizes array");
+
+//     std::vector<pcl::PointCloud<RadarPoint>::Ptr> out;
+//     out.reserve(sizes.size());
+//     size_t off = 0;
+//     for (hsize_t n : sizes) 
+//     {
+//         auto cloud = std::make_shared<pcl::PointCloud<RadarPoint>>();
+//         cloud->resize(static_cast<size_t>(n));
+//         for (size_t k = 0; k < static_cast<size_t>(n); ++k) {
+//             RadarPoint p{};
+//             p.x = flat[(off+k)*D + 0];
+//             p.y = flat[(off+k)*D + 1];
+//             p.z = (D >= 3) ? flat[(off+k)*D + 2] : 0.f;
+//             p.intensity = (D >= 4) ? flat[(off+k)*D + 3] : 0.f;
+//             p.doppler = (D >= 5) ? flat[(off+k)*D + 4] : 0.f;
+//             (*cloud)[k] = p;
+//         }
+//         off += static_cast<size_t>(n);
+//         out.push_back(cloud);
+//     }
+//     return out;
+// }
 
 }

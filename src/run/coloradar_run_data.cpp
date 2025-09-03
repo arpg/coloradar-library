@@ -124,6 +124,18 @@ pcl::PointCloud<pcl::PointXYZI>::Ptr ColoradarPlusRun::getLidarOctomap() const {
     return cloud;
 }
 
+pcl::PointCloud<pcl::PointXYZI>::Ptr ColoradarPlusRun::getMapSample(const int sampleIdx) const {
+    auto cloud = std::make_shared<pcl::PointCloud<pcl::PointXYZI>>();
+    std::filesystem::path frameFilePath = lidarMapsDirPath_ / ("frame_" + std::to_string(sampleIdx) + ".pcd");
+    if (pcl::io::loadPCDFile<pcl::PointXYZI>(frameFilePath.string(), *cloud) == -1) throw std::runtime_error("Failed to load PCD file: " + frameFilePath.string());
+    return cloud;
+}
+
+void ColoradarPlusRun::saveMapSample(const int sampleIdx, const pcl::PointCloud<pcl::PointXYZI>::Ptr sample) {
+    std::filesystem::path frameFilePath = lidarMapsDirPath_ / ("frame_" + std::to_string(sampleIdx) + ".pcd");
+    pcl::io::savePCDFile(frameFilePath, *sample);
+}
+
 
 std::shared_ptr<std::vector<int16_t>> ColoradarPlusRun::getCascadeDatacube(const std::filesystem::path& binFilePath) const {
     return readDatacube(binFilePath, cascadeConfig_);
@@ -189,25 +201,10 @@ void ColoradarPlusRun::createLidarOctomap(
 }
 
 
-pcl::PointCloud<pcl::PointXYZI>::Ptr ColoradarPlusRun::sampleMapFrame(
-    const float& horizontalFov,
-    const float& verticalFov,
-    const float& range,
-    const Eigen::Affine3f& mapFramePose,
-    const pcl::PointCloud<pcl::PointXYZI>::Ptr& mapCloud
-) {
-    float maxRange = range == 0 ? std::numeric_limits<float>::max() : range;
-    pcl::PointCloud<pcl::PointXYZI>::Ptr sample(new pcl::PointCloud<pcl::PointXYZI>);
-    pcl::transformPointCloud(*mapCloud, *sample, mapFramePose);
-    filterFov(sample, horizontalFov, verticalFov, maxRange);
-    return sample;
-}
-
-
 std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> ColoradarPlusRun::sampleMapFrames(
-    const float& horizontalFov,
-    const float& verticalFov,
-    const float& range,
+    const float horizontalFov,
+    const float verticalFov,
+    const float range,
     const std::vector<Eigen::Affine3f>& mapFramePoses
 ) {
     if (mapFramePoses.empty()) throw std::runtime_error("Empty sampling poses.");
@@ -217,18 +214,12 @@ std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> ColoradarPlusRun::sampleMapFra
 
     auto startT = std::chrono::high_resolution_clock::now();
     for (const auto& pose : mapFramePoses) {
-        samples.push_back(sampleMapFrame(horizontalFov, verticalFov, range, pose, mapCloud));
+        samples.push_back(Run::sampleMapFrame(horizontalFov, verticalFov, range, pose, mapCloud));
     }
     double elapsedTime = std::chrono::duration<double>(std::chrono::high_resolution_clock::now() - startT).count();
     std::cout << std::fixed << std::setprecision(2)  << name_ << ": sampled " << mapFramePoses.size() << " map frames in " << elapsedTime << " seconds." << std::endl;
 
     return samples;
-}
-
-
-void ColoradarPlusRun::saveMapSample(const pcl::PointCloud<pcl::PointXYZI>::Ptr& sample, const int& sampleIdx) {
-    std::filesystem::path frameFilePath = lidarMapsDirPath_ / ("frame_" + std::to_string(sampleIdx) + ".pcd");
-    pcl::io::savePCDFile(frameFilePath, *sample);
 }
 
 
@@ -240,16 +231,16 @@ void ColoradarPlusRun::saveMapSamples(const std::vector<pcl::PointCloud<pcl::Poi
         }
     }
     for (size_t i = 0; i < samples.size(); ++i) {
-        saveMapSample(samples[i], i);
+        saveMapSample(i, samples[i]);
     }
 }
 
 
 void ColoradarPlusRun::createMapSamples(
-    const float& horizontalFov,
-    const float& verticalFov,
-    const float& range,
-    const std::vector<double>& sensorTimestamps,
+    const float horizontalFov,
+    const float verticalFov,
+    const float range,
+    const std::vector<double> sensorTimestamps,
     const Eigen::Affine3f& baseToSensorTransform
 ) {
     for (const auto& entry : std::filesystem::directory_iterator(lidarMapsDirPath_)) {
@@ -264,23 +255,15 @@ void ColoradarPlusRun::createMapSamples(
     auto startT = std::chrono::high_resolution_clock::now();
     for (size_t i = 0; i < basePoses.size(); ++i) {
         Eigen::Affine3f mapToSensorT = basePoses[i] * baseToSensorTransform;
-        auto sample = sampleMapFrame(horizontalFov, verticalFov, range, mapToSensorT, mapCloud);
-        saveMapSample(sample, i);
+        auto sample = Run::sampleMapFrame(horizontalFov, verticalFov, range, mapToSensorT, mapCloud);
+        saveMapSample(i, sample);
     }
     double elapsedTime = std::chrono::duration<double>(std::chrono::high_resolution_clock::now() - startT).count();
     std::cout << std::fixed << std::setprecision(2) << name_ << ": sampled " << basePoses.size() << " map frames in " << elapsedTime << " seconds." << std::endl;
 }
 
 
-pcl::PointCloud<pcl::PointXYZI>::Ptr ColoradarPlusRun::readMapSample(const int& sampleIdx) const {
-    auto cloud = std::make_shared<pcl::PointCloud<pcl::PointXYZI>>();
-    std::filesystem::path frameFilePath = lidarMapsDirPath_ / ("frame_" + std::to_string(sampleIdx) + ".pcd");
-    if (pcl::io::loadPCDFile<pcl::PointXYZI>(frameFilePath.string(), *cloud) == -1) throw std::runtime_error("Failed to load PCD file: " + frameFilePath.string());
-    return cloud;
-}
-
-
-std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> ColoradarPlusRun::readMapSamples(const int& numSamples) const {
+std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> ColoradarPlusRun::readMapSamples(const int numSamples) const {
     std::vector<std::filesystem::path> samplePaths = coloradar::internal::readArrayDirectory(lidarMapsDirPath_, "frame_", ".pcd", numSamples);
     std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> samples;
     samples.reserve(samplePaths.size());

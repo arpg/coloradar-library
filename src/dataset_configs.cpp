@@ -25,24 +25,24 @@ std::filesystem::path DatasetExportConfig::parseDestination(const YAML::Node &de
     return validateDestination(destination);
 }
 
+
 std::vector<std::string> DatasetExportConfig::parseRuns(const YAML::Node &runsValue) {
+    if (!runsValue || runsValue.IsNull()) return {};
     std::vector<std::string> runs;
-    if (!runsValue) {
-        return runs;
-    }
+
     if (runsValue.IsScalar()) {
         std::string run = runsValue.as<std::string>();
         runs.push_back(run);
     } else if (runsValue.IsSequence()) {
         for (const auto &n : runsValue) {
+            if (!n.IsScalar()) throw std::runtime_error("Invalid 'runs' item: each entry must be a string.");
             std::string run = n.as<std::string>();
             runs.push_back(run);
         }
-    } else {
-        throw std::runtime_error("Invalid format for 'runs' key.");
-    }
+    } else throw std::runtime_error("Invalid format for 'runs' key. Expected a string or a list of strings.");
     return validateRuns(runs);
 }
+
 
 std::filesystem::path DatasetExportConfig::validateDestination(const std::filesystem::path &destination) {
     std::filesystem::path absoluteDestination = std::filesystem::absolute(destination);
@@ -67,8 +67,14 @@ std::filesystem::path DatasetExportConfig::validateDestination(const std::filesy
 std::vector<std::string> DatasetExportConfig::validateRuns(const std::vector<std::string> &runs) {
     if (runs.size() == 1 && (runs[0].empty() || runs[0] == "all")) return {};
     for (const auto &run : runs) {
-        if (run.empty()) throw std::runtime_error("empty string is not allowed in the list of runs.");
-        if (run == "all") throw std::runtime_error("'all' is not allowed in the list of runs.");
+        if (run.empty()) throw std::runtime_error("Invalid run name: empty string.");
+        if (run == "all") throw std::runtime_error("Invalid run name: 'all' is not allowed if other names are specified.");
+        for (unsigned char c : run) {
+            if (!(std::isalnum(c) || c == '_' || c == '-')) throw std::runtime_error(
+                "Invalid run name \"" + run + "\"\nOnly letter, number, '_' or '-' characters are allowed."
+                "\nUse correct YAML list formats:\n```\n  runs:\n    - run1\n    - run2\n```\nor as a flow sequence:\n```\n  runs: [run1, run2]\n```"
+            );
+        }
     }
     return runs;
 }
@@ -97,6 +103,11 @@ DatasetExportConfig::DatasetExportConfig(const std::string &yamlFilePath) {
     validateConfigYaml(config);
     destinationFilePath_ = parseDestination(config["global"]["destination_file"], destinationFilePath_);
     runs_ = parseRuns(config["global"]["runs"]);
+    // std::cout << "DatasetExportConfig(): parsed " << runs_.size() << " runs: ";
+    for (const auto &run : runs_) {
+        std::cout << run << " ";
+    }
+    std::cout << std::endl;
     exportTransforms_ = coloradar::internal::parseBoolYamlKey(config["global"]["export_transforms"], exportTransforms_);
 
     cascadeCfg_.loadFromFile(config["devices"]["cascade_radar"]);

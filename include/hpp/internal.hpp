@@ -125,7 +125,7 @@ void coloradar::internal::filterFov(std::shared_ptr<CloudT>& cloud, const float&
 
     CloudT unfilteredCloud(*cloud);
     cloud->clear();
-
+    
     for (size_t i = 0; i < unfilteredCloud.size(); ++i) {
         const PointT& point = unfilteredCloud[i];
         float distance = std::sqrt(std::pow(getX(point), 2) + std::pow(getY(point), 2) + std::pow(getZ(point), 2));

@@ -9,26 +9,29 @@ namespace coloradar {
 
 class Dataset {
 protected:
-    // CONSTANTS
-    inline static constexpr std::string_view poseTimestampsContentName = "base_timestamps";
-    inline static constexpr std::string_view imuTimestampsContentName = "imu_timestamps";
-    inline static constexpr std::string_view lidarTimestampsContentName = "lidar_timestamps";
-    inline static constexpr std::string_view cascadeCubeTimestampsContentName = "cascade_cube_timestamps";
-    inline static constexpr std::string_view cascadeTimestampsContentName = "cascade_timestamps";
- 
-    inline static constexpr std::string_view transformBaseToCascadeContentName = "transform_base_to_cascade";
-    inline static constexpr std::string_view transformBaseToLidarContentName = "transform_base_to_lidar";
-    inline static constexpr std::string_view transformBaseToImuContentName = "transform_base_to_imu";
+    inline static const std::string poseTimestampsContentName        = "base_timestamps";
+    inline static const std::string imuTimestampsContentName         = "imu_timestamps";
+    inline static const std::string lidarTimestampsContentName       = "lidar_timestamps";
+    inline static const std::string cascadeCubeTimestampsContentName = "cascade_cube_timestamps";
+    inline static const std::string cascadeTimestampsContentName     = "cascade_timestamps";
 
-    inline static constexpr std::string_view posesContentName = "base_poses";
+    inline static const std::string transformBaseToCascadeContentName = "transform_base_to_cascade";
+    inline static const std::string transformBaseToLidarContentName   = "transform_base_to_lidar";
+    inline static const std::string transformBaseToImuContentName     = "transform_base_to_imu";
 
-    inline static constexpr std::string_view lidarCloudsContentName = "lidar_clouds";
-    inline static constexpr std::string_view lidarMapContentName = "lidar_map";
-    inline static constexpr std::string_view lidarMapSamplesContentName = "lidar_map_samples";
+    inline static const std::string posesContentName        = "base_poses";
+    inline static const std::string imuPosesContentName     = "imu_poses";
+    inline static const std::string lidarPosesContentName   = "lidar_poses";
+    inline static const std::string cascadePosesContentName = "cascade_poses";
 
-    inline static constexpr std::string_view cascadeDatacubesContentName = "cascade_datacubes";
-    inline static constexpr std::string_view cascadeHeatmapsContentName = "cascade_heatmaps"; 
-    inline static constexpr std::string_view cascadeCloudsContentName = "cascade_clouds";
+    inline static const std::string lidarCloudsContentName     = "lidar_clouds";
+    inline static const std::string lidarMapContentName        = "lidar_map";
+    inline static const std::string lidarMapSamplesContentName = "lidar_map_samples";
+
+    inline static const std::string cascadeDatacubesContentName = "cascade_datacubes";
+    inline static const std::string cascadeHeatmapsContentName  = "cascade_heatmaps";
+    inline static const std::string cascadeCloudsContentName    = "cascade_clouds";
+        
 
     // ATTRIBUTES
     Eigen::Affine3f imuTransform_;
@@ -46,8 +49,8 @@ protected:
     
 
     // METHODS
-    const std::string getExportArrayName(const std::string_view contentName, const std::string_view runName) const { 
-        return std::string(contentName) + "_" + std::string(runName); 
+    const std::string getExportArrayName(const std::string contentName, const std::string runName) const { 
+        return contentName + "_" + runName; 
     }
 
 public:

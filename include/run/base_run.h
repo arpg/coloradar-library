@@ -42,6 +42,15 @@ public:
     virtual std::shared_ptr<std::vector<float>> getCascadeHeatmap(const int hmIdx) const = 0;
     virtual pcl::PointCloud<RadarPoint>::Ptr getCascadePointcloud(const int cloudIdx, const double intensityThreshold = 0.0) const = 0;
     virtual pcl::PointCloud<pcl::PointXYZI>::Ptr getLidarOctomap() const = 0;
+    virtual pcl::PointCloud<pcl::PointXYZI>::Ptr getMapSample(const int sampleIdx) const = 0;
+    virtual void saveMapSample(const int sampleIdx, const pcl::PointCloud<pcl::PointXYZI>::Ptr sample) = 0;
+    
+    // run/base_run_data.cpp
+    pcl::PointCloud<pcl::PointXYZI>::Ptr sampleMapFrame(
+        const float horizontalFov, const float verticalFov, const float range, 
+        const Eigen::Affine3f& mapFramePose, 
+        const pcl::PointCloud<pcl::PointXYZI>::Ptr mapCloud
+    );
 };
 
 
