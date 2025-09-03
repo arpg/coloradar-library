@@ -21,16 +21,16 @@ namespace coloradar {
 //     return runs;
 // }
 
-// std::vector<ColoradarPlusRun*> ColoradarPlusDataset::getRuns() {
+// std::vector<std::shared_ptr<ColoradarPlusRun>> ColoradarPlusDataset::getRuns() {
 //     std::vector<std::string> runNames = listRuns();
-//     std::vector<ColoradarPlusRun*> runs(runNames.size());
+//     std::vector<std::shared_ptr<ColoradarPlusRun>> runs(runNames.size());
 //     for (size_t i = 0; i < runNames.size(); ++i)
-//         runs[i] = getRun(runNames[i]);
+//         runs[i] = std::make_shared<ColoradarPlusRun>(runsDirPath_ / runNames[i], cascadeConfig_);
 //     return runs;
 // }
 
-// ColoradarPlusRun* ColoradarPlusDataset::getRun(const std::string& runName) {
-//     return new ColoradarPlusRun(runsDirPath_ / runName, cascadeConfig_);
+// std::shared_ptr<ColoradarPlusRun> ColoradarPlusDataset::getRun(const std::string& runName) {
+//     return std::make_shared<ColoradarPlusRun>(runsDirPath_ / runName, cascadeConfig_);
 // }
 
 

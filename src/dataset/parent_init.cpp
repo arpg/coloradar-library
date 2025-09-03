@@ -47,6 +47,13 @@ void ColoradarPlusDataset::init(const std::filesystem::path& pathToRunsDir, cons
     lidar_ = std::make_unique<LidarDevice>();
     cascade_ = std::make_unique<CascadeDevice>();
     cascadeConfig_ = std::make_shared<coloradar::CascadeConfig>(calibDirPath_);
+
+    for (const auto& entry : std::filesystem::directory_iterator(runsDirPath_)) {
+        std::string entryName = entry.path().filename().string();
+        if (entry.is_directory() && coloradar::internal::toLower(entryName).find("run") != std::string::npos) {
+            runs_[entryName] = std::make_shared<ColoradarPlusRun>(runsDirPath_ / entryName, cascadeConfig_);
+        }
+    }
 }
 
 void ColoradarPlusDataset::postInit() {

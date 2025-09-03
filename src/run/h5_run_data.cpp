@@ -20,7 +20,7 @@ void H5Run::setData(
 ) {
     // pose data
     if (!poseTimestamps.empty() && !poses.empty() && poseTimestamps.size() != poses.size())
-        throw std::invalid_argument("H5Run::setData() Length Mismatch: 'poseTimestamps' (" + std::to_string(poseTimestamps.size()) + ") vs 'poses' (" + std::to_string(poses.size()) + ").");
+        throw std::invalid_argument("Data length mismatch in run " + name_ + ": 'poseTimestamps' (" + std::to_string(poseTimestamps.size()) + ") vs 'poses' (" + std::to_string(poses.size()) + ").");
     poseTimestamps_ = poseTimestamps;
     poses_ = poses;
 
@@ -32,7 +32,10 @@ void H5Run::setData(
 
     // lidar data
     if (!lidarTimestamps.empty() && !lidarPointclouds.empty() && lidarTimestamps.size() != lidarPointclouds.size())
-        throw std::invalid_argument("H5Run::setData() Length Mismatch: 'lidarTimestamps' (" + std::to_string(lidarTimestamps.size()) + ") vs 'lidarPointclouds' (" + std::to_string(lidarPointclouds.size()) + ").");
+        throw std::invalid_argument(
+            "Data length mismatch in run " + name_ + ": 'lidarTimestamps' (" + std::to_string(lidarTimestamps.size()) + ")"
+            " vs 'lidarPointclouds' (" + std::to_string(lidarPointclouds.size()) + ")."
+        );
     lidarTimestamps_ = lidarTimestamps;
     lidarPointclouds_ = lidarPointclouds;
     lidarOctomap_ = lidarOctomap;
@@ -41,7 +44,7 @@ void H5Run::setData(
     // datacube data
     if (!cascadeCubeTimestamps.empty() && !cascadeDatacubes.empty() && cascadeCubeTimestamps.size() != cascadeDatacubes.size())
         throw std::invalid_argument(
-            "H5Run::setData() Length Mismatch: 'cascadeCubeTimestamps' (" + std::to_string(cascadeCubeTimestamps.size()) + ")"
+            "Data length mismatch in run " + name_ + ": 'cascadeCubeTimestamps' (" + std::to_string(cascadeCubeTimestamps.size()) + ")"
             " vs 'cascadeDatacubes' (" + std::to_string(cascadeDatacubes.size()) + ")."
         );
     if (!cascadeDatacubes.empty()) {
@@ -65,8 +68,8 @@ void H5Run::setData(
     }
     if (!cascadePointclouds.empty()) {
         if (numHeatmaps == 0) numHeatmaps = cascadePointclouds.size();
-        else if (cascadePointclouds_.size() != numHeatmaps) 
-            throw std::invalid_argument("Expected " + std::to_string(numHeatmaps) + " cascade pointclouds, got " + std::to_string(cascadePointclouds_.size()) + ".");
+        else if (cascadePointclouds.size() != numHeatmaps) 
+            throw std::invalid_argument("Expected " + std::to_string(numHeatmaps) + " cascade pointclouds, got " + std::to_string(cascadePointclouds.size()) + ".");
     }
     if (!cascadeHeatmaps.empty()) {
         if (!cascadeHeatmaps[0]) throw std::invalid_argument("cascadeHeatmaps[0] is null.");

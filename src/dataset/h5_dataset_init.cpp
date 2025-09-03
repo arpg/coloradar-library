@@ -115,7 +115,7 @@ H5Dataset::H5Dataset(const std::filesystem::path& pathToH5File) {
             cascadeHeatmaps = coloradar::internal::readH5Heatmaps(file, getExportArrayName(cascadeHeatmapsContentName, run));
             if (configDataContent.find(cascadeCloudsContentName) != configDataContent.end()) {
                 auto rawCascadePointclouds = coloradar::internal::readH5LidarClouds(file, getExportArrayName(cascadeCloudsContentName, run));
-                cascadePointclouds.reserve(rawCascadePointclouds.size());
+                // cascadePointclouds.reserve(rawCascadePointclouds.size());
                 for (const auto& cloud : rawCascadePointclouds) {
                     cascadePointclouds.push_back(toRadarCloud(cloud));
                 }

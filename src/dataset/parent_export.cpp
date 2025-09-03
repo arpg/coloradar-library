@@ -187,13 +187,14 @@ std::vector<std::string> ColoradarPlusDataset::exportCascade(const RadarExportCo
 
         // datacubes
         if (config.exportDatacubes()) {
+            hsize_t numCubeFrames = run->cascadeCubeTimestamps().size();
             hsize_t datacubeSize = static_cast<hsize_t>(cascadeConfig_->numElevationBins * cascadeConfig_->numAzimuthBins * cascadeConfig_->nRangeBins() * 2);
             std::vector<int16_t> datacubesFlat;
-            for (size_t i = 0; i < numFrames; ++i) {
+            for (size_t i = 0; i < numCubeFrames; ++i) {
                 auto datacube = run->getCascadeDatacube(i);
                 datacubesFlat.insert(datacubesFlat.end(), datacube->begin(), datacube->end());
             }
-            coloradar::internal::saveDatacubesToHDF5(cascadeDatacubesContentName + "_" + run->name(), datasetFile, datacubesFlat, numFrames, datacubeSize);
+            coloradar::internal::saveDatacubesToHDF5(cascadeDatacubesContentName + "_" + run->name(), datasetFile, datacubesFlat, numCubeFrames, datacubeSize);
         }
         
         // heatmaps
