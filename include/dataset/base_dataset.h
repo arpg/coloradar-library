@@ -68,7 +68,7 @@ public:
     
     std::vector<std::string> listRuns() const { return runNames_; }
     std::vector<std::shared_ptr<Run>> getRuns() const { return runs_; }
-    std::shared_ptr<Run> getRun(const std::string& runName) const { 
+    std::shared_ptr<Run> getRun(const std::string& runName) const {
         auto it = std::find(runNames_.begin(), runNames_.end(), runName);
         if (it == runNames_.end()) throw std::invalid_argument("Run '" + runName + "' not found in dataset.");
         return runs_[std::distance(runNames_.begin(), it)];

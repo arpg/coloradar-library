@@ -1,4 +1,4 @@
-#include "radar_configs.h"
+#include "configs/radar_configs.h"
 
 
 namespace coloradar {

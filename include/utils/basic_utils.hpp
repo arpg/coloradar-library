@@ -1,5 +1,5 @@
-#ifndef BASIC_HPP
-#define BASIC_HPP
+#ifndef BASIC_UTILS_HPP
+#define BASIC_UTILS_HPP
 
 
 namespace coloradar {

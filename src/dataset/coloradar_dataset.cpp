@@ -1,9 +1,10 @@
-#include "dataset/dataset.h"
+#include "dataset/coloradar_dataset.h"
 
 
 namespace coloradar {
 
-// PUBLIC METHODS
+
+// CONSTRUCTOR METHODS
 
 ColoradarDataset::ColoradarDataset(const std::filesystem::path& pathToDataset) {
     init(pathToDataset);
@@ -15,9 +16,6 @@ ColoradarDataset::ColoradarDataset(const std::filesystem::path& pathToRunsDir, c
     postInit();
 }
 
-
-// PROTECTED METHODS
-
 void ColoradarDataset::postInit() {
     cascadeTransform_ = loadTransform(transformsDirPath_ / "base_to_cascade.txt");
     singleChipTransform_ = loadTransform(transformsDirPath_ / "base_to_single_chip.txt");
@@ -25,5 +23,6 @@ void ColoradarDataset::postInit() {
     single_chip_ = std::make_unique<SingleChipDevice>();
     singleChipConfig_ = std::make_shared<coloradar::SingleChipConfig>(calibDirPath_);
 }
+
 
 }

@@ -1,4 +1,4 @@
-#include "coloradar_tools.h"
+#include "main.h"
 
 #include <gtest/gtest.h>
 #include <random>

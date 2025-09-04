@@ -1,4 +1,4 @@
-#include "device.h"
+#include "configs/device.h"
 
 
 bool coloradar::validateDeviceName(const std::string &deviceName) {

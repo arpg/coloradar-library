@@ -1,5 +1,5 @@
 #define PCL_NO_PRECOMPILE
-#include "visualizer.h"
+#include "utils/visualizer.h"
 
 
 template class pcl::visualization::PointCloudGeometryHandlerXYZ<coloradar::RadarPoint>;

@@ -1,7 +1,7 @@
 #ifndef RADAR_CONFIGS_H
 #define RADAR_CONFIGS_H
 
-#include "utils.h"
+#include "utils/utils.h"
 
 
 namespace coloradar {

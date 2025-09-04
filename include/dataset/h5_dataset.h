@@ -13,14 +13,12 @@ protected:
     // ATTRIBUTES
     std::filesystem::path h5SourceFilePath_;
 
-    // std::unordered_map<std::string, std::shared_ptr<H5Run>> runs_;
-
     
     // METHODS
     H5Dataset() = default;
 
 public:
-    // dataset/h5_dataset_init.cpp
+    // src/dataset/h5_dataset.cpp
     explicit H5Dataset(const std::filesystem::path& pathToH5File);
     H5Dataset(const H5Dataset&) = delete;
     H5Dataset& operator=(const H5Dataset&) = delete;
@@ -28,9 +26,6 @@ public:
     H5Dataset& operator=(H5Dataset&&) noexcept = default;
     virtual ~H5Dataset() = default;
     void summary() const;
-
-    // virtual std::vector<std::shared_ptr<H5Run>> getRuns() const override { return runs_; }
-    // virtual std::shared_ptr<H5Run> getRun(const std::string& runName) const override;
 };
 
 }

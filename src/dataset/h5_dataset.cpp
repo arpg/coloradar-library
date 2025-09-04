@@ -115,9 +115,8 @@ H5Dataset::H5Dataset(const std::filesystem::path& pathToH5File) {
             cascadeHeatmaps = coloradar::internal::readH5Heatmaps(file, getExportArrayName(cascadeHeatmapsContentName, run));
             if (configDataContent.find(cascadeCloudsContentName) != configDataContent.end()) {
                 auto rawCascadePointclouds = coloradar::internal::readH5LidarClouds(file, getExportArrayName(cascadeCloudsContentName, run));
-                // cascadePointclouds.reserve(rawCascadePointclouds.size());
                 for (const auto& cloud : rawCascadePointclouds) {
-                    cascadePointclouds.push_back(toRadarCloud(cloud));
+                    cascadePointclouds.push_back(toRadarCloud(cloud));  // WARNING: ignores doppler values
                 }
             }
         }
@@ -135,15 +134,6 @@ H5Dataset::H5Dataset(const std::filesystem::path& pathToH5File) {
 }
 
 void H5Dataset::summary() const {
-    // std::cout << "data_content: ";
-    // for (const auto& c : configDataContent) std::cout << c << " ";
-    // std::cout << std::endl;
-
-    // if (cascadeConfig_) {
-    //     std::cout << "cascade nRangeBins = " << cascadeConfig_->nRangeBins() << std::endl;
-    // }
-
-    // Print timestamp array lengths for each run
     std::cout << "\nTotal runs: " << runs_.size() << std::endl;
     for (const auto& run : runs_) {
         std::cout << "Run " << run->name() << ": poses=" << run->poseTimestamps().size() 

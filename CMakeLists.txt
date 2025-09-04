@@ -202,28 +202,25 @@ set(CUDA_LIBS ${CUDA_LIBRARIES} ${CUDA_CUFFT_LIBRARIES})
 include_directories(${PROJECT_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS} ${YAML_CPP_INCLUDE_DIRS} ${PCL_INCLUDE_DIRS} ${OCTOMAP_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS} ${HDF5_INCLUDE_DIRS} ${JSONCPP_INCLUDE_DIRS} ${JSONCPP_INCLUDE_DIRS}/json)
 
 add_library(coloradar_lib SHARED
-    src/internal.cpp
-
-    src/utils/basic.cpp
+    src/internal_utils/h5_utils.cpp
+    src/internal_utils/internal_utils.cpp
+    src/utils/basic_utils.cpp
     src/utils/octo_pointcloud.cpp
 
-    src/radar_configs.cpp
-    src/device.cpp
-    src/dataset_configs.cpp
+    src/configs/radar_configs.cpp
+    src/configs/device.cpp
+    src/configs/dataset_configs.cpp
     
     src/run/base_run.cpp
     src/run/h5_run.cpp
     src/run/coloradar_plus_run.cpp
     src/run/coloradar_run.cpp
-   
-    src/dataset/h5_dataset_init.cpp
-    src/dataset/parent_init.cpp
-    src/dataset/parent_data.cpp
-    src/dataset/parent_export.cpp
-    src/dataset/child_init.cpp
-    src/dataset/child_data.cpp
 
-    src/visualizer.cpp
+    src/utils/visualizer.cpp
+   
+    src/dataset/h5_dataset.cpp
+    src/dataset/coloradar_plus_dataset.cpp
+    src/dataset/coloradar_dataset.cpp
 )
 target_link_libraries(coloradar_lib Threads::Threads ${YAML_CPP_LIBRARIES} ${PCL_LIBRARIES} ${OCTOMAP_LIBRARIES} ${HDF5_LIBRARIES} ${JSONCPP_LIBRARIES})
 install(TARGETS coloradar_lib LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})

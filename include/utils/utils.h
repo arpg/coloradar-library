@@ -1,7 +1,8 @@
 #ifndef UTILS_H
 #define UTILS_H
 
-#include "internal.h"
+#include "internal_utils/h5_utils.h"
+#include "internal_utils/internal_utils.h"
 
 
 namespace coloradar {
@@ -57,7 +58,7 @@ POINT_CLOUD_REGISTER_POINT_STRUCT(coloradar::RadarPoint,
 #endif
 
 
-#include "utils_hpp/basic.hpp"
-#include "utils_hpp/octo_pointcloud.hpp"
+#include "utils/basic_utils.hpp"
+#include "utils/octo_pointcloud.hpp"
 
 #endif

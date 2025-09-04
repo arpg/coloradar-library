@@ -1,7 +1,7 @@
 #ifndef DATASET_CONFIGS_H
 #define DATASET_CONFIGS_H
 
-#include "device.h"
+#include "configs/device.h"
 
 
 namespace coloradar {

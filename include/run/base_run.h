@@ -1,8 +1,8 @@
 #ifndef BASE_RUN_H
 #define BASE_RUN_H
 
-#include "radar_configs.h"
-#include "dataset_configs.h"
+#include "configs/radar_configs.h"
+#include "configs/dataset_configs.h"
 
 
 namespace coloradar {
