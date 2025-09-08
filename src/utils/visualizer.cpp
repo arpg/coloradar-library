@@ -34,6 +34,13 @@ DatasetVisualizer::DatasetVisualizer(
     clippedCascadeRadarConfig = std::make_shared<CascadeConfig>(*cascadeRadarConfig); // copy config
     clippedCascadeRadarConfig->clipHeatmap(sampleHeatmap, cascadeRadarConfig->numAzimuthBins, 0, static_cast<int>(cascadeRadarConfig->nRangeBins() * 0.75), true); // clip sample heatmap to modify the config
     clippedCascadeRadarConfig->precomputePointcloudTemplate(); // update cloud template
+
+    std::cout << "DatasetVisualizer(): baseToCascadeTransform = " << baseToCascadeTransform.translation().transpose() << " " << Eigen::Quaternionf(baseToCascadeTransform.rotation()).coeffs().transpose() << std::endl;
+    std::cout << "DatasetVisualizer(): cascadeRadarConfig->heatmapSize() = " << cascadeRadarConfig->heatmapSize() << std::endl;
+    std::cout << "DatasetVisualizer(): cascadeRadarConfig->numAzimuthBins = " << cascadeRadarConfig->numAzimuthBins << std::endl;
+    std::cout << "DatasetVisualizer(): cascadeRadarConfig->nRangeBins() = " << cascadeRadarConfig->nRangeBins() << std::endl;
+    std::cout << "DatasetVisualizer(): clippedCascadeRadarConfig->numAzimuthBins = " << clippedCascadeRadarConfig->numAzimuthBins << std::endl;
+    std::cout << "DatasetVisualizer(): clippedCascadeRadarConfig->nRangeBins() = " << clippedCascadeRadarConfig->nRangeBins() << std::endl;
 }
 
 
@@ -78,6 +85,8 @@ void DatasetVisualizer::visualize(const std::shared_ptr<Run> run, const bool use
     // init visualization parameters
     numSteps = baseToLidarFrameIndices.size();
     mapIsPrebuilt = usePrebuiltMap;
+    std::cout << "visualize(): numSteps = " << numSteps << std::endl;
+    std::cout << "visualize(): usePrebuiltMap = " << usePrebuiltMap << std::endl;
     if (usePrebuiltMap) {
         lidarMapCloud = run->getLidarOctomap();
         filterOccupancy(lidarMapCloud, 0, true);
@@ -121,11 +130,13 @@ void DatasetVisualizer::keyboardCallback(const pcl::visualization::KeyboardEvent
 
 
 void DatasetVisualizer::step(const int increment) {
+    std::cout << "step(): currentStep = " << currentStep << std::endl;
     if (increment == 0) throw std::runtime_error("Step increment must be non-zero.");
     int prevStep = currentStep;
     int targetStep = std::clamp(currentStep + increment, 0, numSteps - 1);
     if (targetStep == currentStep) return;
     currentStep = targetStep;
+    std::cout << "step(): targetStep = " << targetStep << std::endl;
     
     // update lidar map is accumulating
     if (!mapIsPrebuilt) {
@@ -169,9 +180,22 @@ pcl::PointCloud<RadarPoint>::Ptr DatasetVisualizer::readCascadeCloud(const int s
 
 pcl::PointCloud<pcl::PointXYZI>::Ptr DatasetVisualizer::readLidarCloud(const int scanIdx) {
     auto lidarCloud = run->getLidarPointCloud(scanIdx);                  // lidar frame
+    std::cout << "readLidarCloud(): scanIdx = " << scanIdx << std::endl;
+    std::cout << "readLidarCloud(): lidarCloud[0] = (" 
+              << std::fixed << std::setprecision(4) 
+              << lidarCloud->points[0].x << ", "
+              << lidarCloud->points[0].y << ", " 
+              << lidarCloud->points[0].z << ")" << std::endl;
     auto lidarPose = lidarPoses[scanIdx];                                // base frame, lidar timestamp
+    // std::cout << "readLidarCloud(): lidarPose = " << lidarPose.translation().transpose() << " " << Eigen::Quaternionf(lidarPose.rotation()).coeffs().transpose() << std::endl;
     auto lidarToMapT = lidarPose * baseToLidarTransform;
+    // std::cout << "readLidarCloud(): lidarToMapT = " << lidarToMapT.translation().transpose() << " " << Eigen::Quaternionf(lidarToMapT.rotation()).coeffs().transpose() << std::endl;
     pcl::transformPointCloud(*lidarCloud, *lidarCloud, lidarToMapT);     // map frame
+    std::cout << "readLidarCloud(): transformed lidarCloud[0] = ("
+              << std::fixed << std::setprecision(4)
+              << lidarCloud->points[0].x << ", "
+              << lidarCloud->points[0].y << ", "
+              << lidarCloud->points[0].z << ")" << std::endl;
     return lidarCloud;
 }
 
