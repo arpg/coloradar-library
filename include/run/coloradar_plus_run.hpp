@@ -7,7 +7,9 @@ namespace coloradar {
 
 template<CloudType CloudT>
 std::shared_ptr<CloudT> ColoradarPlusRun::getLidarPointCloud(const int cloudIdx) const {
-    std::filesystem::path pclBinFilePath = lidarCloudsDirPath_ / ("lidar_pointcloud_" + std::to_string(cloudIdx) + ".bin");
+    std::filesystem::path cloudsDir = lidarCloudsDirPath_;
+    int fileIdx = frameIdxToFileIdx(cloudIdx, cloudsDir);
+    std::filesystem::path pclBinFilePath = cloudsDir / ("lidar_pointcloud_" + std::to_string(fileIdx) + ".bin");
     return getLidarPointCloud<CloudT>(pclBinFilePath);
 }
 

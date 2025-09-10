@@ -164,19 +164,26 @@ void ColoradarPlusRun::createRadarPointclouds(
 // PUBLIC METHODS
 
 pcl::PointCloud<pcl::PointXYZI>::Ptr ColoradarPlusRun::getLidarPointCloud(const int cloudIdx) const {
-    return getLidarPointCloud<pcl::PointCloud<pcl::PointXYZI>>(cloudIdx);
+    int fileIdx = frameIdxToFileIdx(cloudIdx, lidarCloudsDirPath_);
+    return getLidarPointCloud<pcl::PointCloud<pcl::PointXYZI>>(fileIdx);
 }
 
 std::shared_ptr<std::vector<int16_t>> ColoradarPlusRun::getCascadeDatacube(const int cubeIdx) const {
-    return getCascadeDatacube(cascadeCubesDirPath_ / "data" / ("frame_" + std::to_string(cubeIdx) + ".bin"));
+    std::filesystem::path cubesDir = cascadeCubesDirPath_ / "data";
+    int fileIdx = frameIdxToFileIdx(cubeIdx, cubesDir);
+    return getCascadeDatacube(cubesDir / ("frame_" + std::to_string(fileIdx) + ".bin"));
 }
 
 std::shared_ptr<std::vector<float>> ColoradarPlusRun::getCascadeHeatmap(const int hmIdx) const {
-    return getCascadeHeatmap(cascadeHeatmapsDirPath_ / "data" / ("heatmap_" + std::to_string(hmIdx) + ".bin"));
+    std::filesystem::path heatmapsDir = cascadeHeatmapsDirPath_ / "data";
+    int fileIdx = frameIdxToFileIdx(hmIdx, heatmapsDir);
+    return getCascadeHeatmap(heatmapsDir / ("heatmap_" + std::to_string(fileIdx) + ".bin"));
 }
 
 pcl::PointCloud<RadarPoint>::Ptr ColoradarPlusRun::getCascadePointcloud(const int cloudIdx, const double intensityThreshold) const {
-    return getCascadePointcloud(cascadeCloudsDirPath_ / "data" / ("radar_pointcloud_" + std::to_string(cloudIdx) + ".bin"), intensityThreshold);
+    std::filesystem::path cloudsDir = cascadeCloudsDirPath_ / "data";
+    int fileIdx = frameIdxToFileIdx(cloudIdx, cloudsDir);
+    return getCascadePointcloud(cloudsDir / ("radar_pointcloud_" + std::to_string(fileIdx) + ".bin"), intensityThreshold);
 }
 
 pcl::PointCloud<pcl::PointXYZI>::Ptr ColoradarPlusRun::getLidarOctomap() const {

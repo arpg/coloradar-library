@@ -8,6 +8,7 @@
 namespace coloradar {
 
 
+int frameIdxToFileIdx(const int frameIdx, const std::filesystem::path& framesDirPath);
 const int findClosestTimestampIndex(const double targetTimestamp, const std::vector<double>& timestamps, const std::string& preference = "none");
 template<PoseType PoseT> std::vector<PoseT> interpolatePoses(const std::vector<PoseT>& poses, const std::vector<double>& poseTimestamps, const std::vector<double>& targetTimestamps);
 

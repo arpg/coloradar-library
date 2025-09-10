@@ -335,7 +335,6 @@ std::vector<std::string> ColoradarPlusDataset::exportLidar(const LidarExportConf
     if (config.exportMap()) content.push_back(lidarMapContentName);
     if (config.exportMapSamples()) content.push_back(lidarMapSamplesContentName);
 
-    // std::cout << "Finished runs: ";
     for (auto run : runs) {
         std::vector<double> truePoseTimestamps = run->poseTimestamps();
         std::vector<double> timestamps = run->lidarTimestamps();
@@ -395,6 +394,7 @@ std::vector<std::string> ColoradarPlusDataset::exportLidar(const LidarExportConf
             }
 
             if (config.exportMapSamples()) {
+                std::cout << "Exporting map samples..." << std::endl;
                 std::vector<double> centerTimestamps;
                 Eigen::Affine3f centerTransform;
                 if (config.centerSensor()->name() == (new CascadeDevice())->name()) {
@@ -421,9 +421,10 @@ std::vector<std::string> ColoradarPlusDataset::exportLidar(const LidarExportConf
                 if (config.forceResample()) {
                     resample = true;
                 } else if (config.allowResample()) {
+                    std::cout << "Resample allowed" << std::endl;
                     try {
                         auto sample = run->getMapSample(0);
-                    } catch (const std::filesystem::filesystem_error& e) {
+                    } catch (...) {
                         std::cout << run->name() << ": map samples not found, resampling... " << std::endl;
                         resample = true;
                     }

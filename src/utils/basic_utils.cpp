@@ -3,15 +3,34 @@
 
 namespace coloradar {
 
+namespace {
+    std::unordered_set<std::string> warnedDirectories;
+}
+
+
+int frameIdxToFileIdx(const int frameIdx, const std::filesystem::path& framesDirPath) {
+    std::optional<int> minFileIdx;
+    for (const auto& entry : std::filesystem::directory_iterator(framesDirPath)) {
+        const std::string entryName = entry.path().filename().string();
+        auto fileIdx = coloradar::internal::extractFirstInt(entryName);
+        if (!fileIdx) throw std::runtime_error("unexpected file name " + entryName + " in folder " + framesDirPath.string());
+        if (!minFileIdx || *fileIdx < *minFileIdx) minFileIdx = *fileIdx;
+    }
+    if (!minFileIdx) throw std::runtime_error("no files with integers found in " + framesDirPath.string());
+    
+    std::string dirPathStr = framesDirPath.string();
+    if (*minFileIdx != 0 && warnedDirectories.find(dirPathStr) == warnedDirectories.end()) {
+        std::cout << "\nWarning! Frames are not indexed from 0 in directory\n'" << dirPathStr << "'\n(first detected frame index: " << *minFileIdx << ")\n" << std::endl;
+        warnedDirectories.insert(dirPathStr);
+    }
+    return *minFileIdx + frameIdx;
+}
+
+
 const int findClosestTimestampIndex(const double targetTimestamp, const std::vector<double>& timestamps, const std::string& preference) {
-    if (timestamps.empty()) {
-        throw std::runtime_error("Timestamps vector is empty.");
-    }
-
-    if (preference != "none" && preference != "before" && preference != "after") {
-        throw std::invalid_argument("Invalid preference: must be 'none', 'before', or 'after'.");
-    }
-
+    if (timestamps.empty()) throw std::runtime_error("Timestamps vector is empty.");
+    if (preference != "none" && preference != "before" && preference != "after") throw std::invalid_argument("Invalid preference: must be 'none', 'before', or 'after'.");
+    
     auto it = std::lower_bound(timestamps.begin(), timestamps.end(), targetTimestamp);
     size_t afterIdx = static_cast<size_t>(it - timestamps.begin());
 

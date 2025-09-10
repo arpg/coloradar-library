@@ -8,6 +8,7 @@
 namespace coloradar::internal {
 
     std::string toLower(std::string s);
+    std::optional<int> extractFirstInt(const std::string& input);
     
     void checkPathExists(const std::filesystem::path& path);
     void createDirectoryIfNotExists(const std::filesystem::path& dirPath);

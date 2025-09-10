@@ -1,6 +1,17 @@
 #include "internal_utils/internal_utils.h"
 
 
+namespace coloradar::internal {
+
+std::optional<int> extractFirstInt(const std::string& input) {
+    static const std::regex re(R"(\d+)");
+    std::smatch match;
+    if (std::regex_search(input, match, re)) return std::stoi(match.str());
+    return std::nullopt;
+}
+
+}
+
 void coloradar::internal::checkPathExists(const std::filesystem::path& path) {
     // std::cout << "Validating path: " << path << std::endl;
     if (!std::filesystem::exists(path)) {
