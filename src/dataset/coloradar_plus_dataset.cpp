@@ -394,7 +394,6 @@ std::vector<std::string> ColoradarPlusDataset::exportLidar(const LidarExportConf
             }
 
             if (config.exportMapSamples()) {
-                std::cout << "Exporting map samples..." << std::endl;
                 std::vector<double> centerTimestamps;
                 Eigen::Affine3f centerTransform;
                 if (config.centerSensor()->name() == (new CascadeDevice())->name()) {
