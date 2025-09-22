@@ -80,7 +80,7 @@ std::filesystem::path ColoradarPlusDataset::exportToFile(DatasetExportConfig& ex
         exportRunObjects.push_back(std::dynamic_pointer_cast<ColoradarPlusRun>(getRun(runName)));
         finalConfig["runs"].append(runName);
     }
-    std::cout << "Exporting " << finalConfig["runs"].size() << " runs." << std::endl;
+    std::cout << "Exporting " << finalConfig["runs"].size() << " run(s)." << std::endl;
 
     H5::H5File datasetFile(exportConfig.destinationFilePath(), H5F_ACC_TRUNC);
     auto baseContent = exportBaseDevice(exportConfig.base(), exportRunObjects, datasetFile);
@@ -216,15 +216,15 @@ std::vector<std::string> ColoradarPlusDataset::exportCascade(const RadarExportCo
     if (config.exportHeatmaps()) content.push_back(cascadeHeatmapsContentName);
 
     // FOV
-    float range = cascadeConfig_->clipRange(config.fov().rangeMeters);
+    float range = cascadeConfig_->clipRange(config.heatmapCloudFov().rangeMeters);
     int rangeMaxBin = cascadeConfig_->rangeToRangeIdx(range);
-    int azimuthMaxBin = config.fov().azimuthIdx;
-    int elevationMaxBin = config.fov().elevationIdx;
-    float horizontalFov = config.fov().horizontalDegreesTotal;
-    float verticalFov = config.fov().verticalDegreesTotal;
-    if (config.fov().useDegreeConstraints) {
-        azimuthMaxBin = cascadeConfig_->horizontalFovToAzimuthIdx(config.fov().horizontalDegreesTotal);
-        elevationMaxBin = cascadeConfig_->verticalFovToElevationIdx(config.fov().verticalDegreesTotal);
+    int azimuthMaxBin = config.heatmapCloudFov().azimuthIdx;
+    int elevationMaxBin = config.heatmapCloudFov().elevationIdx;
+    float horizontalFov = config.heatmapCloudFov().horizontalDegreesTotal;
+    float verticalFov = config.heatmapCloudFov().verticalDegreesTotal;
+    if (config.heatmapCloudFov().useDegreeConstraints) {
+        azimuthMaxBin = cascadeConfig_->horizontalFovToAzimuthIdx(config.heatmapCloudFov().horizontalDegreesTotal);
+        elevationMaxBin = cascadeConfig_->verticalFovToElevationIdx(config.heatmapCloudFov().verticalDegreesTotal);
     }
     else {
         azimuthMaxBin = cascadeConfig_->clipAzimuthMaxBin(azimuthMaxBin);
@@ -379,10 +379,35 @@ std::vector<std::string> ColoradarPlusDataset::exportLidar(const LidarExportConf
         
         // map and samples
         if (config.exportMap() || config.exportMapSamples()) {
-            auto map = run->getLidarOctomap();
+            pcl::PointCloud<pcl::PointXYZI>::Ptr map;
+            bool buildMap = false;
+            if (config.forceMapRebuild()) {
+                buildMap = true;
+            } else if (config.allowMapRebuild()) {
+                try {
+                    map = run->getLidarOctomap();
+                } catch (...) {
+                    std::cout << run->name() << ": lidar octomap not found." << std::endl;
+                    buildMap = true;
+                }
+            }
+            if (buildMap) {
+                std::cout << run->name() << ": building octomap... " << std::endl;
+                octomap::OcTree octree = run->buildLidarOctomap(
+                    config.mapResolution(), 
+                    config.mapInputCloudFov().horizontalDegreesTotal, 
+                    config.mapInputCloudFov().verticalDegreesTotal, 
+                    config.mapInputCloudFov().rangeMeters, 
+                    lidarTransform_
+                );
+                octreeToPcl(octree, map);
+                if (config.saveMap()) {
+                    run->saveLidarOctomap(octree);
+                }
+            }
+            
             hsize_t numDims = config.collapseElevation() ? 3 : 4;  // x, y, (z), occupancy
             if (config.removeOccupancyDim()) numDims -= 1;
-
             if (config.collapseElevation()) {
                 collapseElevation(map, config.collapseElevationMinZ(), config.collapseElevationMaxZ());
             }
@@ -420,7 +445,6 @@ std::vector<std::string> ColoradarPlusDataset::exportLidar(const LidarExportConf
                 if (config.forceResample()) {
                     resample = true;
                 } else if (config.allowResample()) {
-                    std::cout << "Resample allowed" << std::endl;
                     try {
                         auto sample = run->getMapSample(0);
                     } catch (...) {

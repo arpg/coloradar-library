@@ -76,7 +76,7 @@ protected:
     float collapseElevationMinZ_;
     float collapseElevationMaxZ_;
     bool removeDopplerDim_;
-    FovConfig fov_;
+    FovConfig heatmapCloudFov_;
 
     bool exportDatacubes_;
     bool exportHeatmaps_;
@@ -95,7 +95,7 @@ public:
         float collapseElevationMinZ = 0.0f,
         float collapseElevationMaxZ = 0.0f,
         bool removeDopplerDim = false,
-        FovConfig fov = FovConfig(),
+        FovConfig heatmapCloudFov = FovConfig(),
 
         bool exportDatacubes = false,
         bool exportHeatmaps = false,
@@ -108,7 +108,7 @@ public:
         collapseElevationMinZ_(collapseElevationMinZ),
         collapseElevationMaxZ_(collapseElevationMaxZ),
         removeDopplerDim_(removeDopplerDim),
-        fov_(fov),
+        heatmapCloudFov_(heatmapCloudFov),
         exportDatacubes_(exportDatacubes),
         exportHeatmaps_(exportHeatmaps),
         exportClouds_(exportClouds),
@@ -123,7 +123,7 @@ public:
     const float collapseElevationMinZ() const { return collapseElevationMinZ_; }
     const float collapseElevationMaxZ() const { return collapseElevationMaxZ_; }
     const bool removeDopplerDim() const { return removeDopplerDim_; }
-    const FovConfig& fov() const { return fov_; }
+    const FovConfig& heatmapCloudFov() const { return heatmapCloudFov_; }
     const bool exportDatacubes() const { return exportDatacubes_; }
     const bool exportHeatmaps() const { return exportHeatmaps_; }
     const bool exportClouds() const { return exportClouds_; }
@@ -144,6 +144,11 @@ protected:
     FovConfig cloudFov_;
 
     bool exportMap_;
+    bool allowMapRebuild_;
+    bool forceMapRebuild_;
+    bool saveMap_;
+    float mapResolution_;
+    FovConfig mapInputCloudFov_;
     bool exportMapSamples_;
     bool removeOccupancyDim_;
     bool logOddsToProbability_;
@@ -170,6 +175,11 @@ public:
         FovConfig cloudFov = FovConfig(),
 
         bool exportMap = false,
+        bool allowMapRebuild = false,
+        bool forceMapRebuild = false,
+        bool saveMap = false,
+        float mapResolution = 0.25f,
+        FovConfig mapInputCloudFov = FovConfig(),
         bool exportMapSamples = false,
         bool removeOccupancyDim = false,
         bool logOddsToProbability = false,
@@ -188,6 +198,11 @@ public:
         removeIntensityDim_(removeIntensityDim),
         cloudFov_(cloudFov),
         exportMap_(exportMap),
+        allowMapRebuild_(allowMapRebuild),
+        forceMapRebuild_(forceMapRebuild),
+        saveMap_(saveMap),
+        mapResolution_(mapResolution),
+        mapInputCloudFov_(mapInputCloudFov),
         exportMapSamples_(exportMapSamples),
         removeOccupancyDim_(removeOccupancyDim),
         logOddsToProbability_(logOddsToProbability),
@@ -209,6 +224,11 @@ public:
       removeIntensityDim_(other.removeIntensityDim_),
       cloudFov_(other.cloudFov_),
       exportMap_(other.exportMap_),
+      allowMapRebuild_(other.allowMapRebuild_),
+      forceMapRebuild_(other.forceMapRebuild_),
+      saveMap_(other.saveMap_),
+      mapResolution_(other.mapResolution_),
+      mapInputCloudFov_(other.mapInputCloudFov_),
       exportMapSamples_(other.exportMapSamples_),
       removeOccupancyDim_(other.removeOccupancyDim_),
       logOddsToProbability_(other.logOddsToProbability_),
@@ -230,6 +250,11 @@ public:
             removeIntensityDim_ = other.removeIntensityDim_;
             cloudFov_ = other.cloudFov_;
             exportMap_ = other.exportMap_;
+            allowMapRebuild_ = other.allowMapRebuild_;
+            forceMapRebuild_ = other.forceMapRebuild_;
+            saveMap_ = other.saveMap_;
+            mapResolution_ = other.mapResolution_;
+            mapInputCloudFov_ = other.mapInputCloudFov_;
             exportMapSamples_ = other.exportMapSamples_;
             removeOccupancyDim_ = other.removeOccupancyDim_;
             logOddsToProbability_ = other.logOddsToProbability_;
@@ -250,6 +275,11 @@ public:
     const bool removeIntensityDim() const { return removeIntensityDim_; }
     const FovConfig& cloudFov() const { return cloudFov_; }
     const bool exportMap() const { return exportMap_; }
+    const bool allowMapRebuild() const { return allowMapRebuild_; }
+    const bool forceMapRebuild() const { return forceMapRebuild_; }
+    const bool saveMap() const { return saveMap_; }
+    const float mapResolution() const { return mapResolution_; }
+    const FovConfig& mapInputCloudFov() const { return mapInputCloudFov_; }
     const bool exportMapSamples() const { return exportMapSamples_; }
     const bool removeOccupancyDim() const { return removeOccupancyDim_; }
     const bool logOddsToProbability() const { return logOddsToProbability_; }
