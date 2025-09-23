@@ -243,12 +243,14 @@ std::vector<std::string> ColoradarPlusDataset::exportCascade(const RadarExportCo
         }
 
         // timestamps
+        std::cout << "Exporting cascade timestamps for run " << run->name() << std::endl;
         if (config.exportTimestamps()) {
             coloradar::internal::saveVectorToHDF5(cascadeCubeTimestampsContentName + "_" + run->name(), datasetFile, run->cascadeCubeTimestamps());
             coloradar::internal::saveVectorToHDF5(cascadeTimestampsContentName + "_" + run->name(), datasetFile, timestamps);
         }
 
         // poses
+        std::cout << "Exporting cascade poses for run " << run->name() << std::endl;
         if (config.exportPoses()) {
             coloradar::internal::savePosesToHDF5(cascadePosesContentName + "_" + run->name(), datasetFile, sensorPoses);
         }
@@ -267,9 +269,10 @@ std::vector<std::string> ColoradarPlusDataset::exportCascade(const RadarExportCo
         
         // heatmaps
         if (config.exportHeatmaps()) {
-            auto heatmapConfig = std::make_shared<CascadeConfig>(*static_cast<CascadeConfig*>(cascadeConfig_.get()));
+            std::shared_ptr<CascadeConfig> heatmapConfig;
             std::vector<float> heatmapsFlat;
             for (size_t i = 0; i < numFrames; ++i) {
+                heatmapConfig = std::make_shared<CascadeConfig>(*static_cast<CascadeConfig*>(cascadeConfig_.get()));
                 auto heatmap = run->getCascadeHeatmap(i);
                 heatmap = heatmapConfig->clipHeatmap(heatmap, azimuthMaxBin, elevationMaxBin, rangeMaxBin);
                 if (config.collapseElevation()) {
@@ -379,7 +382,7 @@ std::vector<std::string> ColoradarPlusDataset::exportLidar(const LidarExportConf
         
         // map and samples
         if (config.exportMap() || config.exportMapSamples()) {
-            pcl::PointCloud<pcl::PointXYZI>::Ptr map;
+            pcl::PointCloud<pcl::PointXYZI>::Ptr map = std::make_shared<pcl::PointCloud<pcl::PointXYZI>>();
             bool buildMap = false;
             if (config.forceMapRebuild()) {
                 buildMap = true;
@@ -395,11 +398,12 @@ std::vector<std::string> ColoradarPlusDataset::exportLidar(const LidarExportConf
                 std::cout << run->name() << ": building octomap... " << std::endl;
                 octomap::OcTree octree = run->buildLidarOctomap(
                     config.mapResolution(), 
-                    config.mapInputCloudFov().horizontalDegreesTotal, 
-                    config.mapInputCloudFov().verticalDegreesTotal, 
+                    config.mapInputCloudFov().horizontalDegreesTotal,
+                    config.mapInputCloudFov().verticalDegreesTotal,
                     config.mapInputCloudFov().rangeMeters, 
                     lidarTransform_
                 );
+                std::cout << run->name() << ": finished building octomap." << std::endl;
                 octreeToPcl(octree, map);
                 if (config.saveMap()) {
                     run->saveLidarOctomap(octree);
@@ -419,6 +423,7 @@ std::vector<std::string> ColoradarPlusDataset::exportLidar(const LidarExportConf
             }
 
             if (config.exportMapSamples()) {
+                std::cout << run->name() << ": exporting map samples..." << std::endl;
                 std::vector<double> centerTimestamps;
                 Eigen::Affine3f centerTransform;
                 if (config.centerSensor()->name() == (new CascadeDevice())->name()) {
