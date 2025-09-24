@@ -86,6 +86,7 @@ std::filesystem::path ColoradarPlusDataset::exportToFile(DatasetExportConfig& ex
     auto baseContent = exportBaseDevice(exportConfig.base(), exportRunObjects, datasetFile);
     auto imuContent = exportImu(exportConfig.imu(), exportRunObjects, datasetFile);
     auto cascadeContent = exportCascade(exportConfig.cascade(), exportRunObjects, datasetFile, &finalConfig);
+    // std::cout << "Heatmap config:\n" << finalConfig["heatmap_radar_config"] << std::endl;
     auto lidarContent = exportLidar(exportConfig.lidar(), exportRunObjects, datasetFile);
     for (const auto &contentList : {baseContent, imuContent, cascadeContent, lidarContent}) {
         if (contentList.empty()) continue;
@@ -104,12 +105,21 @@ std::filesystem::path ColoradarPlusDataset::exportToFile(DatasetExportConfig& ex
         finalConfig["data_content"].append(transformBaseToImuContentName);
     }
 
+    // std::string configString = Json::writeString(Json::StreamWriterBuilder(), finalConfig);
+    // H5::StrType strType(H5::PredType::C_S1, H5T_VARIABLE);
+    // H5::DataSpace dataspace(H5S_SCALAR);
+    // H5::DataSet configDataset = datasetFile.createDataSet("config", strType, dataspace);
+    // configDataset.write(configString, strType);
+    // configDataset.close();
     std::string configString = Json::writeString(Json::StreamWriterBuilder(), finalConfig);
-    H5::StrType strType(H5::PredType::C_S1, H5T_VARIABLE);
+    H5::StrType strType(H5::PredType::C_S1, configString.size() + 1);
+    strType.setCset(H5T_CSET_UTF8);
+    strType.setStrpad(H5T_STR_NULLTERM);
     H5::DataSpace dataspace(H5S_SCALAR);
     H5::DataSet configDataset = datasetFile.createDataSet("config", strType, dataspace);
-    configDataset.write(configString, strType);
+    configDataset.write(configString.c_str(), strType);
     configDataset.close();
+
     std::cout << "Closing file..." << std::endl;
     datasetFile.close();
     return exportConfig.destinationFilePath();
@@ -244,16 +254,6 @@ std::vector<std::string> ColoradarPlusDataset::exportCascade(
         hsize_t numFrames = timestamps.size();
         std::vector<Eigen::Affine3f> basePoses = interpolatePoses(run->getPoses<Eigen::Affine3f>(), run->poseTimestamps(), timestamps);
         std::vector<Eigen::Affine3f> sensorPoses(numFrames);
-        std::cout << "N cascade frames: " << numFrames << std::endl;
-        for (int i = 0; i < numFrames; ++i) {
-            sensorPoses[i] = basePoses[i] * cascadeTransform_;
-            if (i < 110 && i >= 100) {
-                auto t = basePoses[i].translation();
-                std::cout << "basePoses[" << i << "]: " << t.x() << " " << t.y() << " " << t.z() << std::endl;
-                t = sensorPoses[i].translation();
-                std::cout << "sensorPoses[" << i << "]: " << t.x() << " " << t.y() << " " << t.z() << std::endl;
-            }
-        }
 
         // timestamps
         if (config.exportTimestamps()) {
@@ -434,7 +434,6 @@ std::vector<std::string> ColoradarPlusDataset::exportLidar(const LidarExportConf
             filterOccupancy(map, config.occupancyThresholdPercent() / 100.0, config.logOddsToProbability());
 
             if (config.exportMap()) {
-                std::cout << "Exporting lidar map of size " << map->size() << " for run " << run->name() << std::endl;
                 std::vector<float> mapFlat = coloradar::internal::flattenLidarCloud(map, config.collapseElevation(), config.removeOccupancyDim());
                 coloradar::internal::saveCloudToHDF5(lidarMapContentName + "_" + run->name(), datasetFile, mapFlat, numDims);
             }
@@ -476,14 +475,7 @@ std::vector<std::string> ColoradarPlusDataset::exportLidar(const LidarExportConf
 
                 std::vector<float> samplesFlat;
                 std::vector<hsize_t> sampleSizes(numSamples);
-                std::cout << "N map samples: " << numSamples << std::endl;
                 for (size_t i = 0; i < numSamples; ++i) {
-                    // if (i < 110 && i >= 100) {
-                    //     auto t = basePosesCenterTs[i].translation();
-                    //     std::cout << "basePosesCenterTs[" << i << "]: " << t.x() << " " << t.y() << " " << t.z() << std::endl;
-                    //     t = centerPoses[i].translation();
-                    //     std::cout << "centerPoses[" << i << "]: " << t.x() << " " << t.y() << " " << t.z() << std::endl;
-                    // }
                     pcl::PointCloud<pcl::PointXYZI>::Ptr sample;
                     if (resample) {
                         sample = run->sampleMapFrame(

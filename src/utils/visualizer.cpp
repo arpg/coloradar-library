@@ -189,7 +189,7 @@ void DatasetVisualizer::step(const int increment) {
         updateLidarMap(currentStep);
         renderLidarMap();
     }
-    // int cascadeFrameIdx = baseToCascadeFrameIndices[currentStep];
+
     auto cascadeCloud = readCascadeCloud(currentStep);
     renderRadarCloud(cascadeCloud);
     renderLegend();
@@ -227,6 +227,7 @@ pcl::PointCloud<RadarPoint>::Ptr DatasetVisualizer::readCascadeCloud(const int s
         }
     }
     auto cascadeCloud = clippedCascadeRadarConfig->heatmapToPointcloud(cascadeHeatmap, cascadeRadarIntensityThreshold); // use clipped config to convert heatmap to pointcloud
+    std::cout << "Converted heatmap to point cloud of size " << cascadeCloud->size() << std::endl;
     // cascadeCloud = extractTopNIntensity(cascadeCloud, 500);
     cascadeCloud = normalizeRadarCloudIntensity(cascadeCloud);
     

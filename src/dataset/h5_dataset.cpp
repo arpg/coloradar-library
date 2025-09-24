@@ -12,8 +12,16 @@ H5Dataset::H5Dataset(const std::filesystem::path& pathToH5File) {
 
     // read config
     H5::StrType strType(H5::PredType::C_S1, H5T_VARIABLE);
-    std::string configStr;
-    datasetConfig.read(configStr, strType);
+    strType.setCset(H5T_CSET_UTF8);
+    strType.setStrpad(H5T_STR_NULLTERM);
+    char* cbuf = nullptr;
+    datasetConfig.read(&cbuf, strType);
+    std::string configStr = cbuf ? std::string(cbuf) : std::string();
+    if (cbuf) H5free_memory(cbuf);
+    // H5::StrType strType(H5::PredType::C_S1, H5T_VARIABLE);
+    // std::string configStr;
+    // datasetConfig.read(configStr, strType);
+
     Json::CharReaderBuilder b;
     std::unique_ptr<Json::CharReader> reader(b.newCharReader());
     Json::Value root;
