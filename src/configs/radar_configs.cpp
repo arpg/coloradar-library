@@ -83,15 +83,14 @@ std::shared_ptr<std::vector<float>> RadarConfig::clipHeatmap(
     int elevationRightBin = elevationBinLimit + elevationMaxBin + 1;
 
     auto clipped = std::make_shared<std::vector<float>>();
-    clipped->reserve((elevationRightBin - elevationLeftBin + 1) * (azimuthRightBin - azimuthLeftBin + 1) * (rangeMaxBin + 1) * 2);
-
     for (int e = elevationLeftBin; e <= elevationRightBin; ++e) {
         for (int a = azimuthLeftBin; a <= azimuthRightBin; ++a) {
             for (int r = 0; r <= rangeMaxBin; ++r) {
-                for (int n = 0; n < 2; ++n) {
-                    int index = (((e * numAzimuthBins + a) * nRangeBins() + r) * 2) + n;
-                    clipped->push_back((*heatmap)[index]);
+                int index = ((e * numAzimuthBins + a) * nRangeBins() + r) * 2;
+                if (hasDoppler) {
+                    for (int n = 0; n < 2; ++n) clipped->push_back((*heatmap)[index + n]);
                 }
+                else clipped->push_back((*heatmap)[index]);
             }
         }
     }
@@ -102,7 +101,9 @@ std::shared_ptr<std::vector<float>> RadarConfig::clipHeatmap(
         azimuthBins = std::vector<float>(azimuthBins.begin() + azimuthLeftBin,   azimuthBins.begin() + azimuthRightBin);
         elevationBins = std::vector<float>(elevationBins.begin() + elevationLeftBin, elevationBins.begin() + elevationRightBin);
     }
-
+    // std::cout << "clipHeatmap(): clipped->size() = " << clipped->size() << ", nRangeBins(): " << nRangeBins() << std::endl;
+    // std::cout << "elevationLeftBin: " << elevationLeftBin << ", elevationRightBin: " << elevationRightBin << ", numElevationBins: " << numElevationBins << std::endl;
+    // std::cout << "azimuthLeftBin: " << azimuthLeftBin << ", azimuthRightBin: " << azimuthRightBin << ", numAzimuthBins: " << numAzimuthBins << std::endl;
     return clipped;
 }
 
@@ -306,11 +307,10 @@ void RadarConfig::fromJson(const Json::Value& root) {
     if (!H.isMember("elevationBins") || !H["elevationBins"].isArray())
         throw std::invalid_argument("RadarConfig::fromJson: heatmap.elevationBins missing or not array.");
 
-    // numRangeBins     = H["numRangeBins"].asInt();
-    // numPosRangeBins  = H["numPosRangeBins"].asInt();
-    numPosRangeBins  = H["numRangeBins"].asInt();
-    numRangeBins     = numPosRangeBins * 2;
-
+    numRangeBins     = H["numRangeBins"].asInt();
+    numPosRangeBins  = H["numPosRangeBins"].asInt();
+    // numPosRangeBins  = H["numRangeBins"].asInt();
+    // numRangeBins     = numPosRangeBins * 2;
     numElevationBins = H["numElevationBins"].asInt();
     numAzimuthBins   = H["numAzimuthBins"].asInt();
     rangeBinWidth    = H["rangeBinWidth"].asDouble();

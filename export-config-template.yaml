@@ -31,7 +31,7 @@ devices:
     collapse_elevation: False  # True to collapse elevation, aggregate data into 2D
     collapse_elevation_min_z_meters: 0
     collapse_elevation_max_z_meters: 0
-    remove_doppler_dim: False  # True to export heatmaps and point clouds without the doppler dimension
+    remove_doppler_dim: True  # True to export heatmaps and point clouds without the doppler dimension
 
 
   lidar:
@@ -68,7 +68,7 @@ devices:
     allow_resample: True          # False to fail if samples don't exist on disk
     force_resample: False         # True to always rewrite existing samples based on the latest configuration
     save_samples: False           # True to save the samples on disk. Will overwrite any existing samples
-    center_sensor: cascade_radar  # sampling perspective options: base_frame, lidar, cascade_radar
+    center_sensor: cascade_radar  # sampling perspective options: base, lidar, cascade_radar
     map_sample_fov:
       horizontal_degrees_total: 360
       vertical_degrees_total: 180
@@ -80,7 +80,7 @@ devices:
     occupancy_threshold_percent: 0          # set a positive float value between 0 and 100 to filter by occupancy probability
 
 
-  base_frame:
+  base:
     export_poses: False
     export_timestamps: False
 

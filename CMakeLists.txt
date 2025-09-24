@@ -106,7 +106,11 @@ execute_process(
 )
 
 
-find_package(Boost 1.78 REQUIRED COMPONENTS system filesystem thread)
+# Find Boost
+set(Boost_NO_BOOST_CMAKE ON)   # prefer classic FindBoost on all platforms
+find_package(Boost 1.78 REQUIRED COMPONENTS filesystem thread)
+
+
 find_package(Threads REQUIRED)
 find_package(MPI REQUIRED)
 find_package(Eigen3 3.4.0 REQUIRED NO_MODULE)
@@ -222,7 +226,9 @@ add_library(coloradar_lib SHARED
     src/dataset/coloradar_plus_dataset.cpp
     src/dataset/coloradar_dataset.cpp
 )
+
 target_link_libraries(coloradar_lib Threads::Threads ${YAML_CPP_LIBRARIES} ${PCL_LIBRARIES} ${OCTOMAP_LIBRARIES} ${HDF5_LIBRARIES} ${JSONCPP_LIBRARIES})
+
 install(TARGETS coloradar_lib LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
 if(pybind11_FOUND)

@@ -58,6 +58,11 @@ H5Dataset::H5Dataset(const std::filesystem::path& pathToH5File) {
     if (root.isMember("radar_config") && root["radar_config"].isObject()) {
         cascadeConfig_ = std::make_shared<coloradar::CascadeConfig>(root["radar_config"]);
     }
+    if (root.isMember("heatmap_radar_config") && root["heatmap_radar_config"].isObject()) {
+        heatmapConfig_ = std::make_shared<coloradar::CascadeConfig>(root["heatmap_radar_config"]);
+    } else {
+        heatmapConfig_ = std::make_shared<CascadeConfig>(*static_cast<CascadeConfig*>(cascadeConfig_.get()));
+    }
 
     // read transforms
     if (configDataContent.find(transformBaseToCascadeContentName) != configDataContent.end()) {
@@ -137,7 +142,7 @@ void H5Dataset::summary() const {
     std::cout << "\nTotal runs: " << runs_.size() << std::endl;
     for (const auto& run : runs_) {
         std::cout << "Run " << run->name() << ": poses=" << run->poseTimestamps().size() 
-                 << " (" << run->getPoses<Eigen::Affine3f>().size() << " poses)"
+                 // << " (" << run->getPoses<Eigen::Affine3f>().size() << " poses)"
                  << ", imu=" << run->imuTimestamps().size()
                  << ", lidar=" << run->lidarTimestamps().size()
                  // << " (" << run->getLidarPointCloud(0)->size() << " clouds)"

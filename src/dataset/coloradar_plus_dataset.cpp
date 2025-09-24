@@ -85,7 +85,7 @@ std::filesystem::path ColoradarPlusDataset::exportToFile(DatasetExportConfig& ex
     H5::H5File datasetFile(exportConfig.destinationFilePath(), H5F_ACC_TRUNC);
     auto baseContent = exportBaseDevice(exportConfig.base(), exportRunObjects, datasetFile);
     auto imuContent = exportImu(exportConfig.imu(), exportRunObjects, datasetFile);
-    auto cascadeContent = exportCascade(exportConfig.cascade(), exportRunObjects, datasetFile);
+    auto cascadeContent = exportCascade(exportConfig.cascade(), exportRunObjects, datasetFile, &finalConfig);
     auto lidarContent = exportLidar(exportConfig.lidar(), exportRunObjects, datasetFile);
     for (const auto &contentList : {baseContent, imuContent, cascadeContent, lidarContent}) {
         if (contentList.empty()) continue;
@@ -200,7 +200,12 @@ std::vector<std::string> ColoradarPlusDataset::exportImu(const ImuExportConfig &
     return content;
 }
 
-std::vector<std::string> ColoradarPlusDataset::exportCascade(const RadarExportConfig &config, std::vector<std::shared_ptr<ColoradarPlusRun>> runs, H5::H5File& datasetFile) {
+std::vector<std::string> ColoradarPlusDataset::exportCascade(
+    const RadarExportConfig &config,
+    std::vector<std::shared_ptr<ColoradarPlusRun>> runs, 
+    H5::H5File& datasetFile,
+    Json::Value* finalConfig
+) {
     std::vector<std::string> content;
     if (!config.exportTimestamps() && !config.exportPoses() && !config.exportDatacubes() && !config.exportHeatmaps() && !config.exportClouds()) return content;
     std::cout << "Exporting cascade data..." << std::endl;
@@ -232,25 +237,31 @@ std::vector<std::string> ColoradarPlusDataset::exportCascade(const RadarExportCo
         horizontalFov = cascadeConfig_->azimuthIdxToFovDegrees(azimuthMaxBin);
         verticalFov = cascadeConfig_->elevationIdxToFovDegrees(elevationMaxBin);
     }
+    std::shared_ptr<CascadeConfig> heatmapConfig = nullptr;
 
     for (auto run : runs) {
         std::vector<double> timestamps = run->cascadeTimestamps();
         hsize_t numFrames = timestamps.size();
         std::vector<Eigen::Affine3f> basePoses = interpolatePoses(run->getPoses<Eigen::Affine3f>(), run->poseTimestamps(), timestamps);
         std::vector<Eigen::Affine3f> sensorPoses(numFrames);
+        std::cout << "N cascade frames: " << numFrames << std::endl;
         for (int i = 0; i < numFrames; ++i) {
             sensorPoses[i] = basePoses[i] * cascadeTransform_;
+            if (i < 110 && i >= 100) {
+                auto t = basePoses[i].translation();
+                std::cout << "basePoses[" << i << "]: " << t.x() << " " << t.y() << " " << t.z() << std::endl;
+                t = sensorPoses[i].translation();
+                std::cout << "sensorPoses[" << i << "]: " << t.x() << " " << t.y() << " " << t.z() << std::endl;
+            }
         }
 
         // timestamps
-        std::cout << "Exporting cascade timestamps for run " << run->name() << std::endl;
         if (config.exportTimestamps()) {
             coloradar::internal::saveVectorToHDF5(cascadeCubeTimestampsContentName + "_" + run->name(), datasetFile, run->cascadeCubeTimestamps());
             coloradar::internal::saveVectorToHDF5(cascadeTimestampsContentName + "_" + run->name(), datasetFile, timestamps);
         }
 
         // poses
-        std::cout << "Exporting cascade poses for run " << run->name() << std::endl;
         if (config.exportPoses()) {
             coloradar::internal::savePosesToHDF5(cascadePosesContentName + "_" + run->name(), datasetFile, sensorPoses);
         }
@@ -269,7 +280,6 @@ std::vector<std::string> ColoradarPlusDataset::exportCascade(const RadarExportCo
         
         // heatmaps
         if (config.exportHeatmaps()) {
-            std::shared_ptr<CascadeConfig> heatmapConfig;
             std::vector<float> heatmapsFlat;
             for (size_t i = 0; i < numFrames; ++i) {
                 heatmapConfig = std::make_shared<CascadeConfig>(*static_cast<CascadeConfig*>(cascadeConfig_.get()));
@@ -285,6 +295,10 @@ std::vector<std::string> ColoradarPlusDataset::exportCascade(const RadarExportCo
             }
             coloradar::internal::saveHeatmapsToHDF5(cascadeHeatmapsContentName + "_" + run->name(), datasetFile, heatmapsFlat, numFrames, heatmapConfig->numAzimuthBins, heatmapConfig->nRangeBins(), heatmapConfig->numElevationBins, heatmapConfig->hasDoppler);
             heatmapsFlat.clear();
+        }
+        if (heatmapConfig) {
+            if (!finalConfig) throw std::runtime_error("exportCascade(): finalConfig is nullptr");
+            (*finalConfig)["heatmap_radar_config"] = heatmapConfig->toJson();
         }
 
         // clouds
@@ -408,6 +422,8 @@ std::vector<std::string> ColoradarPlusDataset::exportLidar(const LidarExportConf
                 if (config.saveMap()) {
                     run->saveLidarOctomap(octree);
                 }
+            } else {
+                map = run->getLidarOctomap();
             }
             
             hsize_t numDims = config.collapseElevation() ? 3 : 4;  // x, y, (z), occupancy
@@ -418,12 +434,12 @@ std::vector<std::string> ColoradarPlusDataset::exportLidar(const LidarExportConf
             filterOccupancy(map, config.occupancyThresholdPercent() / 100.0, config.logOddsToProbability());
 
             if (config.exportMap()) {
+                std::cout << "Exporting lidar map of size " << map->size() << " for run " << run->name() << std::endl;
                 std::vector<float> mapFlat = coloradar::internal::flattenLidarCloud(map, config.collapseElevation(), config.removeOccupancyDim());
                 coloradar::internal::saveCloudToHDF5(lidarMapContentName + "_" + run->name(), datasetFile, mapFlat, numDims);
             }
 
             if (config.exportMapSamples()) {
-                std::cout << run->name() << ": exporting map samples..." << std::endl;
                 std::vector<double> centerTimestamps;
                 Eigen::Affine3f centerTransform;
                 if (config.centerSensor()->name() == (new CascadeDevice())->name()) {
@@ -460,7 +476,14 @@ std::vector<std::string> ColoradarPlusDataset::exportLidar(const LidarExportConf
 
                 std::vector<float> samplesFlat;
                 std::vector<hsize_t> sampleSizes(numSamples);
+                std::cout << "N map samples: " << numSamples << std::endl;
                 for (size_t i = 0; i < numSamples; ++i) {
+                    // if (i < 110 && i >= 100) {
+                    //     auto t = basePosesCenterTs[i].translation();
+                    //     std::cout << "basePosesCenterTs[" << i << "]: " << t.x() << " " << t.y() << " " << t.z() << std::endl;
+                    //     t = centerPoses[i].translation();
+                    //     std::cout << "centerPoses[" << i << "]: " << t.x() << " " << t.y() << " " << t.z() << std::endl;
+                    // }
                     pcl::PointCloud<pcl::PointXYZI>::Ptr sample;
                     if (resample) {
                         sample = run->sampleMapFrame(

@@ -27,7 +27,7 @@ protected:
 
     std::vector<std::string> exportBaseDevice(const BaseExportConfig &config, std::vector<std::shared_ptr<ColoradarPlusRun>> runs, H5::H5File& datasetFile);
     std::vector<std::string> exportImu(const ImuExportConfig &config, std::vector<std::shared_ptr<ColoradarPlusRun>> runs, H5::H5File& datasetFile);
-    std::vector<std::string> exportCascade(const RadarExportConfig &config, std::vector<std::shared_ptr<ColoradarPlusRun>> runs, H5::H5File& datasetFile);
+    std::vector<std::string> exportCascade(const RadarExportConfig &config, std::vector<std::shared_ptr<ColoradarPlusRun>> runs, H5::H5File& datasetFile, Json::Value* finalConfig = nullptr);
     std::vector<std::string> exportLidar(const LidarExportConfig &config, std::vector<std::shared_ptr<ColoradarPlusRun>> runs, H5::H5File& datasetFile);
 
 public:

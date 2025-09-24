@@ -12,8 +12,8 @@ class H5Dataset : public Dataset {
 protected:
     // ATTRIBUTES
     std::filesystem::path h5SourceFilePath_;
+    std::shared_ptr<RadarConfig> heatmapConfig_;
 
-    
     // METHODS
     H5Dataset() = default;
 
@@ -26,6 +26,8 @@ public:
     H5Dataset& operator=(H5Dataset&&) noexcept = default;
     virtual ~H5Dataset() = default;
     void summary() const;
+
+    const std::shared_ptr<RadarConfig> heatmapConfig() const { return heatmapConfig_; }
 };
 
 }
