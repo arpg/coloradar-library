@@ -86,7 +86,6 @@ std::filesystem::path ColoradarPlusDataset::exportToFile(DatasetExportConfig& ex
     auto baseContent = exportBaseDevice(exportConfig.base(), exportRunObjects, datasetFile);
     auto imuContent = exportImu(exportConfig.imu(), exportRunObjects, datasetFile);
     auto cascadeContent = exportCascade(exportConfig.cascade(), exportRunObjects, datasetFile, &finalConfig);
-    // std::cout << "Heatmap config:\n" << finalConfig["heatmap_radar_config"] << std::endl;
     auto lidarContent = exportLidar(exportConfig.lidar(), exportRunObjects, datasetFile);
     for (const auto &contentList : {baseContent, imuContent, cascadeContent, lidarContent}) {
         if (contentList.empty()) continue;
@@ -105,19 +104,12 @@ std::filesystem::path ColoradarPlusDataset::exportToFile(DatasetExportConfig& ex
         finalConfig["data_content"].append(transformBaseToImuContentName);
     }
 
-    // std::string configString = Json::writeString(Json::StreamWriterBuilder(), finalConfig);
-    // H5::StrType strType(H5::PredType::C_S1, H5T_VARIABLE);
-    // H5::DataSpace dataspace(H5S_SCALAR);
-    // H5::DataSet configDataset = datasetFile.createDataSet("config", strType, dataspace);
-    // configDataset.write(configString, strType);
-    // configDataset.close();
     std::string configString = Json::writeString(Json::StreamWriterBuilder(), finalConfig);
-    H5::StrType strType(H5::PredType::C_S1, configString.size() + 1);
-    strType.setCset(H5T_CSET_UTF8);
-    strType.setStrpad(H5T_STR_NULLTERM);
-    H5::DataSpace dataspace(H5S_SCALAR);
-    H5::DataSet configDataset = datasetFile.createDataSet("config", strType, dataspace);
-    configDataset.write(configString.c_str(), strType);
+    const hsize_t dims[1] = { static_cast<hsize_t>(configString.size()) };
+    H5::DataSpace dataspace(1, dims);
+    H5::DataSet configDataset = datasetFile.createDataSet("config", H5::PredType::STD_U8LE, dataspace);
+    const unsigned char* bytes = reinterpret_cast<const unsigned char*>(configString.data());
+    configDataset.write(bytes, H5::PredType::NATIVE_UINT8);
     configDataset.close();
 
     std::cout << "Closing file..." << std::endl;

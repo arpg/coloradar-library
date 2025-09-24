@@ -51,9 +51,10 @@ pcl::PointCloud<RadarPoint>::Ptr RadarConfig::heatmapToPointcloud(const std::sha
     outputCloud->reserve(pointcloudTemplate->size());
     size_t heatmapIdx = 0;
 
+    float intensity, doppler = 0.0f;
     for (size_t pointIdx = 0; pointIdx < pointcloudTemplate->size(); ++pointIdx) {
-        const float intensity = heatmap->at(heatmapIdx++);
-        const float doppler   = heatmap->at(heatmapIdx++);
+        intensity = heatmap->at(heatmapIdx++);
+        if (hasDoppler) doppler = heatmap->at(heatmapIdx++);
         if (intensity >= intensityThreshold) {
             RadarPoint point = (*pointcloudTemplate)[pointIdx];
             point.intensity = intensity;

@@ -74,22 +74,8 @@ void DatasetVisualizer::visualize(const std::shared_ptr<Run> run, const bool use
         auto lidarIdx = findClosestTimestampIndex(cascadeTimestamp, run->lidarTimestamps());
         cascadeToLidarFrameIndices[cascadeIdx] = lidarIdx;
     }
-    // baseToLidarFrameIndices.resize(basePoses.size());
-    // baseToCascadeFrameIndices.resize(basePoses.size());
-    // for (size_t baseIdx = 0; baseIdx < basePoses.size(); baseIdx++) {
-    //     auto baseTimestamp = run->poseTimestamps()[baseIdx];
-    //     auto lidarFrameIdx = findClosestTimestampIndex(baseTimestamp, run->lidarTimestamps(), "before");
-    //     auto cascadeFrameIdx = findClosestTimestampIndex(baseTimestamp, run->cascadeTimestamps(), "before");
-    //     baseToLidarFrameIndices[baseIdx] = lidarFrameIdx;
-    //     baseToCascadeFrameIndices[baseIdx] = cascadeFrameIdx;
-    // }
-    
-    // init visualization parameters
-    // numSteps = baseToLidarFrameIndices.size();
     numSteps = basePosesCascadeTs.size();
     mapIsPrebuilt = usePrebuiltMap;
-    // std::cout << "visualize(): numSteps = " << numSteps << std::endl;
-    // std::cout << "visualize(): usePrebuiltMap = " << usePrebuiltMap << std::endl;
     if (usePrebuiltMap) {
         lidarMapCloud = run->getLidarOctomap();
         if (lidarMapCloud->empty()) throw std::runtime_error("Prebuilt map cloud is empty.");
@@ -211,37 +197,17 @@ void DatasetVisualizer::updateLidarMap(const int step) {
 
 pcl::PointCloud<RadarPoint>::Ptr DatasetVisualizer::readCascadeCloud(const int scanIdx) {
     auto cascadeHeatmap = run->getCascadeHeatmap(scanIdx);
-    std::cout << "readCascadeCloud(): scanIdx = " << scanIdx << ", cascadeHeatmap->size() = " << cascadeHeatmap->size() << ", hasDoppler: " << cascadeRadarConfig->hasDoppler << std::endl;
-    if (cascadeHeatmap->size() >= 5) {
-        for (int i = 0; i < 5; ++i) {
-            std::cout << "Original heatmap element " << i << ": " << cascadeHeatmap->at(i) << std::endl;
-        }
-    }
     int targetNumRangeBins = static_cast<int>(cascadeRadarConfig->nRangeBins() * 0.75);
     if (cascadeRadarConfig->numElevationBins > 0 || cascadeRadarConfig->nRangeBins() > targetNumRangeBins) {
         cascadeHeatmap = cascadeRadarConfig->clipHeatmap(cascadeHeatmap, cascadeRadarConfig->numAzimuthBins, 0, targetNumRangeBins, false); // clip without config update
     }
-    if (cascadeHeatmap->size() >= 5) {
-        for (int i = 0; i < 5; ++i) {
-            std::cout << "Clipped heatmap element " << i << ": " << cascadeHeatmap->at(i) << std::endl;
-        }
-    }
     auto cascadeCloud = clippedCascadeRadarConfig->heatmapToPointcloud(cascadeHeatmap, cascadeRadarIntensityThreshold); // use clipped config to convert heatmap to pointcloud
-    std::cout << "Converted heatmap to point cloud of size " << cascadeCloud->size() << std::endl;
-    // cascadeCloud = extractTopNIntensity(cascadeCloud, 500);
     cascadeCloud = normalizeRadarCloudIntensity(cascadeCloud);
     
     auto map_T_base = basePosesCascadeTs[scanIdx];  // read map_T_base as "base to map"
     auto base_T_cascade = baseToCascadeTransform; // read base_T_cascade as "cascade to base"
     auto map_T_cascade = map_T_base * base_T_cascade; // read map_T_cascade as "cascade to map"
-    pcl::transformPointCloud(*cascadeCloud, *cascadeCloud, map_T_cascade);                                  // map frame
-    std::cout << "readCascadeCloud(): cascadeCloud->size() = " << cascadeCloud->size() << std::endl;
-    if (cascadeCloud->size() >= 5) {
-        for (int i = 0; i < 5; ++i) {
-            const auto& point = cascadeCloud->points[i];
-            std::cout << "Radar cloud point " << i << ": " << point.x << ", " << point.y << ", " << point.z << std::endl;
-        }
-    }
+    pcl::transformPointCloud(*cascadeCloud, *cascadeCloud, map_T_cascade); // map frame
     return cascadeCloud;
 }
 

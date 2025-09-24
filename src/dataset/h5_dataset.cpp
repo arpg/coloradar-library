@@ -8,32 +8,27 @@ H5Dataset::H5Dataset(const std::filesystem::path& pathToH5File) {
     coloradar::internal::checkPathExists(pathToH5File);
     h5SourceFilePath_ = pathToH5File;
     H5::H5File file(h5SourceFilePath_.string(), H5F_ACC_RDONLY);
-    H5::DataSet datasetConfig = file.openDataSet("config");
 
     // read config
-    H5::StrType strType(H5::PredType::C_S1, H5T_VARIABLE);
-    strType.setCset(H5T_CSET_UTF8);
-    strType.setStrpad(H5T_STR_NULLTERM);
-    char* cbuf = nullptr;
-    datasetConfig.read(&cbuf, strType);
-    std::string configStr = cbuf ? std::string(cbuf) : std::string();
-    if (cbuf) H5free_memory(cbuf);
-    // H5::StrType strType(H5::PredType::C_S1, H5T_VARIABLE);
-    // std::string configStr;
-    // datasetConfig.read(configStr, strType);
-
+    H5::DataSet datasetConfig = file.openDataSet("config");
+    H5::DataSpace space = datasetConfig.getSpace();
+    int ndims = space.getSimpleExtentNdims();
+    if (ndims != 1) throw std::runtime_error("HDF5 'config' dataset must be 1-D uint8.");
+    hsize_t dims[1] = {0};
+    space.getSimpleExtentDims(dims, nullptr);
+    std::vector<unsigned char> buf(static_cast<size_t>(dims[0]));
+    if (!buf.empty()) {
+        datasetConfig.read(buf.data(), H5::PredType::NATIVE_UINT8);
+    }
+    std::string configStr(reinterpret_cast<const char*>(buf.data()), buf.size());
     Json::CharReaderBuilder b;
     std::unique_ptr<Json::CharReader> reader(b.newCharReader());
     Json::Value root;
     std::string errs;
     const char* begin = configStr.data();
     const char* end   = begin + configStr.size();
-    if (!reader->parse(begin, end, &root, &errs)) {
-        throw std::runtime_error("Failed to parse JSON from HDF5 'config': " + errs);
-    }
-    if (!root.isObject()) {
-        throw std::runtime_error("Invalid config JSON: expected an object at top level.");
-    }
+    if (!reader->parse(begin, end, &root, &errs)) throw std::runtime_error("Failed to parse JSON from HDF5 'config': " + errs);
+    if (!root.isObject()) throw std::runtime_error("Invalid config JSON: expected an object at top level.");
 
     // extract runs
     std::vector<std::string> configRuns;
