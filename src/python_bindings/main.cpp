@@ -182,7 +182,7 @@ pcl::PointCloud<coloradar::RadarPoint>::Ptr heatmapToPointcloudBinding(
     if (buf.ndim != 1) {
         throw std::runtime_error("Heatmap array must be 1-dimensional");
     }
-    const size_t expected_size = static_cast<size_t>(config.numElevationBins * config.numAzimuthBins * config.nRangeBins() * 2);
+    const size_t expected_size = static_cast<size_t>(config.numElevationBins() * config.numAzimuthBins() * config.nRangeBins() * 2);
     if (buf.size != expected_size) throw std::runtime_error("Heatmap size mismatch: expected " + std::to_string(expected_size) + ", got " + std::to_string(buf.size));
 
     const float* data_ptr = static_cast<const float*>(buf.ptr);
@@ -230,42 +230,41 @@ PYBIND11_MODULE(coloradar_dataset_lib, m) {
     using RC = coloradar::RadarConfig;
 
     py::class_<RC, std::shared_ptr<RC>>(m, "RadarConfig")
-        .def_readonly("has_doppler", &RC::hasDoppler)
-        .def_readonly("num_elevation_bins", &RC::numElevationBins)
-        .def_readonly("num_azimuth_bins",   &RC::numAzimuthBins)
-        .def_readonly("range_bin_width",    &RC::rangeBinWidth)
-        .def_readonly("azimuth_bins",       &RC::azimuthBins)
-        .def_readonly("elevation_bins",     &RC::elevationBins)
-        .def_readonly("design_frequency",   &RC::designFrequency)
-        .def_readonly("num_tx_antennas",    &RC::numTxAntennas)
-        .def_readonly("num_rx_antennas",    &RC::numRxAntennas)
-        .def_readonly("tx_centers",         &RC::txCenters)
-        .def_readonly("rx_centers",         &RC::rxCenters)
-        .def_readonly("num_adc_samples_per_chirp", &RC::numAdcSamplesPerChirp)
-        .def_readonly("num_chirps_per_frame",      &RC::numChirpsPerFrame)
-        .def_readonly("adc_sample_frequency",      &RC::adcSampleFrequency)
-        .def_readonly("start_frequency",           &RC::startFrequency)
-        .def_readonly("idle_time",                 &RC::idleTime)
-        .def_readonly("adc_start_time",            &RC::adcStartTime)
-        .def_readonly("ramp_end_time",             &RC::rampEndTime)
-        .def_readonly("frequency_slope",           &RC::frequencySlope)
-        .def_readonly("num_doppler_bins",          &RC::numDopplerBins)
-        .def_readonly("coupling_calib_matrix",     &RC::couplingCalibMatrix)
-        .def_readonly("calib_adc_sample_frequency",&RC::calibAdcSampleFrequency)
-        .def_readonly("calib_frequency_slope",     &RC::calibFrequencySlope)
-        .def_readonly("frequency_calib_matrix",    &RC::frequencyCalibMatrix)
-        .def_readonly("phase_calib_matrix",        &RC::phaseCalibMatrix)
-        .def_readonly("num_azimuth_beams",         &RC::numAzimuthBeams)
-        .def_readonly("num_elevation_beams",       &RC::numElevationBeams)
-        .def_readonly("azimuth_aperture_len",      &RC::azimuthApertureLen)
-        .def_readonly("elevation_aperture_len",    &RC::elevationApertureLen)
-        .def_readonly("num_angles",                &RC::numAngles)
-        .def_readonly("num_virtual_elements",      &RC::numVirtualElements)
-        .def_readonly("virtual_array_map",         &RC::virtualArrayMap)
-        .def_readonly("azimuth_angles",            &RC::azimuthAngles)
-        .def_readonly("elevation_angles",          &RC::elevationAngles)
-        .def_readonly("doppler_bin_width",         &RC::dopplerBinWidth)
-
+        .def("has_doppler", &RC::hasDoppler)
+        .def("num_elevation_bins", &RC::numElevationBins)
+        .def("num_azimuth_bins",   &RC::numAzimuthBins)
+        .def("range_bin_width",    &RC::rangeBinWidth)
+        .def("azimuth_bins",       &RC::azimuthBins)
+        .def("elevation_bins",     &RC::elevationBins)
+        .def("design_frequency",   &RC::designFrequency)
+        .def("num_tx_antennas",    &RC::numTxAntennas)
+        .def("num_rx_antennas",    &RC::numRxAntennas)
+        .def("tx_centers",         &RC::txCenters)
+        .def("rx_centers",         &RC::rxCenters)
+        .def("num_adc_samples_per_chirp", &RC::numAdcSamplesPerChirp)
+        .def("num_chirps_per_frame",      &RC::numChirpsPerFrame)
+        .def("adc_sample_frequency",      &RC::adcSampleFrequency)
+        .def("start_frequency",           &RC::startFrequency)
+        .def("idle_time",                 &RC::idleTime)
+        .def("adc_start_time",            &RC::adcStartTime)
+        .def("ramp_end_time",             &RC::rampEndTime)
+        .def("frequency_slope",           &RC::frequencySlope)
+        .def("num_doppler_bins",          &RC::numDopplerBins)
+        .def("coupling_calib_matrix",     &RC::couplingCalibMatrix)
+        .def("calib_adc_sample_frequency",&RC::calibAdcSampleFrequency)
+        .def("calib_frequency_slope",     &RC::calibFrequencySlope)
+        .def("frequency_calib_matrix",    &RC::frequencyCalibMatrix)
+        .def("phase_calib_matrix",        &RC::phaseCalibMatrix)
+        .def("num_azimuth_beams",         &RC::numAzimuthBeams)
+        .def("num_elevation_beams",       &RC::numElevationBeams)
+        .def("azimuth_aperture_len",      &RC::azimuthApertureLen)
+        .def("elevation_aperture_len",    &RC::elevationApertureLen)
+        .def("num_angles",                &RC::numAngles)
+        .def("num_virtual_elements",      &RC::numVirtualElements)
+        .def("virtual_array_map",         &RC::virtualArrayMap)
+        .def("azimuth_angles",            &RC::azimuthAngles)
+        .def("elevation_angles",          &RC::elevationAngles)
+        .def("doppler_bin_width",         &RC::dopplerBinWidth)
         .def("n_range_bins", &RC::nRangeBins)
         .def("max_range",    &RC::maxRange)
         .def("to_json",      &RC::toJson)
@@ -281,36 +280,32 @@ PYBIND11_MODULE(coloradar_dataset_lib, m) {
         .def("vertical_fov_to_elevation_idx",&RC::verticalFovToElevationIdx, py::arg("vertical_fov"))
         .def("range_to_range_idx",          &RC::rangeToRangeIdx,          py::arg("range"))
 
-        .def("clip_heatmap", [](coloradar::RadarConfig& self, const std::vector<float>& heatmap, int azimuth_max_bin, int elevation_max_bin, int range_max_bin, bool update_config) {
-            auto clipped = self.clipHeatmap(std::make_shared<std::vector<float>>(heatmap), azimuth_max_bin, elevation_max_bin, range_max_bin, update_config);
-            return vectorToNumpy(*clipped);
-        }, py::arg("heatmap"), py::arg("azimuth_max_bin"), py::arg("elevation_max_bin"), py::arg("range_max_bin"), py::arg("update_config") = true)
+        .def("clip_heatmap", [](coloradar::RadarConfig& self, const std::vector<float>& heatmap, int azimuth_max_bin, int elevation_max_bin, int range_max_bin) {
+            auto result = self.clipHeatmap(std::make_shared<std::vector<float>>(heatmap), azimuth_max_bin, elevation_max_bin, range_max_bin);
+            return py::make_tuple(vectorToNumpy(*result.heatmap), result.newConfig);
+        }, py::arg("heatmap"), py::arg("azimuth_max_bin"), py::arg("elevation_max_bin"), py::arg("range_max_bin"))
 
-        .def("clip_heatmap", [](coloradar::RadarConfig& self, const std::vector<float>& heatmap, float horizontal_fov, float vertical_fov, float range, bool update_config) {
-            auto clipped = self.clipHeatmap(std::make_shared<std::vector<float>>(heatmap), horizontal_fov, vertical_fov, range, update_config);
-            return vectorToNumpy(*clipped);
-        }, py::arg("heatmap"), py::arg("horizontal_fov"), py::arg("vertical_fov"), py::arg("range"), py::arg("update_config") = true)
+        .def("clip_heatmap", [](coloradar::RadarConfig& self, const std::vector<float>& heatmap, float horizontal_fov, float vertical_fov, float range) {
+            auto result = self.clipHeatmap(std::make_shared<std::vector<float>>(heatmap), horizontal_fov, vertical_fov, range);
+            return py::make_tuple(vectorToNumpy(*result.heatmap), result.newConfig);
+        }, py::arg("heatmap"), py::arg("horizontal_fov"), py::arg("vertical_fov"), py::arg("range"))
 
-        .def("collapse_heatmap_elevation", [](coloradar::RadarConfig& self, const std::vector<float>& heatmap, double elevation_min_meters, double elevation_max_meters, bool update_config) {
-            auto result = self.collapseHeatmapElevation(std::make_shared<std::vector<float>>(heatmap), elevation_min_meters, elevation_max_meters, update_config);
-            return vectorToNumpy(*result);
+        .def("collapse_heatmap_elevation", [](coloradar::RadarConfig& self, const std::vector<float>& heatmap, double elevation_min_meters, double elevation_max_meters) {
+            auto result = self.collapseHeatmapElevation(std::make_shared<std::vector<float>>(heatmap), elevation_min_meters, elevation_max_meters);
+            return py::make_tuple(vectorToNumpy(*result.heatmap), result.newConfig);
         }, py::arg("heatmap"), 
            py::arg("elevation_min_meters") = -100.0, 
-           py::arg("elevation_max_meters") = 100.0, 
-           py::arg("update_config") = true
-        )
+           py::arg("elevation_max_meters") = 100.0)
 
-        .def("remove_doppler", [](coloradar::RadarConfig& self, const std::vector<float>& heatmap, bool update_config) {
-            auto result = self.removeDoppler(std::make_shared<std::vector<float>>(heatmap), update_config);
-            return vectorToNumpy(*result);
-        }, py::arg("heatmap"), 
-           py::arg("update_config") = true
-        )
-
-        .def("swap_heatmap_dimensions", [](coloradar::RadarConfig& self, const std::vector<float>& heatmap) {
-            auto result = self.swapHeatmapDimensions(std::make_shared<std::vector<float>>(heatmap));
-            return vectorToNumpy(*result);
+        .def("remove_doppler", [](coloradar::RadarConfig& self, const std::vector<float>& heatmap) {
+            auto result = self.removeDoppler(std::make_shared<std::vector<float>>(heatmap));
+            return py::make_tuple(vectorToNumpy(*result.heatmap), result.newConfig);
         }, py::arg("heatmap"))
+
+        // .def("swap_heatmap_dimensions", [](coloradar::RadarConfig& self, const std::vector<float>& heatmap) {
+        //     auto result = self.swapHeatmapDimensions(std::make_shared<std::vector<float>>(heatmap));
+        //     return py::make_tuple(vectorToNumpy(*result.heatmap), result.newConfig);
+        // }, py::arg("heatmap"))
 
         .def("heatmap_to_pointcloud", [](coloradar::RadarConfig& self, const py::array_t<float>& heatmap, float intensityThreshold = 0.0f) {
             auto cloud = heatmapToPointcloudBinding(heatmap, self, intensityThreshold);

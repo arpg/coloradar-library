@@ -73,7 +73,7 @@ std::shared_ptr<std::vector<int16_t>> ColoradarPlusRun::readDatacube(const std::
     std::ifstream file(binFilePath, std::ios::binary);
     if (!file) throw std::runtime_error("Failed to open file: " + binFilePath.string());
 
-    const size_t totalElements = config->numTxAntennas * config->numRxAntennas * config->numChirpsPerFrame * config->numAdcSamplesPerChirp * 2;
+    const size_t totalElements = config->numTxAntennas() * config->numRxAntennas() * config->numChirpsPerFrame() * config->numAdcSamplesPerChirp() * 2;
     const size_t totalBytes = totalElements * sizeof(int16_t);
     auto datacube = std::make_shared<std::vector<int16_t>>(totalElements);
     if (!file.read(reinterpret_cast<char*>(datacube->data()), totalBytes))
@@ -87,7 +87,7 @@ std::shared_ptr<std::vector<float>> ColoradarPlusRun::readHeatmap(const std::fil
     std::ifstream file(binFilePath, std::ios::binary);
     if (!file) throw std::runtime_error("Failed to open file: " + binFilePath.string());
 
-    int totalElements = config->numElevationBins * config->numAzimuthBins * config->numPosRangeBins * 2;
+    int totalElements = config->numElevationBins() * config->numAzimuthBins() * config->nRangeBins() * 2;
     const size_t totalBytes = totalElements * sizeof(float);
     auto heatmap = std::make_shared<std::vector<float>>(totalElements);
     if (!file.read(reinterpret_cast<char*>(heatmap->data()), totalBytes))

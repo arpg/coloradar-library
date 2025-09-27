@@ -67,6 +67,24 @@ std::filesystem::path ColoradarPlusDataset::exportToFile(const std::string &yaml
     return exportToFile(exportConfig);
 }
 
+Json::Value affineToJson(const Eigen::Affine3f& transform) {
+    Json::Value transformJson(Json::objectValue);
+    Eigen::Vector3f trans = transform.translation();
+    Json::Value transJson(Json::arrayValue);
+    transJson.append(trans.x());
+    transJson.append(trans.y());
+    transJson.append(trans.z());
+    transformJson["translation"] = transJson;
+    Eigen::Quaternionf rot(transform.linear());
+    Json::Value rotJson(Json::arrayValue);
+    rotJson.append(rot.x());
+    rotJson.append(rot.y());
+    rotJson.append(rot.z());
+    rotJson.append(rot.w());
+    transformJson["rotation"] = rotJson;
+    return transformJson;
+}
+
 std::filesystem::path ColoradarPlusDataset::exportToFile(DatasetExportConfig& exportConfig) {
     Json::Value finalConfig;
     finalConfig["runs"] = Json::arrayValue;
@@ -83,10 +101,32 @@ std::filesystem::path ColoradarPlusDataset::exportToFile(DatasetExportConfig& ex
     std::cout << "Exporting " << finalConfig["runs"].size() << " run(s)." << std::endl;
 
     H5::H5File datasetFile(exportConfig.destinationFilePath(), H5F_ACC_TRUNC);
-    auto baseContent = exportBaseDevice(exportConfig.base(), exportRunObjects, datasetFile);
-    auto imuContent = exportImu(exportConfig.imu(), exportRunObjects, datasetFile);
-    auto cascadeContent = exportCascade(exportConfig.cascade(), exportRunObjects, datasetFile, &finalConfig);
-    auto lidarContent = exportLidar(exportConfig.lidar(), exportRunObjects, datasetFile);
+    std::vector<std::string> baseContent, imuContent, cascadeContent, lidarContent;
+    try {
+        baseContent = exportBaseDevice(exportConfig.base(), exportRunObjects, datasetFile);
+    } catch (const std::exception& e) {
+        std::cerr << "Error exporting base device data: " << e.what() << std::endl;
+        throw;
+    }
+    try {
+        imuContent = exportImu(exportConfig.imu(), exportRunObjects, datasetFile);
+    } catch (const std::exception& e) {
+        std::cerr << "Error exporting IMU data: " << e.what() << std::endl;
+        throw;
+    }
+    try {
+        cascadeContent = exportCascade(exportConfig.cascade(), exportRunObjects, datasetFile, &finalConfig);
+    } catch (const std::exception& e) {
+        std::cerr << "Error exporting cascade radar data: " << e.what() << std::endl;
+        throw;
+    }
+    try {
+        lidarContent = exportLidar(exportConfig.lidar(), exportRunObjects, datasetFile);
+    } catch (const std::exception& e) {
+        std::cerr << "Error exporting LiDAR data: " << e.what() << std::endl;
+        throw;
+    }
+
     for (const auto &contentList : {baseContent, imuContent, cascadeContent, lidarContent}) {
         if (contentList.empty()) continue;
         for (const auto &content : contentList) {
@@ -96,12 +136,11 @@ std::filesystem::path ColoradarPlusDataset::exportToFile(DatasetExportConfig& ex
 
     if (exportConfig.exportTransforms()) {
         std::cout << "Exporting transforms..." << std::endl;
-        coloradar::internal::savePoseToHDF5(transformBaseToCascadeContentName, datasetFile, cascadeTransform_);
-        coloradar::internal::savePoseToHDF5(transformBaseToLidarContentName, datasetFile, lidarTransform_);
-        coloradar::internal::savePoseToHDF5(transformBaseToImuContentName, datasetFile, imuTransform_);
-        finalConfig["data_content"].append(transformBaseToCascadeContentName);
-        finalConfig["data_content"].append(transformBaseToLidarContentName);
-        finalConfig["data_content"].append(transformBaseToImuContentName);
+        Json::Value transformsJson(Json::objectValue);
+        transformsJson[transformBaseToCascadeContentName] = affineToJson(cascadeTransform_);
+        transformsJson[transformBaseToLidarContentName] = affineToJson(lidarTransform_);
+        transformsJson[transformBaseToImuContentName] = affineToJson(imuTransform_);
+        finalConfig["transforms"] = transformsJson;
     }
 
     std::string configString = Json::writeString(Json::StreamWriterBuilder(), finalConfig);
@@ -239,7 +278,7 @@ std::vector<std::string> ColoradarPlusDataset::exportCascade(
         horizontalFov = cascadeConfig_->azimuthIdxToFovDegrees(azimuthMaxBin);
         verticalFov = cascadeConfig_->elevationIdxToFovDegrees(elevationMaxBin);
     }
-    std::shared_ptr<CascadeConfig> heatmapConfig = nullptr;
+    std::shared_ptr<CascadeConfig> heatmapConfig;
 
     for (auto run : runs) {
         std::vector<double> timestamps = run->cascadeTimestamps();
@@ -261,7 +300,7 @@ std::vector<std::string> ColoradarPlusDataset::exportCascade(
         // datacubes
         if (config.exportDatacubes()) {
             hsize_t numCubeFrames = run->cascadeCubeTimestamps().size();
-            hsize_t datacubeSize = static_cast<hsize_t>(cascadeConfig_->numElevationBins * cascadeConfig_->numAzimuthBins * cascadeConfig_->nRangeBins() * 2);
+            hsize_t datacubeSize = static_cast<hsize_t>(cascadeConfig_->numElevationBins() * cascadeConfig_->numAzimuthBins() * cascadeConfig_->nRangeBins() * 2);
             std::vector<int16_t> datacubesFlat;
             for (size_t i = 0; i < numCubeFrames; ++i) {
                 auto datacube = run->getCascadeDatacube(i);
@@ -274,18 +313,31 @@ std::vector<std::string> ColoradarPlusDataset::exportCascade(
         if (config.exportHeatmaps()) {
             std::vector<float> heatmapsFlat;
             for (size_t i = 0; i < numFrames; ++i) {
-                heatmapConfig = std::make_shared<CascadeConfig>(*static_cast<CascadeConfig*>(cascadeConfig_.get()));
+                heatmapConfig = dynamic_pointer_cast<CascadeConfig>(cascadeConfig_->clone());
                 auto heatmap = run->getCascadeHeatmap(i);
-                heatmap = heatmapConfig->clipHeatmap(heatmap, azimuthMaxBin, elevationMaxBin, rangeMaxBin);
+                auto heatmapResult = heatmapConfig->clipHeatmap(heatmap, azimuthMaxBin, elevationMaxBin, rangeMaxBin);
+                heatmap = heatmapResult.heatmap;
+                heatmapConfig = std::dynamic_pointer_cast<CascadeConfig>(heatmapResult.newConfig);
                 if (config.collapseElevation()) {
-                    heatmap = heatmapConfig->collapseHeatmapElevation(heatmap, config.collapseElevationMinZ(), config.collapseElevationMaxZ());
+                    heatmapResult = heatmapConfig->collapseHeatmapElevation(heatmap, config.collapseElevationMinZ(), config.collapseElevationMaxZ());
+                    heatmap = heatmapResult.heatmap;
+                    heatmapConfig = std::dynamic_pointer_cast<CascadeConfig>(heatmapResult.newConfig);
                 }
                 if (config.removeDopplerDim()) {
-                    heatmap = heatmapConfig->removeDoppler(heatmap);
+                    heatmapResult = heatmapConfig->removeDoppler(heatmap);
+                    heatmap = heatmapResult.heatmap;
+                    heatmapConfig = std::dynamic_pointer_cast<CascadeConfig>(heatmapResult.newConfig);
                 }
                 heatmapsFlat.insert(heatmapsFlat.end(), heatmap->begin(), heatmap->end());
             }
-            coloradar::internal::saveHeatmapsToHDF5(cascadeHeatmapsContentName + "_" + run->name(), datasetFile, heatmapsFlat, numFrames, heatmapConfig->numAzimuthBins, heatmapConfig->nRangeBins(), heatmapConfig->numElevationBins, heatmapConfig->hasDoppler);
+            coloradar::internal::saveHeatmapsToHDF5(
+                cascadeHeatmapsContentName + "_" + run->name(), 
+                datasetFile, heatmapsFlat, numFrames, 
+                heatmapConfig->numAzimuthBins(), 
+                heatmapConfig->nRangeBins(), 
+                heatmapConfig->numElevationBins(), 
+                heatmapConfig->hasDoppler()
+            );
             heatmapsFlat.clear();
         }
         if (heatmapConfig) {
@@ -295,8 +347,8 @@ std::vector<std::string> ColoradarPlusDataset::exportCascade(
 
         // clouds
         if (config.exportClouds()) {
-            hsize_t numDims = cascadeConfig_->numElevationBins > 0 ? 5 : 4;  // x, y, (z), intensity, doppler
-            if (!cascadeConfig_->hasDoppler) numDims -= 1;
+            hsize_t numDims = cascadeConfig_->numElevationBins() > 0 ? 5 : 4;  // x, y, (z), intensity, doppler
+            if (!cascadeConfig_->hasDoppler()) numDims -= 1;
 
             bool buildClouds = false;
             try {
@@ -322,7 +374,7 @@ std::vector<std::string> ColoradarPlusDataset::exportCascade(
                     collapseElevation(cloud, config.collapseElevationMinZ(), config.collapseElevationMaxZ());
                 }
                 cloudSizes[i] = cloud->size();
-                std::vector<float> cloudFlat = coloradar::internal::flattenRadarCloud(cloud, cascadeConfig_->numElevationBins, cascadeConfig_->hasDoppler);
+                std::vector<float> cloudFlat = coloradar::internal::flattenRadarCloud(cloud, cascadeConfig_->numElevationBins(), cascadeConfig_->hasDoppler());
                 cloudsFlat.insert(cloudsFlat.end(), cloudFlat.begin(), cloudFlat.end());
             }
             coloradar::internal::saveCloudsToHDF5(cascadeCloudsContentName + "_" + run->name(), datasetFile, cloudsFlat, numFrames, cloudSizes, numDims);
@@ -380,7 +432,7 @@ std::vector<std::string> ColoradarPlusDataset::exportLidar(const LidarExportConf
                     collapseElevation(cloud, config.collapseElevationMinZ(), config.collapseElevationMaxZ());
                 }
                 cloudSizes[i] = cloud->size();
-                auto cloudFlat = coloradar::internal::flattenLidarCloud(cloud, config.collapseElevation(), config.removeIntensityDim());\
+                auto cloudFlat = coloradar::internal::flattenLidarCloud(cloud, config.collapseElevation(), config.removeIntensityDim());
                 cloudsFlat.insert(cloudsFlat.end(), cloudFlat.begin(), cloudFlat.end());
             }
             coloradar::internal::saveCloudsToHDF5(lidarCloudsContentName + "_" + run->name(), datasetFile, cloudsFlat, numFrames, cloudSizes, numDims);

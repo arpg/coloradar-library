@@ -31,8 +31,8 @@ DatasetVisualizer::DatasetVisualizer(
     
     // init radar config
     auto sampleHeatmap = std::make_shared<std::vector<float>>(cascadeRadarConfig->heatmapSize(), 0.0f);
-    clippedCascadeRadarConfig = std::make_shared<CascadeConfig>(*cascadeRadarConfig); // copy config
-    clippedCascadeRadarConfig->clipHeatmap(sampleHeatmap, cascadeRadarConfig->numAzimuthBins, 0, static_cast<int>(cascadeRadarConfig->nRangeBins() * 0.75), true); // clip sample heatmap to modify the config
+    auto result = cascadeRadarConfig->clipHeatmap(sampleHeatmap, cascadeRadarConfig->numAzimuthBins(), 0, static_cast<int>(cascadeRadarConfig->nRangeBins() * 0.75));
+    clippedCascadeRadarConfig = std::dynamic_pointer_cast<CascadeConfig>(result.newConfig);
     clippedCascadeRadarConfig->precomputePointcloudTemplate(); // update cloud template
 }
 
@@ -198,8 +198,9 @@ void DatasetVisualizer::updateLidarMap(const int step) {
 pcl::PointCloud<RadarPoint>::Ptr DatasetVisualizer::readCascadeCloud(const int scanIdx) {
     auto cascadeHeatmap = run->getCascadeHeatmap(scanIdx);
     int targetNumRangeBins = static_cast<int>(cascadeRadarConfig->nRangeBins() * 0.75);
-    if (cascadeRadarConfig->numElevationBins > 0 || cascadeRadarConfig->nRangeBins() > targetNumRangeBins) {
-        cascadeHeatmap = cascadeRadarConfig->clipHeatmap(cascadeHeatmap, cascadeRadarConfig->numAzimuthBins, 0, targetNumRangeBins, false); // clip without config update
+    if (cascadeRadarConfig->numElevationBins() > 0 || cascadeRadarConfig->nRangeBins() > targetNumRangeBins) {
+        auto result = cascadeRadarConfig->clipHeatmap(cascadeHeatmap, cascadeRadarConfig->numAzimuthBins(), 0, targetNumRangeBins);
+        cascadeHeatmap = result.heatmap;
     }
     auto cascadeCloud = clippedCascadeRadarConfig->heatmapToPointcloud(cascadeHeatmap, cascadeRadarIntensityThreshold); // use clipped config to convert heatmap to pointcloud
     cascadeCloud = normalizeRadarCloudIntensity(cascadeCloud);

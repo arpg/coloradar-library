@@ -1,6 +1,25 @@
 #include "dataset/h5_dataset.h"
 
 
+Eigen::Affine3f jsonToAffine(const Json::Value& transformJson) {
+    if (!transformJson.isObject() || !transformJson.isMember("translation") || !transformJson.isMember("rotation")) {
+        throw std::runtime_error("Invalid transform JSON: must be an object with 'translation' and 'rotation' keys.");
+    }
+    const Json::Value& transJson = transformJson["translation"];
+    if (!transJson.isArray() || transJson.size() != 3) {
+        throw std::runtime_error("Invalid translation JSON: must be an array of 3 floats.");
+    }
+    Eigen::Vector3f translation(transJson[0].asFloat(), transJson[1].asFloat(), transJson[2].asFloat());
+    const Json::Value& rotJson = transformJson["rotation"];
+    if (!rotJson.isArray() || rotJson.size() != 4) {
+        throw std::runtime_error("Invalid rotation JSON: must be an array of 4 floats (quaternion x,y,z,w).");
+    }
+    Eigen::Quaternionf rotation(rotJson[3].asFloat(), rotJson[0].asFloat(), rotJson[1].asFloat(), rotJson[2].asFloat());
+    Eigen::Affine3f transform = Eigen::Translation3f(translation) * rotation;
+    return transform;
+}
+
+
 namespace coloradar {
 
 H5Dataset::H5Dataset(const std::filesystem::path& pathToH5File) {
@@ -68,14 +87,19 @@ H5Dataset::H5Dataset(const std::filesystem::path& pathToH5File) {
     }
 
     // read transforms
-    if (configDataContent.find(transformBaseToCascadeContentName) != configDataContent.end()) {
-        cascadeTransform_ = coloradar::internal::readH5Pose(file, transformBaseToCascadeContentName);
-    }
-    if (configDataContent.find(transformBaseToLidarContentName) != configDataContent.end()) {
-        lidarTransform_ = coloradar::internal::readH5Pose(file, transformBaseToLidarContentName);
-    }
-    if (configDataContent.find(transformBaseToImuContentName) != configDataContent.end()) {
-        imuTransform_ = coloradar::internal::readH5Pose(file, transformBaseToImuContentName);
+    if (root.isMember("transforms") && root["transforms"].isObject()) {
+        const Json::Value& transformsJson = root["transforms"];
+        if (transformsJson.isMember(transformBaseToCascadeContentName)) {
+            cascadeTransform_ = jsonToAffine(transformsJson[transformBaseToCascadeContentName]);
+        }
+        if (transformsJson.isMember(transformBaseToLidarContentName)) {
+            lidarTransform_ = jsonToAffine(transformsJson[transformBaseToLidarContentName]);
+        }
+        if (transformsJson.isMember(transformBaseToImuContentName)) {
+            imuTransform_ = jsonToAffine(transformsJson[transformBaseToImuContentName]);
+        }
+    } else {
+        std::cerr << "Warning: No transforms found in dataset " << h5SourceFilePath_.string() << std::endl;
     }
  
     // read run data
