@@ -1,0 +1,7 @@
+<map id="coloradar::RadarConfig::clipHeatmap" name="coloradar::RadarConfig::clipHeatmap">
+<area shape="rect" id="Node000001" title=" " alt="" coords="224,35,395,75"/>
+<area shape="rect" id="Node000002" href="$classcoloradar_1_1RadarConfig.html#ab78268a5bdb6d5c3b81a41d72a77153f" title=" " alt="" coords="5,5,176,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="210,44,176,39,177,34,211,39"/>
+<area shape="rect" id="Node000003" href="$main_8cpp.html#a988268729f234c69f228e7fedecb706b" title=" " alt="" coords="15,70,166,95"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="211,70,166,76,166,70,210,65"/>
+</map>

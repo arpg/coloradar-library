@@ -1,0 +1,13 @@
+<map id="coloradar::RadarConfig::clipHeatmap" name="coloradar::RadarConfig::clipHeatmap">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,133,176,173"/>
+<area shape="rect" id="Node000002" href="$classcoloradar_1_1RadarConfig.html#af4ec358e6ea7eb4b799f81c5a6119950" title=" " alt="" coords="224,5,395,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="114,131,163,93,223,55,236,49,238,53,225,60,166,98,117,135"/>
+<area shape="rect" id="Node000003" href="$classcoloradar_1_1RadarConfig.html#ac43360c126f0c6292e9eff489c09322a" title=" " alt="" coords="224,69,395,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="159,131,227,111,228,116,161,136"/>
+<area shape="rect" id="Node000004" href="$classcoloradar_1_1RadarConfig.html#a8e0e750cda8594b7e6fe3dab61e9e9f6" title=" " alt="" coords="224,133,395,173"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="176,151,210,151,210,156,176,156"/>
+<area shape="rect" id="Node000005" href="$classcoloradar_1_1RadarConfig.html#ad9d94d1c1e7ed64233272d5881e2a889" title=" " alt="" coords="224,197,395,237"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="161,171,228,191,227,196,159,176"/>
+<area shape="rect" id="Node000006" href="$classcoloradar_1_1RadarConfig.html#a05d77493284e0b0c3fe409dd06b3b498" title=" " alt="" coords="224,261,395,301"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="117,171,166,209,225,247,238,253,236,258,223,252,163,213,114,176"/>
+</map>

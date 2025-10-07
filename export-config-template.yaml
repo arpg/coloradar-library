@@ -1,123 +1,119 @@
 global:
   runs: all
   destination_file: dataset.h5
-  export_transforms: False
+  export_transforms: True
 
 
 devices:
   cascade_radar:
-    # == GLOBAL SETTINGS (applies to everything except datacubes)
-
-    # - meta data
+    # - export meta data
     export_poses: True
     export_timestamps: True
 
-    # - FOV (specify either idx or degree constraints; defaults to all available FOV)
-    fov_azimuth_idx: -1
-    fov_elevation_idx: -1
-    # horizontal_fov_degrees_total: 360
-    # vertical_fov_degrees_total: 180
-    range_meters: -1
-
-    # - collapse elevation, aggregate data into 2D
-    collapse_elevation: False
-    collapse_elevation_min_z_meters: 0
-    collapse_elevation_max_z_meters: 0
-
-    # - other
-    remove_doppler_dim: True
-
-    # == DATA SETTINGS
-
-    # - datacubes
+    # - export raw datacubes
     export_datacubes: False
 
-    # - heatmaps
-    export_heatmaps: True
+    # - export heatmaps
+    export_heatmaps: False
 
-    # - point clouds
+    # - export point clouds
     export_clouds: False
-    # relative intensity per frame
-    intensity_threshold: 0
-    # False for ego-centric clouds
-    clouds_in_global_frame: True
+    intensity_threshold: 0         # filter by absolute intensity (positive value)
+    clouds_in_global_frame: False  # False for ego-centric clouds, True for clouds in map frame
+    
+    # - heatmap and point cloud settings
+    heatmap_cloud_fov:         # specify either idx or degree constraints; defaults to all available FOV
+      azimuth_idx: -1
+      elevation_idx: -1
+      horizontal_degrees_total: 360
+      vertical_degrees_total: 180
+      range_meters: 0
+    collapse_elevation: False  # True to collapse elevation, aggregate data into 2D
+    collapse_elevation_min_z_meters: 0
+    collapse_elevation_max_z_meters: 0
+    remove_doppler_dim: True  # True to export heatmaps and point clouds without the doppler dimension
 
 
   lidar:
-    # == GLOBAL SETTINGS
-
-    # - meta data
+    # - export meta data
     export_poses: True
     export_timestamps: True
 
-    # - collapse elevation, aggregate data into 2D
+    # - collapse elevation, aggregate all data into 2D
     collapse_elevation: False
     collapse_elevation_min_z_meters: 0
     collapse_elevation_max_z_meters: 0
 
-    # == DATA SETTINGS
-
-    # - point clouds
+    # - export raw point clouds
     export_clouds: False
-    remove_intensity_dim: True
+    remove_intensity_dim: True  # False to save point clouds with intensity values
     cloud_fov:
       horizontal_degrees_total: 360
       vertical_degrees_total: 180
-      range_meters: 10
+      range_meters: 0
 
-    # - global octomap and ego-centric map samples
-    export_map: True
-    export_map_samples: True
-    # save spatial coordinates without occupancy values
-    remove_occupancy_dim: False
-    # return occupancy values as [0; 1] instead of (-inf; inf)
-    convert_log_odds_to_probability: False
-    # filter by occupancy probability
-    occupancy_threshold_percent: 0
-    # False to fail if samples don't exist on disk
-    allow_resample: True
-    # True to always rewrite existing samples based on the latest map configuration
-    force_resample: False
-    # True to save the samples on disk. Will overwrite any existing samples
-    save_samples: False
-    # sampling perspective options: base, lidar, cascade
-    center_sensor: cascade_radar
+    # - export global octomap
+    export_map: False
+    allow_map_rebuild: False  # False to fail if map doesn't exist on disk
+    force_map_rebuild: False  # True to always rewrite existing map based on the latest configuration
+    save_map: False           # True to save map on disk. Will overwrite any existing map
+    map_resolution: 0.25      # octomap voxel size
+    map_input_cloud_fov:
+      horizontal_degrees_total: 360
+      vertical_degrees_total: 180
+      range_meters: 0
+    
+    # - export ego-centric map samples
+    export_map_samples: False
+    allow_resample: True          # False to fail if samples don't exist on disk
+    force_resample: False         # True to always rewrite existing samples based on the latest configuration
+    save_samples: False           # True to save the samples on disk. Will overwrite any existing samples
+    center_sensor: cascade_radar  # sampling perspective options: base, lidar, cascade_radar
     map_sample_fov:
       horizontal_degrees_total: 360
       vertical_degrees_total: 180
-      range_meters: 10
+      range_meters: 0
+
+    # - export map and map sample post-processing
+    remove_occupancy_dim: False             # True tosave spatial coordinates without occupancy values
+    convert_log_odds_to_probability: False  # True to return occupancy values as [0; 1] instead of (-inf; inf)
+    occupancy_threshold_percent: 0          # set a positive float value between 0 and 100 to filter by occupancy probability
 
 
-  base_frame:
+  base:
     export_poses: False
     export_timestamps: False
 
 
   imu:
-    export_data: False
     export_poses: False
     export_timestamps: False
 
+    # TBD
+    export_data: False
 
-  # WARNING: only present in dataset v1
+
+  # WARNING: TBD, only for dataset v1
   single_chip_radar:
     export_poses: False
     export_timestamps: False
 
     fov_azimuth_idx: -1
-    fov_range_meters: -1
     fov_elevation_idx: -1
+    horizontal_fov_degrees_total: 360
+    vertical_fov_degrees_total: 180
+    range_meters: 0
 
     collapse_elevation: False
     collapse_elevation_min_z_meters: 0
     collapse_elevation_max_z_meters: 0
 
-    remove_doppler_dim: True
+    remove_doppler_dim: False
 
     export_datacubes: False
 
-    export_heatmaps: True
+    export_heatmaps: False
 
     export_clouds: False
     intensity_threshold: 0
-    clouds_in_global_frame: True
+    clouds_in_global_frame: False

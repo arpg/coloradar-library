@@ -1,0 +1,15 @@
+<map id="coloradar::RadarConfig::clone" name="coloradar::RadarConfig::clone">
+<area shape="rect" id="Node000001" title=" " alt="" coords="477,69,648,109"/>
+<area shape="rect" id="Node000002" href="$classcoloradar_1_1RadarConfig.html#ade6e26885b88af22125303a15f96bc5b" title=" " alt="" coords="241,5,412,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="474,68,400,48,402,43,476,63"/>
+<area shape="rect" id="Node000005" href="$classcoloradar_1_1RadarConfig.html#abb44d75a45a6299ad1c9f9db77573686" title=" " alt="" coords="224,69,429,109"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="464,92,430,92,430,87,464,87"/>
+<area shape="rect" id="Node000006" href="$classcoloradar_1_1RadarConfig.html#accb3a9038c3d614378451e383bbc20d6" title=" " alt="" coords="241,133,412,173"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="476,116,402,136,400,131,474,110"/>
+<area shape="rect" id="Node000003" href="$classcoloradar_1_1RadarConfig.html#ab78268a5bdb6d5c3b81a41d72a77153f" title=" " alt="" coords="5,5,176,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="228,28,176,28,176,23,228,23"/>
+<area shape="rect" id="Node000004" href="$main_8cpp.html#a988268729f234c69f228e7fedecb706b" title=" " alt="" coords="15,77,166,102"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="240,52,139,79,138,74,239,46"/>
+<area shape="poly" id="edge5_Node000005_Node000004" title=" " alt="" coords="210,92,166,92,166,87,210,87"/>
+<area shape="poly" id="edge7_Node000006_Node000004" title=" " alt="" coords="239,132,138,105,139,100,240,127"/>
+</map>

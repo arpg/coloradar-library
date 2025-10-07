@@ -1,0 +1,9 @@
+<map id="coloradar::DatasetVisualizer::reset" name="coloradar::DatasetVisualizer::reset">
+<area shape="rect" id="Node000001" title=" " alt="" coords="459,37,665,77"/>
+<area shape="rect" id="Node000002" href="$classcoloradar_1_1DatasetVisualizer.html#a6d075dfac15a2057f74e5cd3506d4dce" title=" " alt="" coords="204,5,411,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="445,45,411,41,411,36,446,40"/>
+<area shape="rect" id="Node000003" href="$classcoloradar_1_1DatasetVisualizer.html#a6821c4d67b6d95423c7b3f4cdc886992" title=" " alt="" coords="204,69,411,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="446,75,411,79,411,74,445,69"/>
+<area shape="rect" id="Node000004" href="$main_8cpp.html#a988268729f234c69f228e7fedecb706b" title=" " alt="" coords="5,77,156,102"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="190,92,157,92,157,87,190,87"/>
+</map>

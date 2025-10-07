@@ -1,0 +1,33 @@
+services:
+
+  grayscale:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    tty: true     
+    stdin_open: true
+    volumes:
+      - /home/arpg:/host
+    command: python3 /scripts/bag_rgb_to_grayscale.py
+
+  view_bag:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    tty: true     
+    stdin_open: true
+    container_name: bag_viewer
+    environment:
+      - DISPLAY
+      - QT_X11_NO_MITSHM=1
+      # Configure via env:
+      - BAG_PATH=/host/coloradar_plus/bags/bike_path_run2_gray.bag         
+      - IMAGE_TOPIC=/camera/color/image_raw    
+      - VIEWER=image_view                           # rqt | rviz | image_view
+      - PLAY_ARGS=--clock                    # extra args for rosbag play
+      - LOOP=1                               # 1=loop bag, 0=play once
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw     # X11 socket for GUI
+      - /home/arpg:/host            # <-- point to your bag directory
+    shm_size: 1g                             # helps some OpenGL UIs
+    command: ["/scripts/start_viewer.sh"]

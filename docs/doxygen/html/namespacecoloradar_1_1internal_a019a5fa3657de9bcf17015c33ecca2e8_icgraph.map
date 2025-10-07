@@ -1,0 +1,24 @@
+<map id="coloradar::internal::extractFirstInt" name="coloradar::internal::extractFirstInt">
+<area shape="rect" id="Node000001" title="Extracts the first integer found in a string." alt="" coords="507,301,648,341"/>
+<area shape="rect" id="Node000002" href="$namespacecoloradar.html#aa3d06169598b3efc7aaffcef24df94b0" title=" " alt="" coords="252,309,459,334"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="493,324,459,324,459,319,493,319"/>
+<area shape="rect" id="Node000003" href="$classcoloradar_1_1ColoradarPlusRun.html#a97f3241f623aee3680e4f9fb3fe3e099" title=" " alt="" coords="8,29,201,69"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="342,297,323,251,293,193,253,134,229,107,202,83,184,72,186,67,206,79,233,103,257,131,298,191,328,248,347,294"/>
+<area shape="rect" id="Node000004" href="$classcoloradar_1_1ColoradarPlusRun.html#a20e7faeb8529d61dd4b100aa77003963" title=" " alt="" coords="9,117,200,157"/>
+<area shape="poly" id="edge4_Node000002_Node000004" title=" " alt="" coords="334,299,280,236,243,201,203,172,179,160,182,155,205,167,246,197,284,232,338,296"/>
+<area shape="rect" id="Node000005" href="$classcoloradar_1_1ColoradarPlusRun.html#ac81ca9c6d8f84b9cfeaf87a455597357" title=" " alt="" coords="5,205,204,245"/>
+<area shape="poly" id="edge6_Node000002_Node000005" title=" " alt="" coords="313,305,203,260,169,248,171,243,205,255,315,301"/>
+<area shape="rect" id="Node000006" href="$classcoloradar_1_1ColoradarPlusRun.html#af6f6bd35af292d69f645e74b8fec0e60" title=" " alt="" coords="14,269,195,309"/>
+<area shape="poly" id="edge8_Node000002_Node000006" title=" " alt="" coords="242,310,195,304,196,298,242,304"/>
+<area shape="rect" id="Node000007" href="$classcoloradar_1_1ColoradarPlusRun.html#a24965e2fa098c762a1200a9e86898159" title=" " alt="" coords="14,333,195,373"/>
+<area shape="poly" id="edge9_Node000002_Node000007" title=" " alt="" coords="242,338,196,344,195,339,242,333"/>
+<area shape="rect" id="Node000008" href="$classcoloradar_1_1ColoradarRun.html#ab77d2fc07819a7c8d51f6f07f418f77c" title=" " alt="" coords="13,397,196,437"/>
+<area shape="poly" id="edge10_Node000002_Node000008" title=" " alt="" coords="315,342,205,388,171,400,169,395,203,383,313,337"/>
+<area shape="rect" id="Node000009" href="$classcoloradar_1_1ColoradarRun.html#a38bcdce1cfe2652359e0b2fafc3b814a" title=" " alt="" coords="15,461,195,501"/>
+<area shape="poly" id="edge11_Node000002_Node000009" title=" " alt="" coords="335,346,279,398,244,427,205,452,180,464,177,459,203,447,241,422,276,394,331,342"/>
+<area shape="rect" id="Node000010" href="$classcoloradar_1_1ColoradarRun.html#a3fcbf04bb6f2d507f7eac582cfaec779" title=" " alt="" coords="11,525,199,565"/>
+<area shape="poly" id="edge12_Node000002_Node000010" title=" " alt="" coords="343,348,321,385,290,430,251,476,206,516,184,527,182,523,202,511,248,472,286,427,317,382,339,345"/>
+<area shape="poly" id="edge3_Node000003_Node000003" title=" " alt="" coords="147,18,132,11,105,8,80,10,66,15,60,21,63,28,58,30,55,20,63,10,79,5,105,3,134,6,150,13"/>
+<area shape="poly" id="edge5_Node000004_Node000004" title=" " alt="" coords="147,106,132,99,105,96,80,98,66,103,60,109,63,116,58,118,55,108,63,98,79,93,105,91,134,94,150,101"/>
+<area shape="poly" id="edge7_Node000005_Node000005" title=" " alt="" coords="147,194,132,187,105,184,80,186,66,191,60,197,63,204,58,206,55,196,63,186,79,181,105,179,134,182,150,189"/>
+</map>

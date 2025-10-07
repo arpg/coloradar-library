@@ -1,0 +1,8 @@
+<map id="coloradar::internal::readH5LidarClouds" name="coloradar::internal::readH5LidarClouds">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,159,45"/>
+<area shape="rect" id="Node000002" href="$namespacecoloradar_1_1internal.html#ae804ce7505cca7c3a8e5b1da9ffb7e35" title="Constructs a pose object of type PoseT (PCL&#45;style) from translation and rotation components." alt="" coords="396,5,537,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="159,20,207,19,348,19,382,19,382,25,348,24,207,24,159,25"/>
+<area shape="rect" id="Node000003" href="$namespacecoloradar_1_1internal.html#a5568efa71f4c07435166151fb48eb39f" title=" " alt="" coords="207,33,348,73"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="159,34,193,39,192,44,159,39"/>
+<area shape="poly" id="edge3_Node000003_Node000002" title=" " alt="" coords="348,40,382,35,383,40,349,46"/>
+</map>

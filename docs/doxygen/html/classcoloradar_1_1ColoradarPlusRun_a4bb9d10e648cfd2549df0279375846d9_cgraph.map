@@ -1,0 +1,22 @@
+<map id="coloradar::ColoradarPlusRun::createMapSamples" name="coloradar::ColoradarPlusRun::createMapSamples">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,149,187,189"/>
+<area shape="rect" id="Node000002" href="$classcoloradar_1_1ColoradarPlusRun.html#a8db82d8471226a2ae6dd5f67b4538b57" title=" " alt="" coords="244,35,425,75"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="138,147,279,78,281,83,140,151"/>
+<area shape="rect" id="Node000004" href="$namespacecoloradar.html#a3750d42cf0bd0a46e0f1b5eed572d145" title=" " alt="" coords="235,127,435,153"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="187,156,221,151,221,157,187,161"/>
+<area shape="rect" id="Node000008" href="$classcoloradar_1_1Run.html#aceeafd2361023fb77003447a4213583f" title=" " alt="" coords="235,177,435,217"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="187,177,221,181,221,187,187,183"/>
+<area shape="rect" id="Node000010" href="$classcoloradar_1_1ColoradarPlusRun.html#a60dbdc18c26fd52448fde87f06b1bc17" title=" " alt="" coords="244,241,425,281"/>
+<area shape="poly" id="edge10_Node000001_Node000010" title=" " alt="" coords="141,187,236,227,256,234,255,239,234,232,139,192"/>
+<area shape="rect" id="Node000003" href="$namespacecoloradar_1_1internal.html#ac1ebac36bb9b49ec6b3a9afd41000d65" title="Checks whether a filesystem path exists." alt="" coords="484,5,625,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="425,40,470,34,471,39,426,45"/>
+<area shape="rect" id="Node000005" href="$namespacecoloradar_1_1internal.html#ae804ce7505cca7c3a8e5b1da9ffb7e35" title="Constructs a pose object of type PoseT (PCL&#45;style) from translation and rotation components." alt="" coords="675,152,816,192"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="374,125,424,111,488,100,558,96,593,99,627,105,669,121,707,142,704,147,667,126,626,111,592,104,558,102,489,105,425,117,375,130"/>
+<area shape="rect" id="Node000006" href="$namespacecoloradar_1_1internal.html#a537ccc312a43c464c2eb66117f7d3839" title="Extracts an Eigen quaternion object from a PCL&#45;style pose object." alt="" coords="484,120,625,160"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="435,137,470,137,470,143,435,143"/>
+<area shape="rect" id="Node000007" href="$namespacecoloradar_1_1internal.html#aa760936a6331ea2eed939a8ef05a5e97" title="Extracts an Eigen translation vector from a PCL&#45;style pose object." alt="" coords="484,184,625,224"/>
+<area shape="poly" id="edge6_Node000004_Node000007" title=" " alt="" coords="389,150,435,163,482,177,481,182,434,168,388,155"/>
+<area shape="rect" id="Node000009" href="$namespacecoloradar.html#a15b783ce05bdb3be223d10b71e43cf74" title=" " alt="" coords="483,249,627,274"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="405,215,498,242,496,247,403,220"/>
+<area shape="poly" id="edge9_Node000009_Node000005" title=" " alt="" coords="594,246,626,234,697,197,700,201,628,238,596,251"/>
+</map>

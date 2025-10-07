@@ -1,0 +1,26 @@
+<map id="coloradar::DatasetVisualizer::step" name="coloradar::DatasetVisualizer::step">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,197,212,237"/>
+<area shape="rect" id="Node000002" href="$classcoloradar_1_1DatasetVisualizer.html#a9ca512b80844dfc7ab53c8141c67489c" title=" " alt="" coords="260,5,467,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="122,195,176,127,215,88,259,55,270,49,272,53,261,60,218,92,180,130,126,199"/>
+<area shape="rect" id="Node000004" href="$classcoloradar_1_1DatasetVisualizer.html#a832f07753483b93b50e6f88bd0d7eaae" title=" " alt="" coords="260,69,467,109"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="135,195,191,157,259,119,276,112,278,117,261,124,194,161,138,199"/>
+<area shape="rect" id="Node000007" href="$classcoloradar_1_1DatasetVisualizer.html#af42fd234f535a8a3ea90624412b59c17" title=" " alt="" coords="260,133,467,173"/>
+<area shape="poly" id="edge8_Node000001_Node000007" title=" " alt="" coords="188,195,269,174,271,179,190,200"/>
+<area shape="rect" id="Node000008" href="$classcoloradar_1_1DatasetVisualizer.html#a0659da742486af394600d2e6590295a0" title=" " alt="" coords="260,197,467,237"/>
+<area shape="poly" id="edge9_Node000001_Node000008" title=" " alt="" coords="212,215,246,215,246,220,212,220"/>
+<area shape="rect" id="Node000009" href="$classcoloradar_1_1DatasetVisualizer.html#a744d84a10dd113fb131c7ca6a400f68e" title=" " alt="" coords="260,312,467,352"/>
+<area shape="poly" id="edge10_Node000001_Node000009" title=" " alt="" coords="133,235,191,269,261,303,264,304,262,309,259,308,188,273,131,240"/>
+<area shape="rect" id="Node000003" href="$classcoloradar_1_1DatasetVisualizer.html#a9e814aad9b6dca6664b7504f7e955413" title=" " alt="" coords="515,5,741,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="467,23,501,23,501,28,467,28"/>
+<area shape="rect" id="Node000005" href="$classcoloradar_1_1DatasetVisualizer.html#a229dc45a715a0efc31f8cea84cb13c80" title=" " alt="" coords="525,127,731,167"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="457,107,522,121,521,126,456,112"/>
+<area shape="poly" id="edge7_Node000005_Node000001" title=" " alt="" coords="606,169,547,214,508,236,467,252,431,260,394,265,320,265,249,256,188,243,189,238,250,251,320,259,394,259,431,255,466,247,506,231,544,209,603,165"/>
+<area shape="rect" id="Node000006" href="$classcoloradar_1_1DatasetVisualizer.html#a6e905e458f79029bc59b3c18c6a437a4" title=" " alt="" coords="789,99,996,139"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="731,133,775,128,776,134,732,138"/>
+<area shape="poly" id="edge6_Node000006_Node000004" title=" " alt="" coords="789,116,480,98,480,93,789,110"/>
+<area shape="poly" id="edge13_Node000009_Node000001" title=" " alt="" coords="332,314,259,284,178,246,181,241,261,279,334,309"/>
+<area shape="rect" id="Node000010" href="$classcoloradar_1_1DatasetVisualizer.html#aa58e7f5690ad62b7a00a6bbd5db2412c" title=" " alt="" coords="525,280,731,320"/>
+<area shape="poly" id="edge11_Node000009_Node000010" title=" " alt="" coords="466,317,511,311,511,317,467,322"/>
+<area shape="rect" id="Node000011" href="$classcoloradar_1_1DatasetVisualizer.html#a959352607a36704c31be9c3f75facf05" title=" " alt="" coords="525,344,731,384"/>
+<area shape="poly" id="edge12_Node000009_Node000011" title=" " alt="" coords="467,342,511,347,511,353,466,347"/>
+</map>

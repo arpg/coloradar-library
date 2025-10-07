@@ -1,0 +1,6 @@
+<map id="coloradar::ColoradarPlusDataset::init" name="coloradar::ColoradarPlusDataset::init">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,29,187,69"/>
+<area shape="poly" id="edge2_Node000001_Node000001" title=" " alt="" coords="57,30,55,20,61,10,75,5,96,3,120,6,134,13,131,18,119,11,96,8,76,10,64,15,60,21,62,28"/>
+<area shape="rect" id="Node000002" href="$namespacecoloradar_1_1internal.html#ac1ebac36bb9b49ec6b3a9afd41000d65" title="Checks whether a filesystem path exists." alt="" coords="235,29,376,69"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="187,47,221,47,221,52,187,52"/>
+</map>

@@ -1,0 +1,13 @@
+<map id="coloradar::BaseDevice" name="coloradar::BaseDevice">
+<area shape="rect" id="Node000001" title=" " alt="" coords="191,5,359,31"/>
+<area shape="rect" id="Node000002" href="$classcoloradar_1_1ImuDevice.html" title=" " alt="" coords="5,79,167,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="233,38,118,81,116,76,231,33"/>
+<area shape="rect" id="Node000003" href="$classcoloradar_1_1LidarDevice.html" title=" " alt="" coords="191,79,359,104"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="278,44,278,79,273,79,273,44"/>
+<area shape="rect" id="Node000004" href="$classcoloradar_1_1RadarDevice.html" title=" " alt="" coords="384,79,559,104"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="320,33,440,76,438,81,319,38"/>
+<area shape="rect" id="Node000005" href="$classcoloradar_1_1CascadeDevice.html" title=" " alt="" coords="264,152,455,177"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="443,114,379,154,376,150,440,109"/>
+<area shape="rect" id="Node000006" href="$classcoloradar_1_1SingleChipDevice.html" title=" " alt="" coords="479,152,685,177"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="502,109,565,150,562,154,499,114"/>
+</map>

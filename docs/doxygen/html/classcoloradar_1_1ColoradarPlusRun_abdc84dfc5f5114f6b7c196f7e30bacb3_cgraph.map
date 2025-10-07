@@ -1,0 +1,5 @@
+<map id="coloradar::ColoradarPlusRun::readMapSamples" name="coloradar::ColoradarPlusRun::readMapSamples">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,187,45"/>
+<area shape="rect" id="Node000002" href="$namespacecoloradar_1_1internal.html#a9a7788271dfac871cc0137fba0e05462" title="Reads files from a directory and returns them as an ordered array of paths. This function scans the s..." alt="" coords="235,5,389,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="187,23,221,23,221,28,187,28"/>
+</map>

@@ -1,0 +1,28 @@
+<map id="include/run/coloradar_plus_run.hpp" name="include/run/coloradar_plus_run.hpp">
+<area shape="rect" id="Node000001" title=" " alt="" coords="301,5,460,45"/>
+<area shape="rect" id="Node000002" href="$coloradar__plus__run_8h.html" title=" " alt="" coords="301,93,460,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="383,59,383,93,378,93,378,59"/>
+<area shape="rect" id="Node000003" href="$coloradar__plus__dataset_8h.html" title=" " alt="" coords="189,181,375,221"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="350,144,306,183,302,179,347,140"/>
+<area shape="rect" id="Node000011" href="$coloradar__run_8h.html" title=" " alt="" coords="401,181,560,221"/>
+<area shape="poly" id="edge10_Node000002_Node000011" title=" " alt="" coords="415,140,460,179,457,183,411,144"/>
+<area shape="rect" id="Node000004" href="$coloradar__dataset_8h.html" title=" " alt="" coords="189,269,375,309"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="285,235,285,269,279,269,279,235"/>
+<area shape="rect" id="Node000010" href="$coloradar__plus__dataset_8cpp.html" title=" " alt="" coords="5,269,164,309"/>
+<area shape="poly" id="edge9_Node000003_Node000010" title=" " alt="" coords="227,229,129,272,127,267,225,224"/>
+<area shape="rect" id="Node000005" href="$main_8h.html" title=" " alt="" coords="141,365,260,390"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="256,321,214,366,210,362,252,318"/>
+<area shape="rect" id="Node000009" href="$coloradar__dataset_8cpp.html" title=" " alt="" coords="284,357,443,397"/>
+<area shape="poly" id="edge8_Node000004_Node000009" title=" " alt="" coords="311,318,347,355,343,359,308,321"/>
+<area shape="rect" id="Node000006" href="$coloradar__cuda_8h.html" title=" " alt="" coords="24,445,193,485"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="180,401,131,447,127,443,176,397"/>
+<area shape="rect" id="Node000008" href="$main_8cpp.html" title=" " alt="" coords="218,445,370,485"/>
+<area shape="poly" id="edge7_Node000005_Node000008" title=" " alt="" coords="225,397,275,443,272,447,222,401"/>
+<area shape="rect" id="Node000007" href="$cuda_8cpp.html" title=" " alt="" coords="33,533,185,573"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="111,499,111,533,106,533,106,499"/>
+<area shape="poly" id="edge11_Node000011_Node000004" title=" " alt="" coords="426,229,327,272,324,267,423,224"/>
+<area shape="rect" id="Node000012" href="$coloradar__plus__run_8cpp.html" title=" " alt="" coords="399,269,565,309"/>
+<area shape="poly" id="edge12_Node000011_Node000012" title=" " alt="" coords="484,235,484,269,479,269,479,235"/>
+<area shape="rect" id="Node000013" href="$coloradar__run_8cpp.html" title=" " alt="" coords="589,277,775,302"/>
+<area shape="poly" id="edge13_Node000011_Node000013" title=" " alt="" coords="539,224,656,274,654,279,536,229"/>
+</map>

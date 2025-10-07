@@ -1,0 +1,11 @@
+var searchData=
+[
+  ['dataset_0',['dataset',['../classcoloradar_1_1Dataset.html#a4dca0b1200b933af12f429f575353c5e',1,'coloradar::Dataset::Dataset()=default'],['../classcoloradar_1_1Dataset.html#a41a8c9ee51a4efcab542104e87fd8f11',1,'coloradar::Dataset::Dataset(const Dataset &amp;)=delete'],['../classcoloradar_1_1Dataset.html#ab3abc18cc89c2e561fc092d1d71dd47c',1,'coloradar::Dataset::Dataset(Dataset &amp;&amp;) noexcept=default']]],
+  ['datasetexportconfig_1',['datasetexportconfig',['../classcoloradar_1_1DatasetExportConfig.html#a8694fb4f55a3cffbf25585c3a8adb029',1,'coloradar::DatasetExportConfig::DatasetExportConfig(const std::string &amp;yamlFilePath)'],['../classcoloradar_1_1DatasetExportConfig.html#abad46803321aefdfedac75e5ddb04a87',1,'coloradar::DatasetExportConfig::DatasetExportConfig(const std::filesystem::path &amp;destinationFilePath=&quot;dataset.h5&quot;, const std::vector&lt; std::string &gt; &amp;runs={}, bool exportTransforms=true, const RadarExportConfig &amp;cascadeCfg=RadarExportConfig(), const LidarExportConfig &amp;lidarCfg=LidarExportConfig(), const BaseExportConfig &amp;baseCfg=BaseExportConfig(), const ImuExportConfig &amp;imuCfg=ImuExportConfig(), const RadarExportConfig &amp;singleChipCfg=RadarExportConfig())']]],
+  ['datasetvisualizer_2',['DatasetVisualizer',['../classcoloradar_1_1DatasetVisualizer.html#a6d075dfac15a2057f74e5cd3506d4dce',1,'coloradar::DatasetVisualizer']]],
+  ['designfrequency_3',['designFrequency',['../classcoloradar_1_1RadarConfig.html#a3bfd50d1df30ac5f4bf5014aa6bc7b59',1,'coloradar::RadarConfig']]],
+  ['destinationfilepath_4',['destinationFilePath',['../classcoloradar_1_1DatasetExportConfig.html#a0d9835e32d00cb7f11e125fa6b1f2315',1,'coloradar::DatasetExportConfig']]],
+  ['devices_5',['devices',['../classcoloradar_1_1DatasetExportConfig.html#ab2fece6e93dfe25282091048beec801b',1,'coloradar::DatasetExportConfig']]],
+  ['dopplerbinwidth_6',['dopplerBinWidth',['../classcoloradar_1_1RadarConfig.html#a0f741f46d51ba3174fbd797ade890879',1,'coloradar::RadarConfig']]],
+  ['downsamplelidarcloud_7',['downsampleLidarCloud',['../classcoloradar_1_1DatasetVisualizer.html#aa58e7f5690ad62b7a00a6bbd5db2412c',1,'coloradar::DatasetVisualizer']]]
+];

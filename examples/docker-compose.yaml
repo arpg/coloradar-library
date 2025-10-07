@@ -1,5 +1,5 @@
 x-base-image: &base_image ghcr.io/arpg/coloradar-lib:jazzy
-x-dataset-volume: &dataset_volume ~/coloradar_plus:/data/coloradar
+x-dataset-volume: &dataset_volume ~/data/coloradar_plus:/data/coloradar
 
 
 services:

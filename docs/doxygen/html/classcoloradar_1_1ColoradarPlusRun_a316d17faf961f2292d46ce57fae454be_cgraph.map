@@ -1,0 +1,13 @@
+<map id="coloradar::ColoradarPlusRun::sampleMapFrames" name="coloradar::ColoradarPlusRun::sampleMapFrames">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,37,187,77"/>
+<area shape="rect" id="Node000002" href="$classcoloradar_1_1ColoradarPlusRun.html#a8db82d8471226a2ae6dd5f67b4538b57" title=" " alt="" coords="244,5,425,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="187,43,230,37,231,42,187,48"/>
+<area shape="rect" id="Node000004" href="$classcoloradar_1_1Run.html#aceeafd2361023fb77003447a4213583f" title=" " alt="" coords="235,69,435,109"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="187,67,221,71,221,77,187,72"/>
+<area shape="rect" id="Node000003" href="$namespacecoloradar_1_1internal.html#ac1ebac36bb9b49ec6b3a9afd41000d65" title="Checks whether a filesystem path exists." alt="" coords="484,5,625,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="426,23,470,23,470,28,426,28"/>
+<area shape="rect" id="Node000005" href="$namespacecoloradar.html#a15b783ce05bdb3be223d10b71e43cf74" title=" " alt="" coords="483,77,627,102"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="435,87,469,87,469,92,435,92"/>
+<area shape="rect" id="Node000006" href="$namespacecoloradar_1_1internal.html#ae804ce7505cca7c3a8e5b1da9ffb7e35" title="Constructs a pose object of type PoseT (PCL&#45;style) from translation and rotation components." alt="" coords="675,69,816,109"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="627,87,661,87,661,92,627,92"/>
+</map>

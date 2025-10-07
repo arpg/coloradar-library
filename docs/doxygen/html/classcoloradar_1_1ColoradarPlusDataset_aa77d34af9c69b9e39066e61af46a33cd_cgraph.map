@@ -1,0 +1,82 @@
+<map id="coloradar::ColoradarPlusDataset::exportLidar" name="coloradar::ColoradarPlusDataset::exportLidar">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,1020,187,1060"/>
+<area shape="rect" id="Node000002" href="$classcoloradar_1_1LidarExportConfig.html#a4e7781e98c5a27b7c85a6ab96ce65bd8" title=" " alt="" coords="237,5,444,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="95,1020,98,837,104,699,115,548,132,395,156,253,171,191,189,136,209,91,233,56,236,52,240,56,237,59,214,93,194,138,176,192,161,255,137,396,120,548,109,700,103,837,100,1020"/>
+<area shape="rect" id="Node000003" href="$classcoloradar_1_1LidarExportConfig.html#aea5a813d2e1531b7045e3cee92185125" title=" " alt="" coords="237,69,444,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="95,1020,100,848,107,719,118,578,136,435,160,304,174,246,191,195,211,152,233,120,236,116,240,120,237,123,215,155,196,196,180,247,165,305,141,436,124,578,112,720,105,848,100,1020"/>
+<area shape="rect" id="Node000004" href="$classcoloradar_1_1LidarExportConfig.html#a22742cf01ffd7f31c723eff9ceb60848" title=" " alt="" coords="237,133,444,173"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="95,1020,102,858,122,607,140,475,163,354,194,253,212,214,233,184,236,180,240,184,237,187,217,216,199,255,168,355,145,476,127,608,107,859,100,1020"/>
+<area shape="rect" id="Node000005" href="$classcoloradar_1_1LidarExportConfig.html#a4353997cf5b261275b2c718a9770cc7b" title=" " alt="" coords="237,197,444,237"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="95,1020,104,869,126,637,144,516,167,404,196,311,213,275,233,248,236,244,240,248,237,251,218,278,201,313,172,405,149,517,131,638,109,869,101,1020"/>
+<area shape="rect" id="Node000006" href="$classcoloradar_1_1LidarExportConfig.html#a924ebc1569924b9eb00498fe3c4cf5ad" title=" " alt="" coords="237,261,444,301"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="96,1019,107,881,131,671,150,562,172,460,200,376,215,344,233,318,245,307,248,311,237,322,220,346,205,378,177,462,155,563,137,672,112,882,101,1020"/>
+<area shape="rect" id="Node000007" href="$namespacecoloradar.html#a0ba5da6ed2e24106fee7118cb2cc6518" title=" " alt="" coords="495,579,701,605"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="95,1020,104,886,126,685,144,582,167,488,196,412,214,383,233,362,260,343,286,330,312,323,337,322,363,326,390,334,448,362,477,381,503,405,544,461,573,518,591,565,586,567,568,520,539,464,499,409,474,385,445,366,388,339,362,331,337,328,312,329,288,335,263,347,236,366,218,386,201,414,172,489,149,583,131,686,109,886,101,1020"/>
+<area shape="rect" id="Node000008" href="$classcoloradar_1_1LidarExportConfig.html#a9b2fe34ccbd21dee5aac7af88534bf71" title=" " alt="" coords="237,376,444,416"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="97,1020,110,899,136,721,155,629,177,544,203,474,217,447,233,426,237,422,240,426,237,430,222,450,208,476,182,546,160,630,142,722,115,900,102,1020"/>
+<area shape="rect" id="Node000009" href="$classcoloradar_1_1LidarExportConfig.html#afb71220d3c1e5488ff0fe53e343ec83d" title=" " alt="" coords="237,440,444,480"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="97,1019,112,910,140,751,159,670,181,594,205,533,233,490,237,486,240,490,237,494,210,535,186,596,164,671,146,752,118,911,102,1020"/>
+<area shape="rect" id="Node000010" href="$classcoloradar_1_1LidarExportConfig.html#a3b997460cef63fea951581c3ffa61e82" title=" " alt="" coords="237,504,444,544"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="94,1020,96,935,102,876,113,811,130,742,154,674,188,610,233,554,237,550,241,554,237,558,193,613,159,676,135,744,118,812,107,877,102,935,99,1020"/>
+<area shape="rect" id="Node000011" href="$classcoloradar_1_1LidarExportConfig.html#acaff729ef43271e3d3355ccb1f7b201c" title=" " alt="" coords="237,568,444,608"/>
+<area shape="poly" id="edge10_Node000001_Node000011" title=" " alt="" coords="95,1019,101,945,120,837,138,778,162,720,193,666,233,618,237,614,241,618,237,622,197,669,166,723,143,780,126,838,106,945,100,1020"/>
+<area shape="rect" id="Node000012" href="$classcoloradar_1_1LidarExportConfig.html#ab57ff698a2b39574f71e0817617e4b9f" title=" " alt="" coords="237,632,444,672"/>
+<area shape="poly" id="edge11_Node000001_Node000012" title=" " alt="" coords="96,1019,106,955,128,864,146,815,169,767,198,722,233,682,238,678,241,682,237,686,202,725,174,769,151,817,133,866,111,956,102,1020"/>
+<area shape="rect" id="Node000013" href="$classcoloradar_1_1BaseExportConfig.html#a7e783a7e4f91477fac4830b510e95abc" title=" " alt="" coords="237,696,444,736"/>
+<area shape="poly" id="edge12_Node000001_Node000013" title=" " alt="" coords="98,1019,111,965,136,892,154,852,176,814,202,778,233,746,239,741,243,745,236,750,206,781,181,816,159,855,141,894,117,967,104,1021"/>
+<area shape="rect" id="Node000014" href="$classcoloradar_1_1BaseExportConfig.html#a652da865a36bf54725870a08fdd3c09a" title=" " alt="" coords="237,760,444,800"/>
+<area shape="poly" id="edge13_Node000001_Node000014" title=" " alt="" coords="101,1019,118,976,145,919,184,861,207,834,233,810,241,805,244,809,236,814,211,837,188,864,150,922,123,978,106,1021"/>
+<area shape="rect" id="Node000015" href="$namespacecoloradar.html#a15b783ce05bdb3be223d10b71e43cf74" title=" " alt="" coords="269,1117,413,1142"/>
+<area shape="poly" id="edge14_Node000001_Node000015" title=" " alt="" coords="136,1058,183,1080,236,1101,266,1111,264,1116,234,1107,181,1085,134,1062"/>
+<area shape="rect" id="Node000017" href="$namespacecoloradar.html#a0f603e8b447f15fdf57f1616f7e1be0b" title=" " alt="" coords="245,889,437,914"/>
+<area shape="poly" id="edge16_Node000001_Node000017" title=" " alt="" coords="114,1018,164,970,198,944,233,923,250,916,252,921,236,928,201,949,168,974,118,1022"/>
+<area shape="rect" id="Node000018" href="$namespacecoloradar_1_1internal.html#a599df7bc451c81e68bb083aff930682b" title=" " alt="" coords="270,824,411,864"/>
+<area shape="poly" id="edge17_Node000001_Node000018" title=" " alt="" coords="107,1018,156,948,192,908,233,874,256,862,258,866,236,878,195,912,160,951,111,1021"/>
+<area shape="rect" id="Node000019" href="$classcoloradar_1_1LidarExportConfig.html#adfe0b8cfe3bd0335b74eb2731f9a9f98" title=" " alt="" coords="237,988,444,1028"/>
+<area shape="poly" id="edge19_Node000001_Node000019" title=" " alt="" coords="186,1026,223,1021,224,1026,187,1031"/>
+<area shape="rect" id="Node000020" href="$classcoloradar_1_1LidarExportConfig.html#a585d61692b42d53d2d959b9eb50a2dda" title=" " alt="" coords="237,1052,444,1092"/>
+<area shape="poly" id="edge20_Node000001_Node000020" title=" " alt="" coords="187,1049,224,1054,223,1059,186,1054"/>
+<area shape="rect" id="Node000021" href="$namespacecoloradar.html#a3750d42cf0bd0a46e0f1b5eed572d145" title=" " alt="" coords="241,938,441,963"/>
+<area shape="poly" id="edge21_Node000001_Node000021" title=" " alt="" coords="134,1018,181,995,234,973,264,964,266,969,236,979,183,1000,136,1022"/>
+<area shape="rect" id="Node000024" href="$classcoloradar_1_1LidarExportConfig.html#acbd2839e2f53ab475d0cba226999533b" title=" " alt="" coords="237,1167,444,1207"/>
+<area shape="poly" id="edge25_Node000001_Node000024" title=" " alt="" coords="119,1058,169,1105,202,1129,236,1151,253,1159,250,1164,233,1156,199,1134,166,1109,115,1062"/>
+<area shape="rect" id="Node000025" href="$classcoloradar_1_1LidarExportConfig.html#a20962cf91e4cdc25ea65d949de3bd9ab" title=" " alt="" coords="237,1231,444,1271"/>
+<area shape="poly" id="edge26_Node000001_Node000025" title=" " alt="" coords="110,1059,129,1093,158,1136,194,1179,236,1217,245,1222,242,1227,233,1221,190,1183,153,1139,125,1096,105,1062"/>
+<area shape="rect" id="Node000026" href="$classcoloradar_1_1LidarExportConfig.html#a0eefc448af9cb9939d057ce316b02f09" title=" " alt="" coords="237,1295,444,1335"/>
+<area shape="poly" id="edge27_Node000001_Node000026" title=" " alt="" coords="106,1059,121,1105,148,1165,186,1227,210,1256,236,1281,244,1286,240,1290,233,1285,206,1259,182,1230,143,1167,116,1107,100,1061"/>
+<area shape="rect" id="Node000027" href="$classcoloradar_1_1LidarExportConfig.html#ae4069a30673bbf7df827bb583571caaf" title=" " alt="" coords="237,1359,444,1399"/>
+<area shape="poly" id="edge28_Node000001_Node000027" title=" " alt="" coords="103,1060,115,1116,140,1193,157,1234,179,1274,205,1312,236,1345,242,1349,238,1353,233,1349,201,1315,174,1277,152,1236,135,1195,110,1117,98,1061"/>
+<area shape="rect" id="Node000028" href="$classcoloradar_1_1BaseDevice.html#a3cc0a9805e326b73078fd0dbc8d06dd3" title=" " alt="" coords="257,1423,425,1463"/>
+<area shape="poly" id="edge29_Node000001_Node000028" title=" " alt="" coords="101,1060,110,1127,132,1220,149,1271,172,1321,201,1368,237,1409,246,1417,243,1421,233,1413,197,1371,167,1324,144,1273,126,1222,105,1128,96,1061"/>
+<area shape="rect" id="Node000029" href="$classcoloradar_1_1LidarExportConfig.html#a83bb23ad403cc64052f478962cc75205" title=" " alt="" coords="235,1487,447,1527"/>
+<area shape="poly" id="edge30_Node000001_Node000029" title=" " alt="" coords="100,1060,105,1137,112,1189,124,1247,141,1308,165,1368,196,1424,237,1473,241,1477,237,1481,233,1477,192,1427,160,1370,136,1310,119,1249,107,1190,100,1137,95,1060"/>
+<area shape="rect" id="Node000030" href="$namespacecoloradar.html#ae543b85a1a5eea1b3ea90413ce81f34c" title=" " alt="" coords="258,1551,423,1577"/>
+<area shape="poly" id="edge31_Node000001_Node000030" title=" " alt="" coords="103,1060,119,1161,148,1305,166,1378,188,1446,211,1500,237,1537,247,1545,244,1549,233,1541,207,1503,183,1448,161,1380,143,1306,114,1162,98,1061"/>
+<area shape="rect" id="Node000031" href="$classcoloradar_1_1LidarExportConfig.html#a1c998b0d972808526f7561345efcfd55" title=" " alt="" coords="237,1601,444,1641"/>
+<area shape="poly" id="edge32_Node000001_Node000031" title=" " alt="" coords="102,1060,118,1169,146,1327,165,1409,186,1484,210,1545,237,1586,242,1591,238,1595,233,1590,205,1547,181,1485,159,1410,141,1328,112,1170,97,1061"/>
+<area shape="rect" id="Node000032" href="$classcoloradar_1_1LidarExportConfig.html#a226366ebfd1224986da66a0858c054ca" title=" " alt="" coords="237,1665,444,1705"/>
+<area shape="poly" id="edge33_Node000001_Node000032" title=" " alt="" coords="102,1060,115,1180,142,1358,160,1451,182,1535,208,1605,222,1631,237,1652,240,1655,237,1659,233,1655,217,1634,203,1607,177,1537,155,1452,136,1359,110,1181,97,1060"/>
+<area shape="rect" id="Node000033" href="$namespacecoloradar_1_1internal.html#a611417ee72d350a37e8e074b2d4c6ecd" title=" " alt="" coords="263,1921,418,1961"/>
+<area shape="poly" id="edge34_Node000001_Node000033" title=" " alt="" coords="100,1060,107,1224,114,1345,127,1479,144,1613,167,1737,198,1839,216,1878,237,1908,253,1921,249,1925,233,1911,212,1881,193,1840,162,1738,139,1614,121,1479,109,1346,101,1224,95,1060"/>
+<area shape="rect" id="Node000034" href="$namespacecoloradar_1_1internal.html#a9876ea6e4b4597d1c669fcefd91944ca" title=" " alt="" coords="267,1729,415,1769"/>
+<area shape="poly" id="edge36_Node000001_Node000034" title=" " alt="" coords="101,1060,113,1191,138,1389,156,1491,178,1586,205,1663,220,1693,237,1715,256,1730,252,1734,233,1719,216,1696,200,1665,173,1587,151,1492,132,1390,107,1192,96,1060"/>
+<area shape="rect" id="Node000035" href="$classcoloradar_1_1LidarExportConfig.html#ab8b573239a362a4f4bb03445c24685cb" title=" " alt="" coords="237,1857,444,1897"/>
+<area shape="poly" id="edge38_Node000001_Node000035" title=" " alt="" coords="101,1060,109,1213,130,1449,148,1572,171,1686,201,1780,218,1816,237,1844,240,1847,236,1850,233,1847,213,1819,196,1782,166,1688,143,1573,125,1449,103,1213,95,1060"/>
+<area shape="rect" id="Node000036" href="$namespacecoloradar_1_1internal.html#a3a96e0eb5988db3bb4341c0ee6ccc485" title=" " alt="" coords="266,1793,415,1833"/>
+<area shape="poly" id="edge39_Node000001_Node000036" title=" " alt="" coords="101,1060,111,1202,134,1419,152,1532,175,1636,203,1722,219,1755,237,1779,255,1794,252,1798,233,1783,215,1757,198,1724,170,1637,147,1533,129,1420,105,1203,96,1060"/>
+<area shape="rect" id="Node000037" href="$classcoloradar_1_1LidarExportConfig.html#a1f4ca867891c02861979fee6b55f2497" title=" " alt="" coords="237,1985,444,2025"/>
+<area shape="poly" id="edge41_Node000001_Node000037" title=" " alt="" coords="100,1060,105,1234,111,1365,123,1508,140,1653,164,1787,179,1845,196,1897,215,1939,237,1972,240,1975,236,1978,233,1975,210,1942,191,1899,174,1847,159,1788,135,1654,118,1509,106,1365,99,1234,95,1060"/>
+<area shape="rect" id="Node000038" href="$namespacecoloradar_1_1internal.html#a3f79d2ff735aab3655fd87d1c1b85b81" title=" " alt="" coords="265,2049,417,2089"/>
+<area shape="poly" id="edge42_Node000001_Node000038" title=" " alt="" coords="100,1060,103,1245,109,1385,119,1538,136,1694,160,1837,176,1900,193,1955,214,2001,237,2036,254,2050,250,2054,233,2039,209,2004,188,1957,171,1901,155,1838,131,1694,114,1539,103,1385,98,1245,95,1060"/>
+<area shape="rect" id="Node000016" href="$namespacecoloradar_1_1internal.html#ae804ce7505cca7c3a8e5b1da9ffb7e35" title="Constructs a pose object of type PoseT (PCL&#45;style) from translation and rotation components." alt="" coords="527,1729,669,1769"/>
+<area shape="poly" id="edge15_Node000015_Node000016" title=" " alt="" coords="414,1133,432,1141,449,1153,464,1172,478,1196,504,1259,528,1337,548,1422,578,1591,595,1715,590,1716,573,1592,542,1423,522,1338,499,1261,473,1198,459,1175,445,1157,430,1145,412,1138"/>
+<area shape="poly" id="edge18_Node000018_Node000007" title=" " alt="" coords="410,828,445,810,494,764,533,711,563,659,584,617,589,619,568,661,538,714,497,768,448,814,413,832"/>
+<area shape="poly" id="edge22_Node000021_Node000016" title=" " alt="" coords="432,961,449,974,468,999,485,1033,515,1118,540,1222,560,1336,586,1558,598,1715,592,1716,580,1559,554,1337,535,1223,510,1119,480,1035,463,1002,445,978,429,966"/>
+<area shape="rect" id="Node000022" href="$namespacecoloradar_1_1internal.html#a537ccc312a43c464c2eb66117f7d3839" title="Extracts an Eigen quaternion object from a PCL&#45;style pose object." alt="" coords="527,899,669,939"/>
+<area shape="poly" id="edge23_Node000021_Node000022" title=" " alt="" coords="440,936,513,926,514,932,441,941"/>
+<area shape="rect" id="Node000023" href="$namespacecoloradar_1_1internal.html#aa760936a6331ea2eed939a8ef05a5e97" title="Extracts an Eigen translation vector from a PCL&#45;style pose object." alt="" coords="527,963,669,1003"/>
+<area shape="poly" id="edge24_Node000021_Node000023" title=" " alt="" coords="441,960,514,970,513,975,440,966"/>
+<area shape="poly" id="edge35_Node000033_Node000016" title=" " alt="" coords="417,1921,445,1907,484,1878,520,1844,573,1779,577,1782,524,1848,488,1882,448,1912,420,1926"/>
+<area shape="poly" id="edge37_Node000034_Node000016" title=" " alt="" coords="415,1747,514,1747,514,1752,415,1752"/>
+<area shape="poly" id="edge40_Node000036_Node000016" title=" " alt="" coords="415,1792,513,1768,514,1773,416,1797"/>
+</map>

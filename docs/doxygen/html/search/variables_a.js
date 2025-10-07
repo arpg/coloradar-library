@@ -1,0 +1,20 @@
+var searchData=
+[
+  ['name_0',['name',['../structcoloradar_1_1Control.html#aa504b9d8b5a2ff2691e38c719b036c61',1,'coloradar::Control']]],
+  ['name_5f_1',['name_',['../classcoloradar_1_1Run.html#ad1bc6c1581189c323d822136e413deb0',1,'coloradar::Run']]],
+  ['newconfig_2',['newConfig',['../structcoloradar_1_1HeatmapTransformResult.html#afdaa4dd1d24f7d59dfaf41caeb5bfc51',1,'coloradar::HeatmapTransformResult']]],
+  ['numadcsamplesperchirp_5f_3',['numAdcSamplesPerChirp_',['../classcoloradar_1_1RadarConfig.html#a18646798ab034184adaf41a3e9d2d54d',1,'coloradar::RadarConfig']]],
+  ['numangles_5f_4',['numAngles_',['../classcoloradar_1_1RadarConfig.html#a725952ce1a312bb797e6fe8074fb453c',1,'coloradar::RadarConfig']]],
+  ['numazimuthbeams_5f_5',['numAzimuthBeams_',['../classcoloradar_1_1RadarConfig.html#a232dd5d835e4c2482df7cbab86ad91d1',1,'coloradar::RadarConfig']]],
+  ['numazimuthbins_5f_6',['numAzimuthBins_',['../classcoloradar_1_1RadarConfig.html#a0046f759ce46ac60f3db56aaa85c40fe',1,'coloradar::RadarConfig']]],
+  ['numchirpsperframe_5f_7',['numChirpsPerFrame_',['../classcoloradar_1_1RadarConfig.html#a2a9ee9dd09ef3ea8987686322c27f1d1',1,'coloradar::RadarConfig']]],
+  ['numdopplerbins_5f_8',['numDopplerBins_',['../classcoloradar_1_1RadarConfig.html#aaf25714fc14c86133e0836b34550e460',1,'coloradar::RadarConfig']]],
+  ['numelevationbeams_5f_9',['numElevationBeams_',['../classcoloradar_1_1RadarConfig.html#aca18e8bcdcb91abf5fa2c4a416ab319d',1,'coloradar::RadarConfig']]],
+  ['numelevationbins_5f_10',['numElevationBins_',['../classcoloradar_1_1RadarConfig.html#ac9fba975c84a93be00b97ca4f2210a7e',1,'coloradar::RadarConfig']]],
+  ['numposrangebins_5f_11',['numPosRangeBins_',['../classcoloradar_1_1RadarConfig.html#a5fd578305f53b9b3c3500346a4883452',1,'coloradar::RadarConfig']]],
+  ['numrangebins_5f_12',['numRangeBins_',['../classcoloradar_1_1RadarConfig.html#a0a5995b83c0cfe49c705f32d3fec68b3',1,'coloradar::RadarConfig']]],
+  ['numrxantennas_5f_13',['numRxAntennas_',['../classcoloradar_1_1RadarConfig.html#a0dea974ec961fedbd736ca90fa1b3910',1,'coloradar::RadarConfig']]],
+  ['numsteps_14',['numSteps',['../classcoloradar_1_1DatasetVisualizer.html#a2efb69d9773963e5b5d6e41f28f66619',1,'coloradar::DatasetVisualizer']]],
+  ['numtxantennas_5f_15',['numTxAntennas_',['../classcoloradar_1_1RadarConfig.html#a206f792f40b79ce1f70f276a3ca73f2c',1,'coloradar::RadarConfig']]],
+  ['numvirtualelements_5f_16',['numVirtualElements_',['../classcoloradar_1_1RadarConfig.html#a5027e14107d32b1c2790180c916c562e',1,'coloradar::RadarConfig']]]
+];

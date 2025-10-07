@@ -1,0 +1,5 @@
+<map id="coloradar::ImuDevice" name="coloradar::ImuDevice">
+<area shape="rect" id="Node000001" title=" " alt="" coords="9,79,170,104"/>
+<area shape="rect" id="Node000002" href="$classcoloradar_1_1BaseDevice.html" title=" " alt="" coords="5,5,173,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="92,44,92,79,87,79,87,44"/>
+</map>
