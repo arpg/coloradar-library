@@ -1,0 +1,88 @@
+<map id="coloradar::internal::checkPathExists" name="coloradar::internal::checkPathExists">
+<area shape="rect" id="Node000001" title="Checks whether a filesystem path exists." alt="" coords="985,477,1127,517"/>
+<area shape="rect" id="Node000002" href="$classcoloradar_1_1CascadeConfig.html#a1867373efb785e2d79a9ec0bf3835be7" title=" " alt="" coords="490,33,677,73"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1053,463,1049,389,1034,292,1019,242,998,193,971,148,936,110,918,99,893,89,827,75,751,65,677,59,677,54,751,60,828,69,894,84,920,94,939,106,975,145,1003,191,1024,240,1039,291,1055,388,1058,463"/>
+<area shape="rect" id="Node000003" href="$classcoloradar_1_1ColoradarPlusRun.html#a57d3a8d89188dd58e29a46486bed4652" title=" " alt="" coords="493,171,674,211"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="1049,464,1039,410,1019,344,1004,310,985,278,963,249,936,225,917,215,891,207,824,197,748,192,674,191,674,186,748,187,825,192,892,202,919,210,939,220,967,245,990,275,1009,308,1024,342,1044,409,1054,463"/>
+<area shape="rect" id="Node000004" href="$classcoloradar_1_1ColoradarRun.html#a1138181da831a09917bb5e967e18e3a5" title=" " alt="" coords="494,235,673,275"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="1037,466,998,401,969,367,936,340,838,314,673,276,674,271,839,308,939,335,973,364,1002,398,1042,464"/>
+<area shape="rect" id="Node000005" href="$classcoloradar_1_1ColoradarPlusRun.html#a8db82d8471226a2ae6dd5f67b4538b57" title=" " alt="" coords="746,349,927,389"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="1023,469,983,435,936,404,910,392,913,387,939,399,986,431,1026,465"/>
+<area shape="rect" id="Node000008" href="$classcoloradar_1_1H5Dataset.html#a7ece4668e88f364f81a51406a3eff8cb" title=" " alt="" coords="757,413,917,453"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="973,476,905,456,906,451,975,471"/>
+<area shape="rect" id="Node000009" href="$classcoloradar_1_1SingleChipConfig.html#afb63f5c2cefbc1e86672adf1922326bc" title=" " alt="" coords="736,477,937,517"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="972,500,938,500,938,495,972,495"/>
+<area shape="rect" id="Node000010" href="$classcoloradar_1_1SingleChipConfig.html#ac52a7edab23c2de753105c781c7d0551" title=" " alt="" coords="483,427,684,467"/>
+<area shape="poly" id="edge48_Node000001_Node000010" title=" " alt="" coords="991,524,935,539,869,549,801,549,767,543,735,532,718,520,709,507,701,493,686,481,663,469,666,464,690,476,705,490,713,504,722,517,737,527,769,537,802,543,869,544,934,534,990,519"/>
+<area shape="rect" id="Node000011" href="$classcoloradar_1_1CascadeConfig.html#a9b73e56adb8680b9b4d2d4981bba4ac2" title=" " alt="" coords="743,5,930,45"/>
+<area shape="poly" id="edge10_Node000001_Node000011" title=" " alt="" coords="1053,464,1049,384,1033,279,1018,222,998,166,970,113,935,66,911,48,915,43,939,62,975,110,1003,164,1023,220,1038,277,1054,384,1058,464"/>
+<area shape="rect" id="Node000012" href="$classcoloradar_1_1ColoradarPlusDataset.html#a94df80eb2dc41dbb344244c9c8f3dea1" title=" " alt="" coords="493,579,674,619"/>
+<area shape="poly" id="edge12_Node000001_Node000012" title=" " alt="" coords="1010,526,976,543,938,557,870,574,800,586,674,598,674,593,800,581,869,569,937,552,973,538,1008,522"/>
+<area shape="rect" id="Node000017" href="$classcoloradar_1_1ColoradarPlusDataset.html#aeef93b49074f386e88af1f1af3102809" title=" " alt="" coords="493,707,674,747"/>
+<area shape="poly" id="edge18_Node000001_Node000017" title=" " alt="" coords="1048,532,1033,571,1011,617,979,661,960,681,939,697,908,714,875,726,805,741,736,745,674,743,674,737,736,740,804,736,873,721,905,709,936,692,957,677,975,658,1006,614,1028,569,1043,530"/>
+<area shape="rect" id="Node000018" href="$classcoloradar_1_1ColoradarPlusDataset.html#ac2e203b7289f6f1ce1ae73e999a508f0" title=" " alt="" coords="746,643,927,683"/>
+<area shape="poly" id="edge19_Node000001_Node000018" title=" " alt="" coords="1034,530,993,579,967,604,939,626,903,645,901,640,936,622,964,600,989,575,1030,527"/>
+<area shape="rect" id="Node000021" href="$radar__configs_8cpp.html#a51104941b9648a16b40427b9a6c58f46" title=" " alt="" coords="791,810,883,835"/>
+<area shape="poly" id="edge27_Node000001_Node000021" title=" " alt="" coords="1047,531,1007,631,976,689,939,744,900,784,861,812,857,808,896,780,935,741,972,687,1002,629,1042,529"/>
+<area shape="rect" id="Node000025" href="$classcoloradar_1_1ColoradarPlusRun.html#a2b8f49867ba77511c4dab689daf55196" title=" " alt="" coords="746,963,927,1003"/>
+<area shape="poly" id="edge31_Node000001_Node000025" title=" " alt="" coords="1050,531,1010,672,979,761,940,848,898,913,858,964,854,961,894,910,935,845,974,759,1005,671,1045,530"/>
+<area shape="rect" id="Node000029" href="$classcoloradar_1_1ColoradarPlusRun.html#aa8a1be721959bb7ea5d570116ef6173f" title=" " alt="" coords="746,1091,927,1131"/>
+<area shape="poly" id="edge35_Node000001_Node000029" title=" " alt="" coords="1056,531,1049,620,1031,744,1016,813,997,883,971,951,940,1016,906,1059,869,1092,865,1088,902,1056,935,1013,966,949,991,881,1011,811,1026,743,1044,619,1051,531"/>
+<area shape="rect" id="Node000036" href="$namespacecoloradar_1_1internal.html#a6fa9edb52cac5d70827bb19b6a94320d" title="Reads a binary point cloud file into a point cloud object. Loads a point cloud from a binary file,..." alt="" coords="756,1155,917,1195"/>
+<area shape="poly" id="edge42_Node000001_Node000036" title=" " alt="" coords="1056,532,1046,664,1026,847,1011,940,991,1025,968,1096,954,1123,939,1145,919,1160,916,1156,935,1141,950,1120,963,1094,986,1024,1005,939,1021,847,1041,664,1050,531"/>
+<area shape="rect" id="Node000037" href="$classcoloradar_1_1ColoradarPlusRun.html#a3f73f861b520c647d8f3c64748ca8032" title=" " alt="" coords="746,120,927,160"/>
+<area shape="poly" id="edge43_Node000001_Node000037" title=" " alt="" coords="1049,464,1039,404,1019,328,1004,289,985,250,963,213,936,181,910,162,913,158,939,177,967,210,990,247,1009,287,1024,327,1044,403,1054,463"/>
+<area shape="rect" id="Node000038" href="$classcoloradar_1_1ColoradarPlusRun.html#a15b408c0b6de16306121e98c5aa3c471" title=" " alt="" coords="746,235,927,275"/>
+<area shape="poly" id="edge45_Node000001_Node000038" title=" " alt="" coords="1041,465,1025,426,1003,381,973,335,936,295,906,277,909,272,939,291,977,332,1007,378,1030,424,1046,463"/>
+<area shape="rect" id="Node000006" href="$classcoloradar_1_1ColoradarPlusRun.html#a4bb9d10e648cfd2549df0279375846d9" title=" " alt="" coords="493,299,674,339"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="732,351,674,339,675,334,733,346"/>
+<area shape="rect" id="Node000007" href="$classcoloradar_1_1ColoradarPlusRun.html#a316d17faf961f2292d46ce57fae454be" title=" " alt="" coords="493,363,674,403"/>
+<area shape="poly" id="edge6_Node000005_Node000007" title=" " alt="" coords="732,377,674,381,674,375,732,372"/>
+<area shape="poly" id="edge9_Node000009_Node000010" title=" " alt="" coords="722,477,683,469,684,464,723,472"/>
+<area shape="poly" id="edge11_Node000011_Node000002" title=" " alt="" coords="730,40,677,46,676,40,729,34"/>
+<area shape="poly" id="edge17_Node000012_Node000012" title=" " alt="" coords="627,567,611,560,583,557,559,559,544,564,539,570,541,577,536,579,533,569,541,560,558,554,583,552,613,555,629,562"/>
+<area shape="rect" id="Node000013" href="$classcoloradar_1_1ColoradarDataset.html#af1fb8701f2a75d71fddc370aba998c60" title=" " alt="" coords="215,599,420,639"/>
+<area shape="poly" id="edge13_Node000012_Node000013" title=" " alt="" coords="479,609,420,614,420,608,478,604"/>
+<area shape="rect" id="Node000014" href="$classcoloradar_1_1ColoradarDataset.html#ad448b155f63e79060fa8c40689447c37" title=" " alt="" coords="215,663,420,703"/>
+<area shape="poly" id="edge14_Node000012_Node000014" title=" " alt="" coords="502,625,480,633,432,653,395,665,393,660,430,648,478,628,500,620"/>
+<area shape="rect" id="Node000015" href="$classcoloradar_1_1ColoradarPlusDataset.html#a50188ae34c1ce94d6731d1a4855e7d6b" title=" " alt="" coords="206,471,429,511"/>
+<area shape="poly" id="edge15_Node000012_Node000015" title=" " alt="" coords="534,574,484,549,430,525,396,513,397,508,432,520,486,544,536,570"/>
+<area shape="rect" id="Node000016" href="$classcoloradar_1_1ColoradarPlusDataset.html#a759039abad421b770fbb2b3b61f5b21f" title=" " alt="" coords="206,535,429,575"/>
+<area shape="poly" id="edge16_Node000012_Node000016" title=" " alt="" coords="478,584,428,576,429,570,479,579"/>
+<area shape="poly" id="edge20_Node000018_Node000017" title=" " alt="" coords="744,689,664,709,662,704,743,684"/>
+<area shape="rect" id="Node000019" href="$classcoloradar_1_1ColoradarDataset.html#a777f3b83a01e3fd01201b4360dd30f50" title=" " alt="" coords="481,643,686,683"/>
+<area shape="poly" id="edge21_Node000018_Node000019" title=" " alt="" coords="733,665,686,665,686,660,733,660"/>
+<area shape="rect" id="Node000020" href="$classcoloradar_1_1ColoradarPlusDataset.html#a5ecfb4112ef73b298b1c141d1fa32f22" title=" " alt="" coords="493,491,674,531"/>
+<area shape="poly" id="edge24_Node000018_Node000020" title=" " alt="" coords="804,635,752,589,687,545,661,533,663,528,689,540,755,585,808,631"/>
+<area shape="poly" id="edge22_Node000019_Node000013" title=" " alt="" coords="467,646,420,638,420,633,467,641"/>
+<area shape="poly" id="edge23_Node000019_Node000014" title=" " alt="" coords="467,674,420,678,420,672,467,669"/>
+<area shape="poly" id="edge25_Node000020_Node000015" title=" " alt="" coords="479,505,429,502,429,496,479,500"/>
+<area shape="poly" id="edge26_Node000020_Node000016" title=" " alt="" coords="479,531,429,539,428,534,478,525"/>
+<area shape="rect" id="Node000022" href="$classcoloradar_1_1RadarConfig.html#aac17be9bb5dc4982360058870502faee" title=" " alt="" coords="498,771,669,811"/>
+<area shape="poly" id="edge28_Node000021_Node000022" title=" " alt="" coords="777,818,669,804,669,799,777,813"/>
+<area shape="rect" id="Node000023" href="$classcoloradar_1_1RadarConfig.html#acf99f0c74d2671d51e6501d872c2720f" title=" " alt="" coords="498,835,669,875"/>
+<area shape="poly" id="edge29_Node000021_Node000023" title=" " alt="" coords="777,833,669,847,669,841,777,827"/>
+<area shape="rect" id="Node000024" href="$classcoloradar_1_1RadarConfig.html#adc7150ab7a368106f377b900ad6b5e0e" title=" " alt="" coords="498,899,669,939"/>
+<area shape="poly" id="edge30_Node000021_Node000024" title=" " alt="" coords="797,843,689,889,654,901,653,896,687,884,795,839"/>
+<area shape="rect" id="Node000026" href="$classcoloradar_1_1ColoradarPlusRun.html#af3eea82a2a8d06133b0fa8959b3c4968" title=" " alt="" coords="487,963,680,1003"/>
+<area shape="poly" id="edge32_Node000025_Node000026" title=" " alt="" coords="732,985,680,985,680,980,732,980"/>
+<area shape="rect" id="Node000027" href="$classcoloradar_1_1ColoradarRun.html#aee009bd89b652e22815f92979be5db14" title=" " alt="" coords="492,1027,675,1067"/>
+<area shape="poly" id="edge33_Node000025_Node000027" title=" " alt="" coords="744,1009,664,1029,662,1024,743,1004"/>
+<area shape="rect" id="Node000028" href="$classcoloradar_1_1ColoradarRun.html#ab77d2fc07819a7c8d51f6f07f418f77c" title=" " alt="" coords="226,1027,409,1067"/>
+<area shape="poly" id="edge34_Node000027_Node000028" title=" " alt="" coords="478,1049,409,1049,409,1044,478,1044"/>
+<area shape="rect" id="Node000030" href="$classcoloradar_1_1ColoradarPlusRun.html#a79ff7753c5dcb90d2e63888476bf6733" title=" " alt="" coords="479,1091,688,1131"/>
+<area shape="poly" id="edge36_Node000029_Node000030" title=" " alt="" coords="732,1113,688,1113,688,1108,732,1108"/>
+<area shape="rect" id="Node000033" href="$classcoloradar_1_1ColoradarPlusRun.html#afbf64b33573a0c4c5147e03122e4aa38" title=" " alt="" coords="488,1155,679,1195"/>
+<area shape="poly" id="edge39_Node000029_Node000033" title=" " alt="" coords="744,1137,664,1157,662,1152,743,1132"/>
+<area shape="rect" id="Node000034" href="$classcoloradar_1_1ColoradarRun.html#a9cd37536f19b8fdb629b48a8451659fb" title=" " alt="" coords="493,1219,673,1259"/>
+<area shape="poly" id="edge40_Node000029_Node000034" title=" " alt="" coords="746,1139,738,1145,723,1160,714,1176,706,1193,690,1209,668,1221,666,1216,686,1205,702,1189,710,1174,718,1157,734,1141,743,1135"/>
+<area shape="rect" id="Node000031" href="$classcoloradar_1_1ColoradarPlusRun.html#abb2ccebb919c5d26f19ecb66bb30f561" title=" " alt="" coords="204,1091,431,1131"/>
+<area shape="poly" id="edge37_Node000030_Node000031" title=" " alt="" coords="465,1113,431,1113,431,1108,465,1108"/>
+<area shape="rect" id="Node000032" href="$main_8cpp.html#a988268729f234c69f228e7fedecb706b" title=" " alt="" coords="5,1098,156,1123"/>
+<area shape="poly" id="edge38_Node000031_Node000032" title=" " alt="" coords="190,1113,156,1113,156,1108,190,1108"/>
+<area shape="rect" id="Node000035" href="$classcoloradar_1_1ColoradarRun.html#a38bcdce1cfe2652359e0b2fafc3b814a" title=" " alt="" coords="227,1219,407,1259"/>
+<area shape="poly" id="edge41_Node000034_Node000035" title=" " alt="" coords="479,1241,408,1241,408,1236,479,1236"/>
+<area shape="poly" id="edge44_Node000037_Node000003" title=" " alt="" coords="733,163,675,175,674,170,732,158"/>
+<area shape="poly" id="edge46_Node000038_Node000003" title=" " alt="" coords="743,234,662,213,664,208,744,229"/>
+<area shape="poly" id="edge47_Node000038_Node000004" title=" " alt="" coords="732,257,673,257,673,252,732,252"/>
+</map>

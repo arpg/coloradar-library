@@ -1,0 +1,7 @@
+<map id="coloradar::frameIdxToFileIdx" name="coloradar::frameIdxToFileIdx">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,13,212,38"/>
+<area shape="rect" id="Node000002" href="$namespacecoloradar_1_1internal.html#a019a5fa3657de9bcf17015c33ecca2e8" title="Extracts the first integer found in a string." alt="" coords="260,5,401,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="213,23,247,23,247,28,213,28"/>
+<area shape="rect" id="Node000003" href="$namespacecoloradar_1_1internal.html#ae804ce7505cca7c3a8e5b1da9ffb7e35" title="Constructs a pose object of type PoseT (PCL&#45;style) from translation and rotation components." alt="" coords="449,5,591,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="402,23,435,23,435,28,402,28"/>
+</map>

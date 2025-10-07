@@ -1,0 +1,7 @@
+<map id="coloradar::Run::sampleMapFrame" name="coloradar::Run::sampleMapFrame">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,205,45"/>
+<area shape="rect" id="Node000002" href="$namespacecoloradar.html#a15b783ce05bdb3be223d10b71e43cf74" title=" " alt="" coords="253,13,397,38"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="206,23,239,23,239,28,206,28"/>
+<area shape="rect" id="Node000003" href="$namespacecoloradar_1_1internal.html#ae804ce7505cca7c3a8e5b1da9ffb7e35" title="Constructs a pose object of type PoseT (PCL&#45;style) from translation and rotation components." alt="" coords="445,5,587,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="398,23,431,23,431,28,398,28"/>
+</map>

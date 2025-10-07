@@ -1,0 +1,9 @@
+<map id="coloradar::SingleChipConfig::SingleChipConfig" name="coloradar::SingleChipConfig::SingleChipConfig">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,207,45"/>
+<area shape="rect" id="Node000002" href="$classcoloradar_1_1RadarConfig.html#af6c399affeb79c142d98bafe704337bb" title=" " alt="" coords="255,5,425,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="207,23,241,23,241,28,207,28"/>
+<area shape="rect" id="Node000003" href="$classcoloradar_1_1RadarConfig.html#a0019ff72f4a314ce4f2f40f6bd6e39a2" title=" " alt="" coords="473,5,709,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="426,23,460,23,460,28,426,28"/>
+<area shape="rect" id="Node000004" href="$classcoloradar_1_1RadarConfig.html#a05d77493284e0b0c3fe409dd06b3b498" title=" " alt="" coords="757,5,928,45"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="709,23,744,23,744,28,709,28"/>
+</map>

@@ -1,0 +1,13 @@
+<map id="coloradar::ColoradarPlusDataset::exportBaseDevice" name="coloradar::ColoradarPlusDataset::exportBaseDevice">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,101,205,141"/>
+<area shape="rect" id="Node000002" href="$classcoloradar_1_1BaseExportConfig.html#a7e783a7e4f91477fac4830b510e95abc" title=" " alt="" coords="253,5,460,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="149,99,252,55,274,47,275,52,254,60,151,104"/>
+<area shape="rect" id="Node000003" href="$classcoloradar_1_1BaseExportConfig.html#a652da865a36bf54725870a08fdd3c09a" title=" " alt="" coords="253,69,460,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="205,106,239,102,240,107,206,111"/>
+<area shape="rect" id="Node000004" href="$namespacecoloradar_1_1internal.html#a3a96e0eb5988db3bb4341c0ee6ccc485" title=" " alt="" coords="282,133,431,173"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="206,131,269,139,268,145,205,137"/>
+<area shape="rect" id="Node000006" href="$namespacecoloradar_1_1internal.html#a3f79d2ff735aab3655fd87d1c1b85b81" title=" " alt="" coords="281,197,433,237"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="151,139,254,183,275,190,274,195,252,188,149,144"/>
+<area shape="rect" id="Node000005" href="$namespacecoloradar_1_1internal.html#ae804ce7505cca7c3a8e5b1da9ffb7e35" title="Constructs a pose object of type PoseT (PCL&#45;style) from translation and rotation components." alt="" coords="508,133,649,173"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="432,151,495,151,495,156,432,156"/>
+</map>

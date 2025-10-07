@@ -1,0 +1,9 @@
+<map id="coloradar::RadarDevice" name="coloradar::RadarDevice">
+<area shape="rect" id="Node000001" title=" " alt="" coords="124,79,299,104"/>
+<area shape="rect" id="Node000003" href="$classcoloradar_1_1CascadeDevice.html" title=" " alt="" coords="5,152,196,177"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="183,114,120,154,117,150,181,109"/>
+<area shape="rect" id="Node000004" href="$classcoloradar_1_1SingleChipDevice.html" title=" " alt="" coords="221,152,426,177"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="243,109,306,150,304,154,240,114"/>
+<area shape="rect" id="Node000002" href="$classcoloradar_1_1BaseDevice.html" title=" " alt="" coords="127,5,295,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="214,44,214,79,209,79,209,44"/>
+</map>

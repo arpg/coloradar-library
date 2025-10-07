@@ -1,0 +1,5 @@
+<map id="coloradar::Run::getPoses" name="coloradar::Run::getPoses">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,13,188,38"/>
+<area shape="rect" id="Node000002" href="$namespacecoloradar_1_1internal.html#ae804ce7505cca7c3a8e5b1da9ffb7e35" title="Constructs a pose object of type PoseT (PCL&#45;style) from translation and rotation components." alt="" coords="236,5,377,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="188,23,222,23,222,28,188,28"/>
+</map>

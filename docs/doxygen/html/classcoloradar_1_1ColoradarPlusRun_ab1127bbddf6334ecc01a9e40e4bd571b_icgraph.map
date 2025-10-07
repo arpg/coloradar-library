@@ -1,0 +1,9 @@
+<map id="coloradar::ColoradarPlusRun::readRadarPointcloud" name="coloradar::ColoradarPlusRun::readRadarPointcloud">
+<area shape="rect" id="Node000001" title=" " alt="" coords="488,37,679,77"/>
+<area shape="rect" id="Node000002" href="$classcoloradar_1_1ColoradarPlusRun.html#aff5bfc45a503fb7c70c00826bf2d6864" title=" " alt="" coords="241,5,440,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="474,46,440,41,441,36,475,40"/>
+<area shape="rect" id="Node000003" href="$classcoloradar_1_1ColoradarRun.html#af1705e424798201ad716eb03ac567204" title=" " alt="" coords="247,69,435,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="475,74,435,80,434,74,474,69"/>
+<area shape="rect" id="Node000004" href="$classcoloradar_1_1ColoradarRun.html#a3fcbf04bb6f2d507f7eac582cfaec779" title=" " alt="" coords="5,69,193,109"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="233,92,193,92,193,87,233,87"/>
+</map>

@@ -1,0 +1,11 @@
+<map id="coloradar::RadarConfig::precomputePointcloudTemplate" name="coloradar::RadarConfig::precomputePointcloudTemplate">
+<area shape="rect" id="Node000001" title=" " alt="" coords="473,69,709,109"/>
+<area shape="rect" id="Node000002" href="$classcoloradar_1_1RadarConfig.html#af6c399affeb79c142d98bafe704337bb" title=" " alt="" coords="255,69,425,109"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="460,92,425,92,425,87,460,87"/>
+<area shape="rect" id="Node000003" href="$classcoloradar_1_1CascadeConfig.html#a3fa1d541b601c3995645ab5d945b8d9c" title=" " alt="" coords="13,5,199,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="252,68,179,48,180,43,254,63"/>
+<area shape="rect" id="Node000004" href="$classcoloradar_1_1RadarConfig.html#a8e1010fa70ec2225b716d0b388392408" title=" " alt="" coords="21,69,191,109"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="241,92,191,92,191,87,241,87"/>
+<area shape="rect" id="Node000005" href="$classcoloradar_1_1SingleChipConfig.html#abf19091abbac8771e4136d6136d2bec1" title=" " alt="" coords="5,133,207,173"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="254,116,180,136,179,131,252,110"/>
+</map>

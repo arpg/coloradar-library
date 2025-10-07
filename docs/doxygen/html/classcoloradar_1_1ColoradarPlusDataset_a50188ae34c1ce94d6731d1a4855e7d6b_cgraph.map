@@ -1,0 +1,13 @@
+<map id="coloradar::ColoradarPlusDataset::ColoradarPlusDataset" name="coloradar::ColoradarPlusDataset::ColoradarPlusDataset">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,63,228,103"/>
+<area shape="rect" id="Node000002" href="$classcoloradar_1_1ColoradarPlusDataset.html#a94df80eb2dc41dbb344244c9c8f3dea1" title=" " alt="" coords="505,29,687,69"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="228,72,491,54,492,59,229,78"/>
+<area shape="rect" id="Node000004" href="$classcoloradar_1_1ColoradarPlusDataset.html#a5ecfb4112ef73b298b1c141d1fa32f22" title=" " alt="" coords="276,91,457,131"/>
+<area shape="poly" id="edge4_Node000001_Node000004" title=" " alt="" coords="229,93,262,96,262,102,228,98"/>
+<area shape="poly" id="edge3_Node000002_Node000002" title=" " alt="" coords="557,30,555,20,561,10,575,5,596,3,620,6,634,13,631,18,619,11,596,8,576,10,564,15,560,21,562,28"/>
+<area shape="rect" id="Node000003" href="$namespacecoloradar_1_1internal.html#ac1ebac36bb9b49ec6b3a9afd41000d65" title="Checks whether a filesystem path exists." alt="" coords="735,61,876,101"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="687,61,721,66,720,71,686,66"/>
+<area shape="rect" id="Node000005" href="$classcoloradar_1_1ColoradarPlusDataset.html#ac2e203b7289f6f1ce1ae73e999a508f0" title=" " alt="" coords="505,93,687,133"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="458,109,491,109,491,115,458,114"/>
+<area shape="poly" id="edge6_Node000005_Node000003" title=" " alt="" coords="686,97,720,92,721,97,687,102"/>
+</map>

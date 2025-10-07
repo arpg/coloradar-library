@@ -1,0 +1,20 @@
+<map id="coloradar::ColoradarPlusRun::createLidarOctomap" name="coloradar::ColoradarPlusRun::createLidarOctomap">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,97,192,137"/>
+<area shape="rect" id="Node000002" href="$classcoloradar_1_1ColoradarPlusRun.html#af9020b4202042f4a6884713a3cf1074b" title=" " alt="" coords="240,65,421,105"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="192,102,226,97,227,102,193,107"/>
+<area shape="rect" id="Node000007" href="$classcoloradar_1_1ColoradarPlusRun.html#ac82733019926ff52f58eae3bc0e6de88" title=" " alt="" coords="240,129,421,169"/>
+<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="193,128,227,132,226,138,192,133"/>
+<area shape="rect" id="Node000003" href="$namespacecoloradar.html#a3750d42cf0bd0a46e0f1b5eed572d145" title=" " alt="" coords="471,74,671,99"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="421,83,457,83,457,89,421,89"/>
+<area shape="rect" id="Node000004" href="$namespacecoloradar_1_1internal.html#ae804ce7505cca7c3a8e5b1da9ffb7e35" title="Constructs a pose object of type PoseT (PCL&#45;style) from translation and rotation components." alt="" coords="720,5,861,45"/>
+<area shape="poly" id="edge6_Node000002_Node000004" title=" " alt="" coords="421,67,469,60,706,31,707,37,470,65,422,73"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="616,71,706,46,708,51,618,77"/>
+<area shape="rect" id="Node000005" href="$namespacecoloradar_1_1internal.html#a537ccc312a43c464c2eb66117f7d3839" title="Extracts an Eigen quaternion object from a PCL&#45;style pose object." alt="" coords="720,69,861,109"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="671,85,706,86,706,91,671,91"/>
+<area shape="rect" id="Node000006" href="$namespacecoloradar_1_1internal.html#aa760936a6331ea2eed939a8ef05a5e97" title="Extracts an Eigen translation vector from a PCL&#45;style pose object." alt="" coords="720,133,861,173"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="620,97,673,112,718,126,716,131,671,117,618,102"/>
+<area shape="rect" id="Node000008" href="$namespacecoloradar_1_1internal.html#a7727bf0b5fc91afd267d5edab4f7c392" title="Ensures that a directory exists. Creates the directory specified by dirPath along with any necessary ..." alt="" coords="469,127,672,167"/>
+<area shape="poly" id="edge8_Node000007_Node000008" title=" " alt="" coords="421,146,456,145,456,151,421,151"/>
+<area shape="rect" id="Node000009" href="$namespacecoloradar.html#ae543b85a1a5eea1b3ea90413ce81f34c" title=" " alt="" coords="488,191,653,217"/>
+<area shape="poly" id="edge9_Node000007_Node000009" title=" " alt="" coords="420,167,501,186,500,191,418,172"/>
+</map>

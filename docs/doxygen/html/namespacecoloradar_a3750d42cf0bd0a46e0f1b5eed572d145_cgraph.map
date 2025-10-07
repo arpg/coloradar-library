@@ -1,0 +1,9 @@
+<map id="coloradar::interpolatePoses" name="coloradar::interpolatePoses">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,77,205,102"/>
+<area shape="rect" id="Node000002" href="$namespacecoloradar_1_1internal.html#ae804ce7505cca7c3a8e5b1da9ffb7e35" title="Constructs a pose object of type PoseT (PCL&#45;style) from translation and rotation components." alt="" coords="253,5,395,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="149,74,241,47,243,52,151,79"/>
+<area shape="rect" id="Node000003" href="$namespacecoloradar_1_1internal.html#a537ccc312a43c464c2eb66117f7d3839" title="Extracts an Eigen quaternion object from a PCL&#45;style pose object." alt="" coords="253,69,395,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="206,87,239,87,239,92,206,92"/>
+<area shape="rect" id="Node000004" href="$namespacecoloradar_1_1internal.html#aa760936a6331ea2eed939a8ef05a5e97" title="Extracts an Eigen translation vector from a PCL&#45;style pose object." alt="" coords="253,133,395,173"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="151,100,243,127,241,132,149,105"/>
+</map>

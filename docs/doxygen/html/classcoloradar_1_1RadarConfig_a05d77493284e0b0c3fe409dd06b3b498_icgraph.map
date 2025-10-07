@@ -1,0 +1,31 @@
+<map id="coloradar::RadarConfig::nRangeBins" name="coloradar::RadarConfig::nRangeBins">
+<area shape="rect" id="Node000001" title=" " alt="" coords="1000,197,1171,237"/>
+<area shape="rect" id="Node000002" href="$classcoloradar_1_1RadarConfig.html#ade6e26885b88af22125303a15f96bc5b" title=" " alt="" coords="749,53,919,93"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1052,190,1006,151,951,114,908,96,910,91,953,110,1009,147,1055,186"/>
+<area shape="rect" id="Node000005" href="$classcoloradar_1_1RadarConfig.html#abb44d75a45a6299ad1c9f9db77573686" title=" " alt="" coords="463,120,668,160"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="1038,193,996,174,951,159,879,145,804,138,668,136,668,131,804,133,879,140,953,153,998,169,1040,188"/>
+<area shape="rect" id="Node000006" href="$classcoloradar_1_1RadarConfig.html#af6cccf121e61aafd28bd2a0b04c2f35e" title=" " alt="" coords="749,168,919,208"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="986,208,919,201,920,195,987,203"/>
+<area shape="rect" id="Node000007" href="$classcoloradar_1_1RadarConfig.html#a5f890bea4d670387aa9e99f558fcb721" title=" " alt="" coords="480,203,651,243"/>
+<area shape="poly" id="edge10_Node000001_Node000007" title=" " alt="" coords="986,222,952,223,651,225,651,220,952,217,986,217"/>
+<area shape="rect" id="Node000008" href="$main_8cpp.html#acb148aacaac5f11d97fcd76adf0fb4f9" title=" " alt="" coords="204,210,415,235"/>
+<area shape="poly" id="edge11_Node000001_Node000008" title=" " alt="" coords="987,236,879,249,748,260,605,265,462,257,408,249,358,238,359,233,409,244,463,252,605,259,748,255,879,244,986,230"/>
+<area shape="rect" id="Node000009" href="$classcoloradar_1_1RadarConfig.html#a0019ff72f4a314ce4f2f40f6bd6e39a2" title=" " alt="" coords="716,333,952,373"/>
+<area shape="poly" id="edge12_Node000001_Node000009" title=" " alt="" coords="1053,248,1007,284,953,317,909,336,907,331,951,312,1004,279,1049,244"/>
+<area shape="rect" id="Node000003" href="$classcoloradar_1_1RadarConfig.html#ab78268a5bdb6d5c3b81a41d72a77153f" title=" " alt="" coords="480,5,651,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="735,58,650,43,651,38,736,53"/>
+<area shape="rect" id="Node000004" href="$main_8cpp.html#a988268729f234c69f228e7fedecb706b" title=" " alt="" coords="5,127,156,153"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="735,81,494,97,204,124,156,130,156,125,204,119,493,92,735,76"/>
+<area shape="poly" id="edge5_Node000005_Node000004" title=" " alt="" coords="449,143,156,143,156,137,449,137"/>
+<area shape="poly" id="edge7_Node000006_Node000007" title=" " alt="" coords="735,203,651,214,650,209,735,198"/>
+<area shape="poly" id="edge8_Node000007_Node000008" title=" " alt="" coords="467,225,415,225,415,220,467,220"/>
+<area shape="poly" id="edge9_Node000008_Node000004" title=" " alt="" coords="260,208,116,155,118,150,261,203"/>
+<area shape="rect" id="Node000010" href="$classcoloradar_1_1RadarConfig.html#af6c399affeb79c142d98bafe704337bb" title=" " alt="" coords="480,333,651,373"/>
+<area shape="poly" id="edge13_Node000009_Node000010" title=" " alt="" coords="703,356,651,356,651,351,703,351"/>
+<area shape="rect" id="Node000011" href="$classcoloradar_1_1CascadeConfig.html#a3fa1d541b601c3995645ab5d945b8d9c" title=" " alt="" coords="216,269,403,309"/>
+<area shape="poly" id="edge14_Node000010_Node000011" title=" " alt="" coords="471,333,389,312,390,307,472,327"/>
+<area shape="rect" id="Node000012" href="$classcoloradar_1_1RadarConfig.html#a8e1010fa70ec2225b716d0b388392408" title=" " alt="" coords="224,333,395,373"/>
+<area shape="poly" id="edge15_Node000010_Node000012" title=" " alt="" coords="466,356,395,356,395,351,466,351"/>
+<area shape="rect" id="Node000013" href="$classcoloradar_1_1SingleChipConfig.html#abf19091abbac8771e4136d6136d2bec1" title=" " alt="" coords="209,397,410,437"/>
+<area shape="poly" id="edge16_Node000010_Node000013" title=" " alt="" coords="472,379,390,400,389,395,471,374"/>
+</map>

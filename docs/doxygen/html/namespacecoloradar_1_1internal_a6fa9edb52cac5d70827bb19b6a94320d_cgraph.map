@@ -1,0 +1,7 @@
+<map id="coloradar::internal::readLidarPointCloud" name="coloradar::internal::readLidarPointCloud">
+<area shape="rect" id="Node000001" title="Reads a binary point cloud file into a point cloud object. Loads a point cloud from a binary file,..." alt="" coords="5,37,167,77"/>
+<area shape="rect" id="Node000002" href="$namespacecoloradar_1_1internal.html#ac1ebac36bb9b49ec6b3a9afd41000d65" title="Checks whether a filesystem path exists." alt="" coords="215,5,356,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="166,42,201,36,202,41,167,47"/>
+<area shape="rect" id="Node000003" href="$namespacecoloradar_1_1internal.html#ae804ce7505cca7c3a8e5b1da9ffb7e35" title="Constructs a pose object of type PoseT (PCL&#45;style) from translation and rotation components." alt="" coords="215,69,356,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="167,68,202,73,201,78,166,73"/>
+</map>

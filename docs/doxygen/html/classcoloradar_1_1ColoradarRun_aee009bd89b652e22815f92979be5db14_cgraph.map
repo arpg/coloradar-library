@@ -1,0 +1,7 @@
+<map id="coloradar::ColoradarRun::getSingleChipDatacube" name="coloradar::ColoradarRun::getSingleChipDatacube">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,188,45"/>
+<area shape="rect" id="Node000002" href="$classcoloradar_1_1ColoradarPlusRun.html#a2b8f49867ba77511c4dab689daf55196" title=" " alt="" coords="236,5,417,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="189,23,222,23,222,28,189,28"/>
+<area shape="rect" id="Node000003" href="$namespacecoloradar_1_1internal.html#ac1ebac36bb9b49ec6b3a9afd41000d65" title="Checks whether a filesystem path exists." alt="" coords="465,5,607,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="417,23,452,23,452,28,417,28"/>
+</map>

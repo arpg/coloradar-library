@@ -1,0 +1,9 @@
+<map id="coloradar::ColoradarPlusRun::readDatacube" name="coloradar::ColoradarPlusRun::readDatacube">
+<area shape="rect" id="Node000001" title=" " alt="" coords="477,37,659,77"/>
+<area shape="rect" id="Node000002" href="$classcoloradar_1_1ColoradarPlusRun.html#af3eea82a2a8d06133b0fa8959b3c4968" title=" " alt="" coords="236,5,429,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="463,46,429,41,430,36,464,40"/>
+<area shape="rect" id="Node000003" href="$classcoloradar_1_1ColoradarRun.html#aee009bd89b652e22815f92979be5db14" title=" " alt="" coords="241,69,424,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="464,74,424,80,424,74,463,69"/>
+<area shape="rect" id="Node000004" href="$classcoloradar_1_1ColoradarRun.html#ab77d2fc07819a7c8d51f6f07f418f77c" title=" " alt="" coords="5,69,188,109"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="228,92,188,92,188,87,228,87"/>
+</map>

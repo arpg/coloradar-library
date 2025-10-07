@@ -1,0 +1,8 @@
+<map id="coloradar::SingleChipConfig::SingleChipConfig" name="coloradar::SingleChipConfig::SingleChipConfig">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,207,45"/>
+<area shape="rect" id="Node000002" href="$namespacecoloradar_1_1internal.html#ac1ebac36bb9b49ec6b3a9afd41000d65" title="Checks whether a filesystem path exists." alt="" coords="504,5,645,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="207,20,255,19,456,19,490,19,490,25,456,24,255,24,207,25"/>
+<area shape="rect" id="Node000003" href="$classcoloradar_1_1SingleChipConfig.html#afb63f5c2cefbc1e86672adf1922326bc" title=" " alt="" coords="255,33,456,73"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="207,34,241,38,241,43,207,39"/>
+<area shape="poly" id="edge3_Node000003_Node000002" title=" " alt="" coords="456,38,490,33,491,39,456,43"/>
+</map>

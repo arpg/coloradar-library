@@ -1,0 +1,17 @@
+<map id="coloradar::ColoradarPlusDataset::loadTransform" name="coloradar::ColoradarPlusDataset::loadTransform">
+<area shape="rect" id="Node000001" title=" " alt="" coords="529,69,711,109"/>
+<area shape="rect" id="Node000002" href="$classcoloradar_1_1ColoradarPlusDataset.html#aeef93b49074f386e88af1f1af3102809" title=" " alt="" coords="288,5,469,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="530,68,454,48,455,43,532,63"/>
+<area shape="rect" id="Node000003" href="$classcoloradar_1_1ColoradarDataset.html#a777f3b83a01e3fd01201b4360dd30f50" title=" " alt="" coords="276,69,481,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="516,92,482,92,482,87,516,87"/>
+<area shape="rect" id="Node000006" href="$classcoloradar_1_1ColoradarPlusDataset.html#a5ecfb4112ef73b298b1c141d1fa32f22" title=" " alt="" coords="288,133,469,173"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="532,115,455,136,454,131,530,110"/>
+<area shape="rect" id="Node000004" href="$classcoloradar_1_1ColoradarDataset.html#af1fb8701f2a75d71fddc370aba998c60" title=" " alt="" coords="14,5,219,45"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="282,69,198,48,200,43,283,63"/>
+<area shape="rect" id="Node000005" href="$classcoloradar_1_1ColoradarDataset.html#ad448b155f63e79060fa8c40689447c37" title=" " alt="" coords="14,69,219,109"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="262,92,220,92,220,87,262,87"/>
+<area shape="rect" id="Node000007" href="$classcoloradar_1_1ColoradarPlusDataset.html#a50188ae34c1ce94d6731d1a4855e7d6b" title=" " alt="" coords="5,133,228,173"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="274,156,228,156,228,151,274,151"/>
+<area shape="rect" id="Node000008" href="$classcoloradar_1_1ColoradarPlusDataset.html#a759039abad421b770fbb2b3b61f5b21f" title=" " alt="" coords="5,197,228,237"/>
+<area shape="poly" id="edge7_Node000006_Node000008" title=" " alt="" coords="283,179,200,200,198,195,282,174"/>
+</map>

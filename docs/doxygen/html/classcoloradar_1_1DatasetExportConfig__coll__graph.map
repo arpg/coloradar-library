@@ -1,0 +1,17 @@
+<map id="coloradar::DatasetExportConfig" name="coloradar::DatasetExportConfig">
+<area shape="rect" id="Node000001" title=" " alt="" coords="747,65,931,105"/>
+<area shape="rect" id="Node000002" href="$classcoloradar_1_1RadarExportConfig.html" title=" " alt="" coords="389,101,601,126"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="615,114,722,108,756,103,757,108,723,113,615,119"/>
+<area shape="rect" id="Node000003" href="$classcoloradar_1_1BaseExportConfig.html" title=" " alt="" coords="5,50,212,75"/>
+<area shape="poly" id="edge9_Node000001_Node000003" title=" " alt="" coords="194,45,236,40,373,26,481,19,588,24,723,47,781,63,780,68,722,52,587,29,481,24,373,31,236,45,195,51"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="220,74,398,98,398,103,219,80"/>
+<area shape="rect" id="Node000005" href="$classcoloradar_1_1LidarExportConfig.html" title=" " alt="" coords="392,150,599,175"/>
+<area shape="poly" id="edge5_Node000005_Node000003" title=" " alt="" coords="176,76,366,128,390,136,435,147,433,153,389,141,365,133,174,81"/>
+<area shape="rect" id="Node000006" href="$classcoloradar_1_1ImuExportConfig.html" title=" " alt="" coords="396,47,595,73"/>
+<area shape="poly" id="edge8_Node000006_Node000003" title=" " alt="" coords="226,59,396,58,396,63,226,65"/>
+<area shape="rect" id="Node000004" href="$structcoloradar_1_1FovConfig.html" title=" " alt="" coords="31,178,186,203"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="186,173,430,123,432,129,187,178"/>
+<area shape="poly" id="edge6_Node000005_Node000004" title=" " alt="" coords="151,206,192,221,237,232,301,241,329,239,365,232,397,221,428,205,476,173,479,178,431,210,399,225,366,237,330,245,301,246,235,237,190,226,149,211"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="612,153,667,145,722,133,762,120,799,103,801,108,764,124,723,139,668,151,613,158"/>
+<area shape="poly" id="edge7_Node000001_Node000006" title=" " alt="" coords="609,66,747,76,746,81,608,71"/>
+</map>

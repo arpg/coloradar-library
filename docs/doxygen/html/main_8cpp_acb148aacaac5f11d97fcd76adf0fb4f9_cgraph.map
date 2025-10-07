@@ -1,0 +1,15 @@
+<map id="heatmapToPointcloudBinding" name="heatmapToPointcloudBinding">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,150,216,175"/>
+<area shape="rect" id="Node000002" href="$classcoloradar_1_1RadarConfig.html#a5f890bea4d670387aa9e99f558fcb721" title=" " alt="" coords="264,56,435,96"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="146,147,280,98,282,103,148,152"/>
+<area shape="rect" id="Node000004" href="$classcoloradar_1_1RadarConfig.html#a05d77493284e0b0c3fe409dd06b3b498" title=" " alt="" coords="701,63,872,103"/>
+<area shape="poly" id="edge5_Node000001_Node000004" title=" " alt="" coords="216,148,688,92,688,97,216,153"/>
+<area shape="rect" id="Node000005" href="$classcoloradar_1_1RadarConfig.html#a8ca5159c47e7c62f504b2ac8135d53b0" title=" " alt="" coords="264,171,435,211"/>
+<area shape="poly" id="edge6_Node000001_Node000005" title=" " alt="" coords="217,172,251,176,250,182,216,178"/>
+<area shape="rect" id="Node000006" href="$classcoloradar_1_1RadarConfig.html#a11a0dc77c989372b6f9b250cd1745e3f" title=" " alt="" coords="264,235,435,275"/>
+<area shape="poly" id="edge7_Node000001_Node000006" title=" " alt="" coords="145,173,265,220,283,227,281,232,263,225,143,178"/>
+<area shape="rect" id="Node000003" href="$classcoloradar_1_1RadarConfig.html#af6cccf121e61aafd28bd2a0b04c2f35e" title=" " alt="" coords="483,5,653,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="434,54,468,46,470,51,435,59"/>
+<area shape="poly" id="edge4_Node000002_Node000004" title=" " alt="" coords="435,75,688,79,688,84,435,80"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="646,43,697,57,696,62,644,48"/>
+</map>

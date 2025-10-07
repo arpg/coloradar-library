@@ -1,0 +1,36 @@
+<map id="coloradar::H5Dataset::H5Dataset" name="coloradar::H5Dataset::H5Dataset">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,267,165,307"/>
+<area shape="rect" id="Node000002" href="$namespacecoloradar_1_1internal.html#ac1ebac36bb9b49ec6b3a9afd41000d65" title="Checks whether a filesystem path exists." alt="" coords="232,5,373,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="90,265,105,222,130,166,165,107,187,80,212,55,218,50,222,54,215,59,191,83,170,110,135,169,110,224,95,267"/>
+<area shape="rect" id="Node000003" href="$classcoloradar_1_1Dataset.html#a802d9a27425bdf51d7eabeaebbacba08" title=" " alt="" coords="219,69,386,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="95,265,140,194,173,154,212,119,220,114,223,118,215,123,177,158,144,198,99,268"/>
+<area shape="rect" id="Node000004" href="$h5__dataset_8cpp.html#ad4d93140c2446973043298af53d7c050" title=" " alt="" coords="252,134,353,159"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="104,265,151,221,212,176,243,162,245,166,215,181,154,225,107,269"/>
+<area shape="rect" id="Node000005" href="$namespacecoloradar_1_1internal.html#a7075ed88198000e1450262ff1bc659ea" title=" " alt="" coords="446,95,593,135"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="121,264,212,220,262,203,302,193,341,184,391,168,463,138,465,143,393,173,343,189,303,199,264,208,214,225,123,269"/>
+<area shape="rect" id="Node000007" href="$namespacecoloradar_1_1internal.html#ac723def79318e6a40bec53112a84de58" title=" " alt="" coords="231,235,375,275"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="165,272,217,265,217,270,166,278"/>
+<area shape="rect" id="Node000009" href="$namespacecoloradar_1_1internal.html#ab210bd6256e02378481ae15db241e276" title=" " alt="" coords="226,299,379,339"/>
+<area shape="poly" id="edge10_Node000001_Node000009" title=" " alt="" coords="166,296,213,303,212,308,165,301"/>
+<area shape="rect" id="Node000011" href="$namespacecoloradar_1_1internal.html#aead915073677df61f6d52305d89d051d" title=" " alt="" coords="449,388,590,428"/>
+<area shape="poly" id="edge14_Node000001_Node000011" title=" " alt="" coords="121,304,165,327,214,348,271,365,329,378,435,396,434,401,328,383,269,370,212,353,162,332,119,309"/>
+<area shape="rect" id="Node000012" href="$namespacecoloradar_1_1internal.html#a9b4ea012aaa557e9ac64b71ff5af0aa5" title=" " alt="" coords="442,452,597,492"/>
+<area shape="poly" id="edge16_Node000001_Node000012" title=" " alt="" coords="106,305,152,351,182,375,215,395,268,418,323,436,429,459,428,464,322,441,266,423,212,400,179,379,148,355,102,309"/>
+<area shape="rect" id="Node000013" href="$namespacecoloradar_1_1internal.html#a9595dcffb96ab075582a54b5b81abdda" title=" " alt="" coords="440,516,599,556"/>
+<area shape="poly" id="edge18_Node000001_Node000013" title=" " alt="" coords="98,306,116,339,141,380,175,422,215,456,260,480,299,488,340,492,393,501,427,510,426,515,391,507,340,497,298,494,258,485,212,461,171,425,137,383,111,342,94,308"/>
+<area shape="rect" id="Node000014" href="$namespacecoloradar.html#acb12f1124b34e7515cb89addef1c3892" title=" " alt="" coords="213,515,392,541"/>
+<area shape="poly" id="edge20_Node000001_Node000014" title=" " alt="" coords="96,306,112,346,137,396,172,448,215,494,237,508,234,512,212,498,168,452,133,399,107,348,91,308"/>
+<area shape="rect" id="Node000006" href="$namespacecoloradar_1_1internal.html#ae804ce7505cca7c3a8e5b1da9ffb7e35" title="Constructs a pose object of type PoseT (PCL&#45;style) from translation and rotation components." alt="" coords="647,296,788,336"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="572,133,600,151,632,183,660,217,701,282,697,285,656,221,628,186,597,155,569,137"/>
+<area shape="poly" id="edge7_Node000007_Node000006" title=" " alt="" coords="348,232,439,195,484,185,521,179,557,181,600,195,630,212,657,235,698,283,694,286,653,239,627,217,598,200,556,187,521,185,485,190,441,200,350,237"/>
+<area shape="rect" id="Node000008" href="$namespacecoloradar_1_1internal.html#ae2ae8a2e075e3babf03c51e5055c7b84" title=" " alt="" coords="448,209,591,249"/>
+<area shape="poly" id="edge8_Node000007_Node000008" title=" " alt="" coords="375,244,434,237,435,242,376,249"/>
+<area shape="poly" id="edge9_Node000008_Node000006" title=" " alt="" coords="567,247,659,288,657,293,565,252"/>
+<area shape="poly" id="edge11_Node000009_Node000006" title=" " alt="" coords="379,312,440,309,599,309,633,310,633,315,599,315,440,315,380,317"/>
+<area shape="rect" id="Node000010" href="$namespacecoloradar_1_1internal.html#a5568efa71f4c07435166151fb48eb39f" title=" " alt="" coords="449,324,590,364"/>
+<area shape="poly" id="edge12_Node000009_Node000010" title=" " alt="" coords="380,325,435,332,435,337,379,330"/>
+<area shape="poly" id="edge13_Node000010_Node000006" title=" " alt="" coords="590,331,632,325,633,331,590,337"/>
+<area shape="poly" id="edge15_Node000011_Node000006" title=" " alt="" coords="570,386,598,374,665,340,667,345,600,378,572,390"/>
+<area shape="poly" id="edge17_Node000012_Node000006" title=" " alt="" coords="577,450,597,438,650,392,691,345,695,348,654,396,600,442,579,454"/>
+<area shape="poly" id="edge19_Node000013_Node000006" title=" " alt="" coords="579,514,597,502,632,466,661,424,701,348,705,350,666,427,636,469,600,506,582,518"/>
+</map>

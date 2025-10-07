@@ -1,0 +1,26 @@
+<map id="coloradar::interpolatePoses" name="coloradar::interpolatePoses">
+<area shape="rect" id="Node000001" title=" " alt="" coords="719,173,919,198"/>
+<area shape="rect" id="Node000002" href="$classcoloradar_1_1ColoradarPlusRun.html#af9020b4202042f4a6884713a3cf1074b" title=" " alt="" coords="489,5,671,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="795,164,741,112,706,84,669,60,645,48,648,43,672,55,709,80,744,108,798,161"/>
+<area shape="rect" id="Node000004" href="$classcoloradar_1_1ColoradarPlusRun.html#a4bb9d10e648cfd2549df0279375846d9" title=" " alt="" coords="489,69,671,109"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="776,169,670,124,638,112,640,107,672,119,778,165"/>
+<area shape="rect" id="Node000005" href="$classcoloradar_1_1ColoradarPlusDataset.html#a7d0b7ef977008c843d85fbde8aeb8c82" title=" " alt="" coords="489,133,671,173"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="710,173,671,168,671,163,711,168"/>
+<area shape="rect" id="Node000009" href="$classcoloradar_1_1ColoradarPlusDataset.html#a4d17fb61f4ea9c9f63e0011b6b8b93da" title=" " alt="" coords="489,197,671,237"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="711,203,671,208,671,203,710,197"/>
+<area shape="rect" id="Node000010" href="$classcoloradar_1_1ColoradarPlusDataset.html#aa77d34af9c69b9e39066e61af46a33cd" title=" " alt="" coords="489,261,671,301"/>
+<area shape="poly" id="edge10_Node000001_Node000010" title=" " alt="" coords="778,206,672,252,640,264,638,259,670,247,776,201"/>
+<area shape="rect" id="Node000011" href="$classcoloradar_1_1DatasetVisualizer.html#a6821c4d67b6d95423c7b3f4cdc886992" title=" " alt="" coords="235,304,441,344"/>
+<area shape="poly" id="edge12_Node000001_Node000011" title=" " alt="" coords="801,211,748,266,712,294,672,316,614,333,554,341,495,343,441,341,442,335,495,338,554,336,613,327,670,311,709,290,745,262,797,207"/>
+<area shape="rect" id="Node000003" href="$classcoloradar_1_1ColoradarPlusRun.html#aa4e4d4e638433232965deced0b4a5273" title=" " alt="" coords="245,5,431,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="476,28,431,28,431,23,476,23"/>
+<area shape="rect" id="Node000006" href="$classcoloradar_1_1ColoradarPlusDataset.html#a1584be27bf47a99806659fe78ae31cac" title=" " alt="" coords="247,225,429,265"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="510,180,490,188,389,228,387,223,488,183,508,175"/>
+<area shape="rect" id="Node000007" href="$classcoloradar_1_1ColoradarPlusDataset.html#a17b4c592f07a8990a1ef540f825d940d" title=" " alt="" coords="5,225,187,265"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="234,248,187,248,187,243,234,243"/>
+<area shape="rect" id="Node000008" href="$main_8cpp.html#a988268729f234c69f228e7fedecb706b" title=" " alt="" coords="21,293,171,318"/>
+<area shape="poly" id="edge7_Node000006_Node000008" title=" " alt="" coords="244,271,149,295,147,290,242,266"/>
+<area shape="poly" id="edge9_Node000009_Node000006" title=" " alt="" coords="476,232,429,238,428,232,475,227"/>
+<area shape="poly" id="edge11_Node000010_Node000006" title=" " alt="" coords="475,268,428,261,429,256,476,263"/>
+<area shape="poly" id="edge13_Node000011_Node000008" title=" " alt="" coords="221,318,171,314,172,308,221,312"/>
+</map>

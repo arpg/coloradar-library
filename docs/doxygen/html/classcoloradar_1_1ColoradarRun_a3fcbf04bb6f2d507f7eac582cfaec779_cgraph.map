@@ -1,0 +1,13 @@
+<map id="coloradar::ColoradarRun::getSingleChipPointcloud" name="coloradar::ColoradarRun::getSingleChipPointcloud">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,39,193,79"/>
+<area shape="rect" id="Node000002" href="$namespacecoloradar.html#aa3d06169598b3efc7aaffcef24df94b0" title=" " alt="" coords="241,15,448,41"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="193,44,229,40,230,45,194,50"/>
+<area shape="rect" id="Node000005" href="$classcoloradar_1_1ColoradarRun.html#af1705e424798201ad716eb03ac567204" title=" " alt="" coords="251,67,439,107"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="194,67,238,72,237,77,193,72"/>
+<area shape="rect" id="Node000003" href="$namespacecoloradar_1_1internal.html#a019a5fa3657de9bcf17015c33ecca2e8" title="Extracts the first integer found in a string." alt="" coords="521,5,662,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="448,24,507,24,507,29,448,30"/>
+<area shape="rect" id="Node000004" href="$namespacecoloradar_1_1internal.html#ae804ce7505cca7c3a8e5b1da9ffb7e35" title="Constructs a pose object of type PoseT (PCL&#45;style) from translation and rotation components." alt="" coords="735,5,876,45"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="662,23,721,23,721,28,662,28"/>
+<area shape="rect" id="Node000006" href="$classcoloradar_1_1ColoradarPlusRun.html#ab1127bbddf6334ecc01a9e40e4bd571b" title=" " alt="" coords="496,69,687,109"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="439,85,482,85,482,91,439,90"/>
+</map>
