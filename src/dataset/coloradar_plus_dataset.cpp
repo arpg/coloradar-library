@@ -335,10 +335,10 @@ std::vector<std::string> ColoradarPlusDataset::exportCascade(
                 datasetFile, heatmapsFlat, numFrames, 
                 heatmapConfig->numAzimuthBins(), 
                 heatmapConfig->nRangeBins(), 
-                heatmapConfig->numElevationBins(), 
+                heatmapConfig->numElevationBins(),
                 heatmapConfig->hasDoppler()
             );
-            heatmapsFlat.clear();
+            // std::vector<float>().swap(heatmapsFlat); 
         }
         if (heatmapConfig) {
             if (!finalConfig) throw std::runtime_error("exportCascade(): finalConfig is nullptr");
