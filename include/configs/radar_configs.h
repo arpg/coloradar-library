@@ -96,6 +96,8 @@ public:
     const bool& hasDoppler() const { return hasDoppler_; }
     const int& numElevationBins() const { return numElevationBins_; }
     const int& numAzimuthBins() const { return numAzimuthBins_; }
+    const int& numRangeBins() const { return numRangeBins_; }
+    const int& numPosRangeBins() const { return numPosRangeBins_; }
     const double& rangeBinWidth() const { return rangeBinWidth_; }
     const std::vector<float>& azimuthBins() const { return azimuthBins_; }
     const std::vector<float>& elevationBins() const { return elevationBins_; }

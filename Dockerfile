@@ -102,7 +102,7 @@ RUN set -eu; \
         python3-pip \
         $OUTPUT_REDIRECT"
 
-# focal specific
+# focal-specific
 RUN set -eu; \
     . $BUILD_VARIABLES; \
     if [ "$UBUNTU_CODENAME" = "focal" ]; then \
