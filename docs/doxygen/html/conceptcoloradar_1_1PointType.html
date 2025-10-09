@@ -78,16 +78,26 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
+<p>Concept for any supported point type from PCL or OctoMap.  
+<a href="conceptcoloradar_1_1PointType.html#details">More...</a></p>
+
 <p><code>#include &lt;<a class="el" href="types_8h_source.html">types.h</a>&gt;</code></p>
 <h2 class="groupheader">Concept definition</h2>
 <div class="fragment"><div class="line"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt;</div>
 <div class="line"><span class="keyword">concept </span><a class="code hl_concept" href="conceptcoloradar_1_1PointType.html">coloradar::PointType</a> =  <a class="code hl_concept" href="conceptcoloradar_1_1PclPointType.html">PclPointType&lt;T&gt;</a> || <a class="code hl_concept" href="conceptcoloradar_1_1OctomapPointType.html">OctomapPointType&lt;T&gt;</a></div>
-<div class="ttc" id="aconceptcoloradar_1_1OctomapPointType_html"><div class="ttname"><a href="conceptcoloradar_1_1OctomapPointType.html">coloradar::OctomapPointType</a></div><div class="ttdef"><b>Definition</b> <a href="types_8h_source.html#l00025">types.h:25</a></div></div>
-<div class="ttc" id="aconceptcoloradar_1_1PclPointType_html"><div class="ttname"><a href="conceptcoloradar_1_1PclPointType.html">coloradar::PclPointType</a></div><div class="ttdef"><b>Definition</b> <a href="types_8h_source.html#l00022">types.h:22</a></div></div>
-<div class="ttc" id="aconceptcoloradar_1_1PointType_html"><div class="ttname"><a href="conceptcoloradar_1_1PointType.html">coloradar::PointType</a></div><div class="ttdef"><b>Definition</b> <a href="types_8h_source.html#l00028">types.h:28</a></div></div>
+<div class="ttc" id="aconceptcoloradar_1_1OctomapPointType_html"><div class="ttname"><a href="conceptcoloradar_1_1OctomapPointType.html">coloradar::OctomapPointType</a></div><div class="ttdoc">Concept for OctoMap point types.</div><div class="ttdef"><b>Definition</b> <a href="types_8h_source.html#l00054">types.h:54</a></div></div>
+<div class="ttc" id="aconceptcoloradar_1_1PclPointType_html"><div class="ttname"><a href="conceptcoloradar_1_1PclPointType.html">coloradar::PclPointType</a></div><div class="ttdoc">Concept for any PCL-compatible point type (3D or 4D).</div><div class="ttdef"><b>Definition</b> <a href="types_8h_source.html#l00047">types.h:47</a></div></div>
+<div class="ttc" id="aconceptcoloradar_1_1PointType_html"><div class="ttname"><a href="conceptcoloradar_1_1PointType.html">coloradar::PointType</a></div><div class="ttdoc">Concept for any supported point type from PCL or OctoMap.</div><div class="ttdef"><b>Definition</b> <a href="types_8h_source.html#l00061">types.h:61</a></div></div>
 </div><!-- fragment --><a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock">
-<p class="definition">Definition at line <a class="el" href="types_8h_source.html#l00028">28</a> of file <a class="el" href="types_8h_source.html">types.h</a>.</p>
+<div class="textblock"><p>Concept for any supported point type from PCL or OctoMap. </p>
+<dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">T</td><td>The type to check. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">Definition at line <a class="el" href="types_8h_source.html#l00061">61</a> of file <a class="el" href="types_8h_source.html">types.h</a>.</p>
 </div></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>

@@ -81,14 +81,17 @@ $(function() {
   <div class="headertitle"><div class="title">types.h File Reference</div></div>
 </div><!--header-->
 <div class="contents">
+
+<p>Defines C++ concepts and traits for geometric data types.  
+<a href="#details">More...</a></p>
 <div class="textblock"><code>#include &quot;<a class="el" href="definitions_8h_source.html">definitions.h</a>&quot;</code><br />
 </div><div class="textblock"><div class="dynheader">
 Include dependency graph for types.h:</div>
 <div class="dyncontent">
 <div class="center"><img src="types_8h__incl.png" border="0" usemap="#ainclude_2types_8h" alt=""/></div>
 <map name="ainclude_2types_8h" id="ainclude_2types_8h">
-<area shape="rect" title=" " alt="" coords="2382,5,2503,31"/>
-<area shape="rect" href="definitions_8h.html" title=" " alt="" coords="2391,79,2494,104"/>
+<area shape="rect" title="Defines C++ concepts and traits for geometric data types." alt="" coords="2382,5,2503,31"/>
+<area shape="rect" href="definitions_8h.html" title="Centralized header for all external library includes." alt="" coords="2391,79,2494,104"/>
 <area shape="poly" title=" " alt="" coords="2445,31,2445,65,2440,65,2440,31"/>
 <area shape="rect" title=" " alt="" coords="5,159,72,185"/>
 <area shape="poly" title=" " alt="" coords="2391,96,1926,98,1203,107,831,115,497,125,237,138,145,146,85,155,75,157,74,152,83,149,144,141,236,133,497,120,831,109,1203,102,1926,93,2391,90"/>
@@ -193,7 +196,7 @@ This graph shows which files directly or indirectly include this file:</div>
 <div class="dyncontent">
 <div class="center"><img src="types_8h__dep__incl.png" border="0" usemap="#ainclude_2types_8hdep" alt=""/></div>
 <map name="ainclude_2types_8hdep" id="ainclude_2types_8hdep">
-<area shape="rect" title=" " alt="" coords="1057,5,1178,31"/>
+<area shape="rect" title="Defines C++ concepts and traits for geometric data types." alt="" coords="1057,5,1178,31"/>
 <area shape="rect" href="h5__utils_8h.html" title=" " alt="" coords="1130,79,1289,119"/>
 <area shape="poly" title=" " alt="" coords="1143,38,1189,76,1185,81,1140,42"/>
 <area shape="rect" href="internal__utils_8h.html" title="Utility functions used by the main modules of the library." alt="" coords="947,79,1106,119"/>
@@ -277,8 +280,10 @@ This graph shows which files directly or indirectly include this file:</div>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structcoloradar_1_1PoseTraits_3_01octomath_1_1Pose6D_01_4.html">coloradar::PoseTraits&lt; octomath::Pose6D &gt;</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Specialization of <a class="el" href="structcoloradar_1_1PoseTraits.html" title="Provides associated types for a given pose type. This struct template is specialized for concrete pos...">PoseTraits</a> for octomath::Pose6D.  <a href="structcoloradar_1_1PoseTraits_3_01octomath_1_1Pose6D_01_4.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structcoloradar_1_1PoseTraits_3_01Eigen_1_1Affine3f_01_4.html">coloradar::PoseTraits&lt; Eigen::Affine3f &gt;</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Specialization of <a class="el" href="structcoloradar_1_1PoseTraits.html" title="Provides associated types for a given pose type. This struct template is specialized for concrete pos...">PoseTraits</a> for Eigen::Affine3f.  <a href="structcoloradar_1_1PoseTraits_3_01Eigen_1_1Affine3f_01_4.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="namespaces" name="namespaces"></a>
@@ -289,29 +294,47 @@ Namespaces</h2></td></tr>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="concepts" name="concepts"></a>
 Concepts</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">concept &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="conceptcoloradar_1_1Pcl3dPointType.html">coloradar::Pcl3dPointType</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Concept for PCL point types with at least X, Y, and Z coordinates. <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">concept &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="conceptcoloradar_1_1Pcl4dPointType.html">coloradar::Pcl4dPointType</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Concept for PCL-like point types with X, Y, Z, and intensity fields. <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">concept &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="conceptcoloradar_1_1PclPointType.html">coloradar::PclPointType</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Concept for any PCL-compatible point type (3D or 4D). <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">concept &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="conceptcoloradar_1_1OctomapPointType.html">coloradar::OctomapPointType</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Concept for OctoMap point types. <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">concept &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="conceptcoloradar_1_1PointType.html">coloradar::PointType</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Concept for any supported point type from PCL or OctoMap. <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">concept &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="conceptcoloradar_1_1PclCloudType.html">coloradar::PclCloudType</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Concept for PCL point cloud types. <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">concept &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="conceptcoloradar_1_1OctomapCloudType.html">coloradar::OctomapCloudType</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Concept for OctoMap point cloud types. <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">concept &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="conceptcoloradar_1_1CloudType.html">coloradar::CloudType</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Concept for any supported point cloud type from PCL or OctoMap. <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">concept &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="conceptcoloradar_1_1PclPoseType.html">coloradar::PclPoseType</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Concept for PCL-compatible pose types (Eigen-based). <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">concept &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="conceptcoloradar_1_1OctoPoseType.html">coloradar::OctoPoseType</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Concept for OctoMap pose types. <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">concept &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="conceptcoloradar_1_1PoseType.html">coloradar::PoseType</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Concept for any supported pose type from PCL or OctoMap. <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-</div><!-- contents -->
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Defines C++ concepts and traits for geometric data types. </p>
+<p>This file establishes a set of type constraints (concepts) for point clouds, points, and poses from different libraries (PCL, OctoMap). It also provides traits for accessing properties of these types in a generic way, ensuring interoperability within the library.</p>
+<dl class="section date"><dt>Date</dt><dd>2025-10-08 </dd></dl>
+<dl class="section author"><dt>Author</dt><dd>Anna Zavei-Boroda </dd></dl>
+
+<p class="definition">Definition in file <a class="el" href="types_8h_source.html">types.h</a>.</p>
+</div></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
 Generated by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8

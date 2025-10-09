@@ -1,10 +1,10 @@
 <map id="include/internal_utils/h5_utils.h" name="include/internal_utils/h5_utils.h">
 <area shape="rect" id="Node000001" title=" " alt="" coords="2357,5,2515,45"/>
-<area shape="rect" id="Node000002" href="$types_8h.html" title=" " alt="" coords="2323,93,2394,119"/>
+<area shape="rect" id="Node000002" href="$types_8h.html" title="Defines C++ concepts and traits for geometric data types." alt="" coords="2323,93,2394,119"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="2419,47,2382,85,2378,82,2415,44"/>
 <area shape="rect" id="Node000053" href="$h5__utils_8hpp.html" title=" " alt="" coords="2418,93,2609,119"/>
 <area shape="poly" id="edge49_Node000001_Node000053" title=" " alt="" coords="2457,44,2494,82,2490,85,2453,47"/>
-<area shape="rect" id="Node000003" href="$definitions_8h.html" title=" " alt="" coords="2307,167,2410,192"/>
+<area shape="rect" id="Node000003" href="$definitions_8h.html" title="Centralized header for all external library includes." alt="" coords="2307,167,2410,192"/>
 <area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="2361,119,2361,153,2356,153,2356,119"/>
 <area shape="rect" id="Node000004" title=" " alt="" coords="5,247,72,273"/>
 <area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="2307,184,1858,187,1161,196,481,214,231,227,143,234,85,243,75,245,74,240,83,237,142,229,231,221,481,208,1161,191,1858,181,2307,178"/>

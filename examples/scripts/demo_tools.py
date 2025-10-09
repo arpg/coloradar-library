@@ -75,16 +75,17 @@ def plot_poses(timestamps, poses, timestamps_interpolated, poses_interpolated, d
 
 
 def display_azimuth_fov_options(radar_config):
-    draw_fov(radar_config.azimuth_bins)
+    draw_fov(radar_config.azimuth_bins())
 
 def display_elevation_fov_options(radar_config):
-    draw_fov(radar_config.elevation_bins)
+    draw_fov(radar_config.elevation_bins())
 
 def draw_fov(bins):
     fig, ax = plt.subplots(subplot_kw={'projection': 'polar'}, figsize=(35, 25))
     num_sections = len(bins) // 2
     if num_sections < 16:
         color_map = [cm.get_cmap('inferno', num_sections)(i) for i in range(num_sections)]
+        degree_fontsize, section_fontsize = 11, 11
     else:
         plasma_colors = cm.get_cmap('plasma', num_sections // 2)
         magma_colors = cm.get_cmap('inferno', num_sections // 2)
@@ -93,6 +94,8 @@ def draw_fov(bins):
             for pair in zip(plasma_colors(range(num_sections // 2)), magma_colors(range(num_sections // 2)))
             for color in pair
         ]
+        degree_fontsize, section_fontsize = 7, 9
+
     ax.plot([0, 0], [0, 1], color='red', lw=2)
 
     for bin_idx, left_bin_start in enumerate(bins[:num_sections]):
@@ -101,8 +104,9 @@ def draw_fov(bins):
         ax.fill_between([-left_bin_end, -left_bin_start], 0, 1, color=color_map[bin_idx], alpha=0.9)
         bin_center = (left_bin_start + left_bin_end) / 2
         bin_number = num_sections - 1 - bin_idx
-        ax.text(bin_center, 0.5, f'{bin_number}', fontsize=9, ha='center', va='center', color='white')
-        ax.text(-bin_center, 0.5, f'{bin_number}', fontsize=9, ha='center', va='center', color='white')
+        ax.text(bin_center, 0.5, f'{bin_number}', fontsize=section_fontsize, ha='center', va='center', color='white')
+        ax.text(-bin_center, 0.5, f'{bin_number}', fontsize=section_fontsize, ha='center', va='center', color='white')
+        
     ax.set_ylim(0, 1)
     ax.set_theta_zero_location("N")
     ax.set_theta_direction(-1)
@@ -112,8 +116,9 @@ def draw_fov(bins):
     ax.set_yticklabels([])
     ax.xaxis.set_ticks([])
     bin_labels = np.degrees(bins)
+    
     for bin_value, label in zip(bins, bin_labels):
-        ax.text(bin_value, 1.02, f'{label:.1f}°', fontsize=7, ha='center')
+        ax.text(bin_value, 1.02, f'{label:.1f}°', fontsize=degree_fontsize, ha='center')
     plt.show()
 
 
@@ -184,16 +189,54 @@ def show_heatmap_slice(hm0, slice_idx=None):
     plt.show()
 
 
-def show_radar_pcl(cloud, intensity_threshold=0.0):
-    min_intensity = np.min(cloud[:, 3])
-    max_intensity = np.max(cloud[:, 3])
-    normalized_intensities = (cloud[:, 3] - min_intensity) / (max_intensity - min_intensity)
-    filtered_idx = normalized_intensities >= intensity_threshold
-    cmap = plt.get_cmap("plasma")
-    colors = cmap(normalized_intensities[filtered_idx])[:, :3]
-    pcd = o3d.geometry.PointCloud()
-    pcd.points = o3d.utility.Vector3dVector(cloud[:, :3][filtered_idx])
-    pcd.colors = o3d.utility.Vector3dVector(colors)
-    axes = o3d.geometry.TriangleMesh.create_coordinate_frame(size=3.0)
-    o3d.visualization.draw_geometries([pcd, axes], "Radar Point Cloud Visualization")
+# def show_radar_pcl(cloud, intensity_threshold=0.0):
+#     min_intensity = np.min(cloud[:, 3])
+#     max_intensity = np.max(cloud[:, 3])
+#     normalized_intensities = (cloud[:, 3] - min_intensity) / (max_intensity - min_intensity)
+#     filtered_idx = normalized_intensities >= intensity_threshold
+#     cmap = plt.get_cmap("plasma")
+#     colors = cmap(normalized_intensities[filtered_idx])[:, :3]
+#     pcd = o3d.geometry.PointCloud()
+#     pcd.points = o3d.utility.Vector3dVector(cloud[:, :3][filtered_idx])
+#     pcd.colors = o3d.utility.Vector3dVector(colors)
+#     axes = o3d.geometry.TriangleMesh.create_coordinate_frame(size=3.0)
+#     o3d.visualization.draw_geometries([pcd, axes], "Radar Point Cloud Visualization")
 
+
+def show_radar_pcl(cloud, intensity_threshold=0.0):
+    cloud = np.asarray(cloud)
+    if cloud.ndim != 2 or cloud.shape[1] < 4:
+        raise ValueError("Input cloud must be an Nx4 NumPy array.")
+
+    intensities = cloud[:, 3]
+    min_intensity, max_intensity = np.min(intensities), np.max(intensities)
+    if max_intensity == min_intensity:
+        normalized_intensities = np.zeros_like(intensities)
+    else:
+        normalized_intensities = (intensities - min_intensity) / (max_intensity - min_intensity)
+
+    filter_mask = normalized_intensities >= intensity_threshold
+    filtered_points = cloud[filter_mask, :3]
+    filtered_intensities = normalized_intensities[filter_mask]
+    if filtered_points.shape[0] == 0:
+        print("Warning: No points remain after applying the intensity threshold.")
+        return
+
+    fig = plt.figure(figsize=(10, 8))
+    ax = fig.add_subplot(projection='3d')
+    scatter = ax.scatter(
+        filtered_points[:, 0],  # X coordinates
+        filtered_points[:, 1],  # Y coordinates
+        filtered_points[:, 2],  # Z coordinates
+        c=filtered_intensities, # Color-map values
+        cmap='plasma',          # Colormap
+        s=2                     # Marker size
+    )
+    cbar = fig.colorbar(scatter, ax=ax, shrink=0.7, aspect=20)
+    cbar.set_label('Normalized Intensity')
+    ax.set_title('Radar Point Cloud Visualization')
+    ax.set_xlabel('X (m)')
+    ax.set_ylabel('Y (m)')
+    ax.set_zlabel('Z (m)')
+    ax.set_aspect('equal', adjustable='box')
+    plt.show()

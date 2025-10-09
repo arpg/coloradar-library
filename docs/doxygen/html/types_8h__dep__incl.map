@@ -1,5 +1,5 @@
 <map id="include/types.h" name="include/types.h">
-<area shape="rect" id="Node000001" title=" " alt="" coords="1057,5,1178,31"/>
+<area shape="rect" id="Node000001" title="Defines C++ concepts and traits for geometric data types." alt="" coords="1057,5,1178,31"/>
 <area shape="rect" id="Node000002" href="$h5__utils_8h.html" title=" " alt="" coords="1130,79,1289,119"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1143,38,1189,76,1185,81,1140,42"/>
 <area shape="rect" id="Node000034" href="$internal__utils_8h.html" title="Utility functions used by the main modules of the library." alt="" coords="947,79,1106,119"/>
