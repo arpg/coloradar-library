@@ -27,7 +27,6 @@ std::vector<std::shared_ptr<std::vector<int16_t>>> readH5Datacubes(const H5::H5F
 std::vector<std::shared_ptr<std::vector<float>>> readH5Heatmaps(const H5::H5File& file, const std::string& datasetName);
 std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> readH5LidarClouds(const H5::H5File& file, const std::string& baseName);
 pcl::PointCloud<pcl::PointXYZI>::Ptr readH5SingleCloud(const H5::H5File& file, const std::string& datasetName);
-// std::vector<pcl::PointCloud<RadarPoint>::Ptr> readH5RadarClouds(const H5::H5File& file, const std::string& datasetName);
 
 }
 

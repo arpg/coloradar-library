@@ -20,11 +20,11 @@
 <area shape="poly" id="edge47_Node000004_Node000060" title=" " alt="" coords="1196,322,1251,368,1248,372,1193,326"/>
 <area shape="rect" id="Node000061" href="$octo__pointcloud_8hpp.html" title=" " alt="" coords="1373,379,1559,405"/>
 <area shape="poly" id="edge48_Node000004_Node000061" title=" " alt="" coords="1223,321,1412,373,1411,378,1221,327"/>
-<area shape="rect" id="Node000006" href="$types_8h.html" title=" " alt="" coords="984,460,1055,485"/>
+<area shape="rect" id="Node000006" href="$types_8h.html" title="Defines C++ concepts and traits for geometric data types." alt="" coords="984,460,1055,485"/>
 <area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="1079,407,1040,451,1036,448,1075,403"/>
 <area shape="rect" id="Node000057" href="$h5__utils_8hpp.html" title=" " alt="" coords="1079,460,1269,485"/>
 <area shape="poly" id="edge41_Node000005_Node000057" title=" " alt="" coords="1102,403,1153,449,1149,452,1098,407"/>
-<area shape="rect" id="Node000007" href="$definitions_8h.html" title=" " alt="" coords="1619,541,1721,566"/>
+<area shape="rect" id="Node000007" href="$definitions_8h.html" title="Centralized header for all external library includes." alt="" coords="1619,541,1721,566"/>
 <area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="1055,481,1066,483,1217,506,1367,524,1605,545,1605,550,1366,529,1216,511,1066,488,1054,486"/>
 <area shape="rect" id="Node000008" title=" " alt="" coords="2938,621,3005,647"/>
 <area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="1722,551,1915,551,2210,558,2382,566,2562,579,2745,596,2925,619,2924,624,2744,601,2561,584,2381,572,2210,564,1915,557,1722,557"/>

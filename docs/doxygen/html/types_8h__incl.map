@@ -1,6 +1,6 @@
 <map id="include/types.h" name="include/types.h">
-<area shape="rect" id="Node000001" title=" " alt="" coords="2382,5,2503,31"/>
-<area shape="rect" id="Node000002" href="$definitions_8h.html" title=" " alt="" coords="2391,79,2494,104"/>
+<area shape="rect" id="Node000001" title="Defines C++ concepts and traits for geometric data types." alt="" coords="2382,5,2503,31"/>
+<area shape="rect" id="Node000002" href="$definitions_8h.html" title="Centralized header for all external library includes." alt="" coords="2391,79,2494,104"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="2445,31,2445,65,2440,65,2440,31"/>
 <area shape="rect" id="Node000003" title=" " alt="" coords="5,159,72,185"/>
 <area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="2391,96,1926,98,1203,107,831,115,497,125,237,138,145,146,85,155,75,157,74,152,83,149,144,141,236,133,497,120,831,109,1203,102,1926,93,2391,90"/>

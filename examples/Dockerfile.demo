@@ -2,7 +2,7 @@ ARG BASE_IMAGE
 FROM ${BASE_IMAGE}
 
 COPY requirements.txt .
-RUN pip install --break-system-packages -r requirements.txt && rm requirements.txt
+RUN pip install --break-system-packages --ignore-installed -r requirements.txt && rm requirements.txt
 RUN python3 -m ipykernel install
 
 WORKDIR /app

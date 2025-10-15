@@ -1,17 +1,118 @@
 # Coloradar Dataset Library
 
-Here you will find a suite of tools designed to work with the ColoRadar Dataset.
 
 
+[![Build Status](https://img.shields.io/github/actions/workflow/status/arpg/coloradar-library/publish.yml?branch=main)](https://github.com/arpg/coloradar-lib/actions)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Documentation](https://img.shields.io/badge/docs-latest-blue)](https://arpg.github.io/coloradar-library/)
+
+A C++ library with Python bindings for visualizing, processing, and exporting data from the [ColoRadar datasets](https://arpg.github.io/coloradarplus/).
+
+## Key Features
+
+* **Interact with Data:** Use the provided Jupyter notebook to inspect data samples and understand the dataset's structure.
+* **Map Building:** Tools for creating and sampling lidar-based octomaps.
+* **Data Visualization:** An interactive PCL-based visualizer for lidar scans, radar scans, and vehicle trajectory.
+* **Data Export:** Flexible utilities to process and export custom selections of the dataset into a single `.h5` file.
+* **Python Bindings:** Use PyBind11 to integrate radar processing and other functionalities into Python workflows.
+* **Dockerized Environment:** Pre-built Docker images and Compose services for consistent setup and execution.
+
+***
+
+- [Getting Started](#getting-started)
+  - [1. Download the Dataset](#1-download-the-dataset)
+  - [2. Pull the Docker Image](#2-pull-the-docker-image)
+  - [3. (Optional) Clone the Repo to Access Examples](#3-optional-clone-the-repo-to-access-examples)
 - [Build Options](#build-options)
-  - [1. Pre-built Images](#1-pre-built-images)
+  - [1. Using Pre-built Images](#1-using-pre-built-images)
   - [2. Building Your Own Images](#2-building-your-own-images)
   - [3. Local Build](#3-local-build)
 
 
-# Build Options
 
-## 1. Pre-built Images
+## Getting Started
+
+This guide goes through the initial setup of the dataset and running a visualization example.
+
+### Prerequisites
+
+* **Linux or macOS**
+* **Git**
+* **Docker and Docker Compose** (v20.10+)
+* (Optional) **NVIDIA GPU** with compatible drivers.
+
+### 1. Download the Dataset
+
+To run the example, your dataset files must be organized in a specific way.
+
+* Download at least one run.  We will use `ec_hallways_run2.zip` in this example.
+* Download `calib.zip`.
+* Extract all runs inside a directory named `kitti`.
+* Extract the `calib` directory next to `kitti` (not inside it).
+
+Your final directory structure should match the example below:
+```
+<some-dir>/
+├── kitti/
+│   └── ec_hallways_run2/
+│       └── ...
+└── calib/
+    └── ...
+```
+
+### 2. Pull the Docker Image
+
+Pulling is important to ensure the latest version of the library. To pull images from the Github registry, you need to authorize with your Gihub account first:
+```bash
+docker login ghcr.io
+```
+When asked for password, you can use your personal access token instead. If you do not have one, the steps to create it are as follows:
+* On Github, go to **Settings -> Developer settings -> Personal access tokens**.
+* Select **Generate new token** and choose either fine-grained or classic option depending on your security preferences.
+
+![Creating a personal access token](examples/readme_images/token.png "Personal acceess token")
+
+As soon as `docker login ghcr.io` executes successfully, pull the desided image. In this example, we will use an image without ROS support but with built-in CUDA support:
+```
+docker pull ghcr.io/arpg/coloradar-lib:12.6
+```
+To check your local CUDA version, you can use:
+```bash
+nvidia-smi
+```
+
+If you do not have an Nvidia GPU, you can use:
+```
+docker pull ghcr.io/arpg/coloradar-lib:latest
+```
+
+
+### 3. (Optional) Clone the Repo to Access Examples
+
+The image pulled in the previous step has the library installed globally and can be used with any custom setup depending on your needs. This step will go through some pre-defined examples, which are not necessarily how you must set up your environment. 
+
+```bash
+git clone https://github.com/arpg/coloradar-library.git
+cd coloradar-library/examples
+```
+
+Specify the image tag and your local path to the dataset root directory at the top of the `examples/docker-compose.yaml` file:
+```
+x-base-image: &base_image ghcr.io/arpg/coloradar-lib:12.6
+x-dataset-volume: &dataset_volume ~/<some-dir>:/data/coloradar
+```
+
+Finally, run the Jupyter server inside the container:
+```bash
+docker compose up --build jupyter
+```
+
+The examples should now be accessible at `http://localhost:8888`. You can open it in your browser or IDE. Open `demo.ipynb` to examine the dataset.
+
+
+## Build Options
+
+### 1. Using Pre-built Images
 
 Login to the Github container Registry:
 ```bash
@@ -45,7 +146,7 @@ docker pull ghcr.io/arpg/coloradar-lib:12.6-jazzy
 - **NVIDIA Container Toolkit (Optional)**: For GPU support in Docker
 
 
-## 2. Building Your Own Images
+### 2. Building Your Own Images
 
 Run the provided script to build an image for your desired **ROS** and **CUDA** versions
 
@@ -76,7 +177,7 @@ python3 build.py --ros <ros_distro> --cuda <cuda_version>
 *Note*: the CUDA-ROS base images are pulled from [my dockerhub](https://hub.docker.com/repository/docker/annazabnus/ros-cuda).
 
 
-## 3. Local Build
+### 3. Local Build
 
 ```bash
 mkdir build && cd build

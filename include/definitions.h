@@ -1,3 +1,16 @@
+/**
+ * @file definitions.h
+ * @brief Centralized header for all external library includes.
+ *
+ * This file consolidates all necessary C++ standard library, system, and third-party library
+ * headers (like Eigen, PCL, OctoMap, etc.) used throughout the project.
+ * Including this file provides access to all common dependencies.
+ *
+ * @date 2025-10-08
+ * @author Anna Zavei-Boroda
+ */
+ 
+
 #ifndef INCLUDE_H
 #define INCLUDE_H
 
