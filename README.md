@@ -17,6 +17,8 @@ A C++ library with Python bindings for visualizing, processing, and exporting da
 * **Python Bindings:** Use PyBind11 to integrate radar processing and other functionalities into Python workflows.
 * **Dockerized Environment:** Pre-built Docker images and Compose services for consistent setup and execution.
 
+![Example Visualization](examples/readme_images/visualize.png "Example Visualization")
+
 ***
 
 - [Getting Started](#getting-started)
@@ -30,7 +32,7 @@ A C++ library with Python bindings for visualizing, processing, and exporting da
 
 
 
-## Getting Started
+# Getting Started
 
 This guide goes through the initial setup of the dataset and running a visualization example.
 
@@ -72,7 +74,7 @@ When asked for password, you can use your personal access token instead. If you 
 
 ![Creating a personal access token](examples/readme_images/token.png "Personal acceess token")
 
-As soon as `docker login ghcr.io` executes successfully, pull the desided image. In this example, we will use an image without ROS support but with built-in CUDA support:
+As soon as `docker login ghcr.io` executes successfully, pull the desired image. In this example, we will use an image without ROS support but with built-in CUDA support:
 ```
 docker pull ghcr.io/arpg/coloradar-lib:12.6
 ```
@@ -89,7 +91,7 @@ docker pull ghcr.io/arpg/coloradar-lib:latest
 
 ### 3. (Optional) Clone the Repo to Access Examples
 
-The image pulled in the previous step has the library installed globally and can be used with any custom setup depending on your needs. This step will go through some pre-defined examples, which are not necessarily how you must set up your environment. 
+The images come with the library installed globally, allowing you to use it with any custom setup as needed. The following steps demonstrate a few predefined examples, which you can adapt or modify for your own environment.
 
 ```bash
 git clone https://github.com/arpg/coloradar-library.git
@@ -102,15 +104,18 @@ x-base-image: &base_image ghcr.io/arpg/coloradar-lib:12.6
 x-dataset-volume: &dataset_volume ~/<some-dir>:/data/coloradar
 ```
 
-Finally, run the Jupyter server inside the container:
+Finally, run a Jupyter server inside the container:
 ```bash
 docker compose up --build jupyter
 ```
 
-The examples should now be accessible at `http://localhost:8888`. You can open it in your browser or IDE. Open `demo.ipynb` to examine the dataset.
+The examples are now accessible at `http://localhost:8888`. Open this address in your browser or IDE. Run `demo.ipynb` to inspect the dataset.
+
+See more scripts in [examples](examples/README.md).
 
 
-## Build Options
+
+# Build Options
 
 ### 1. Using Pre-built Images
 
@@ -197,7 +202,7 @@ make
 - Yaml-cpp
 - (optional) PyBind11 v.2.6+
 
-#### Running tests from project root:
+Run tests from project root:
 ```bash
 ./build/coloradar_tests
 python3 tests/test_bindings.py
@@ -208,10 +213,9 @@ python3 tests/test_bindings.py
 
 ```bibtex
 @article{Harlow2024ARXIV, 
-   title   = {ColoRadar+: An extension of the dense
-millimeter-wave radar dataset ColoRadar}, 
-   author  = {Kyle Harlow, Doncey Albin, Miles Mena}, 
+   title   = {ColoRadar+: An extension of the dense millimeter-wave radar dataset ColoRadar}, 
+   author  = {Kyle Harlow, Doncey Albin, Kristen Such, Miles Mena, Dusty Woods, Anna Zavei-Boroda, Christoffer Heckman}, 
    journal = {arXiv preprint arXiv:####.#####},
-   year    = {2024}, 
+   year    = {2025}, 
 }
 ```

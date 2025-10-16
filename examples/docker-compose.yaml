@@ -1,4 +1,4 @@
-x-base-image: &base_image ghcr.io/arpg/coloradar-lib:12.6
+x-base-image: &base_image ghcr.io/arpg/coloradar-lib:latest
 x-dataset-volume: &dataset_volume ~/data/coloradar_plus:/data/coloradar
 
 

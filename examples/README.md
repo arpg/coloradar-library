@@ -2,128 +2,114 @@
 
 This directory contains example scripts and configurations for working with the Coloradar library. All examples are designed to run in a Docker container using the provided Docker Compose configuration.
 
-- [1. Initial Setup](#1-initial-setup)
-  - [1.1. Download the Coloradar dataset](#11-download-the-coloradar-dataset)
-  - [1.2. Detect your CUDA version](#12-detect-your-cuda-version)
-  - [1.3. Set the corresponding container tag](#13-set-the-corresponding-container-tag)
-  - [1.4. Set the volumes to point to the dataset](#14-set-the-volumes-to-point-to-the-dataset)
-- [2. Example Docker Compose Services](#2-example-docker-compose-services)
-  - [2.1. Get Export Config Template](#21-get-export-config-template)
-  - [2.2. Build Lidar Maps](#22-build-lidar-maps)
-  - [2.3. Sample Lidar Maps](#23-sample-lidar-maps)
-  - [2.4 Visualize Dataset](#24-visualize-dataset)
-  - [2.5. Export Dataset](#25-export-dataset)
-  - [2.6. Jupyter Notebook Server](#26-jupyter-notebook-server)
-- [3. Using the Demo Notebook](#3-using-the-demo-notebook)
-  - [3.1. Run the Jupyter Server](#31-run-the-jupyter-server)
-  - [3.2. Example Functions](#32-example-functions)
-- [4. Notes and Troubleshooting](#4-notes-and-troubleshooting)
+- [Example Scripts](#example-scripts)
+  - [1. Jupyter Notebook Server](#1-jupyter-notebook-server)
+  - [2. Build Lidar Maps](#2-build-lidar-maps)
+  - [3. Sample Lidar Maps](#3-sample-lidar-maps)
+  - [4. Visualize Dataset](#4-visualize-dataset)
+  - [5. Export Dataset](#5-export-dataset)
+  - [6. Get Export Config Template](#6-get-export-config-template)
+- [Notes and Troubleshooting](#notes-and-troubleshooting)
 
 
-## 1. Initial Setup
+## Example Scripts
 
-#### 1.0. Install Docker and Docker Compose
+The `docker-compose.yaml` file provides several services for different tasks, including exporting the necessary parts of the dataset into a single **.h5** file.
 
-#### 1.1. Download the Coloradar dataset. Put it in a folder so that the following subdirectories are present:
-- `kitti`
-- `calib`
+### 1. Jupyter Notebook Server
 
-#### 1.2. Detect your CUDA version. 
+Starts a Jupyter notebook server accessible at http://localhost:8888. The server is configured to run without authentication (no token or password required).
+
 ```bash
-nvidia-smi
+docker compose up --build jupyter
 ```
 
-#### 1.3. Set the container tag and dataset path in `examples/docker-compose.yaml`:
+If running an image without CUDA support, **remove** the GPU specification under `services.jupyter` in `docker-compose.yaml`. 
 ```
-x-base-image: &base_image ghcr.io/arpg/coloradar-lib:12.6-jazzy
-x-dataset-volume: &dataset_volume ~/coloradar:/data/coloradar
+# remove or comment this section out:
+deploy:
+  resources:
+    reservations:
+      devices:
+        - driver: nvidia
+          count: all
+          capabilities: [gpu]
 ```
 
-## 2. Example Docker Compose Services
+<table>
+  <tr>
+    <td><img src="readme_images/demo-heatmap.png" width="%"></td>
+    <td align="center"><img src="readme_images/demo-cloud.png" width="80%"></td>
+  </tr>
+  <tr>
+    <td colspan="2"><img src="readme_images/demo-poses.png" width="95.5%"></td>
+  </tr>
+</table>
 
-The `docker-compose.yaml` file provides several services for different tasks, including **exporting** the necessary parts of the dataset into a *single **.h5** file*.
 
-### 2.1. Get Export Config Template
+### 2. Build Lidar Maps
+
+Builds lidar octomaps for all runs in the dataset. May take a long time depending on the number of runs. The generated maps are saved as a `.pcd` file for each run. The script ignores runs where a map already exists.
+
 ```bash
-docker compose run get_export_config_template
+docker compose run --build build_maps
 ```
-This service copies the export configuration template to your local directory. The template will be saved as `export-config.yaml` in the current directory.
+![Example Visualization](readme_images/map.jpg "Example Lidar Octomap")
 
-### 2.2. Build Lidar Maps
+
+### 3. Sample Lidar Maps
+
+Create octomap samples limited by a certain FOV for each run in the dataset. The FOV is hardcoded in `scripts/sample_maps.py`. The generated samples are saved as `.pcd` files. The script will always resample, even if older samples exist.
+
 ```bash
-docker compose run build_maps
+docker compose run --build sample_maps
 ```
-Builds maps from the dataset. This service mounts your local data directory to `/data/coloradar` inside the container.
+<table>
+  <tr>
+    <td align="center"><img src="readme_images/lidar.jpg" width="%"></td>
+    <td align="center"><img src="readme_images/lidar2.jpg" width="80%"></td>
+  </tr>
+</table>
 
-### 2.3. Sample Lidar Maps
+
+### 4. Visualize Dataset
+
+Runs an interactive visualization of a single run. Specify the target run name and optionally the frame step size in `docker-compose.yaml` under `services.visualize_run.command`. Then run:
 ```bash
-docker compose run sample_maps
+docker compose up --build visualize_run
 ```
-Samples maps from the dataset. Similar to build_maps, this service uses your local data directory. The sampling FOV is hardcoded in the script `scripts/sample_maps`.
 
-
-### 2.4. Visualize Dataset
-```bash
-docker compose up visualize_run
-```
 Tested on Ubuntu only. If seeing a display error, run
 ```bash
 xhost +local:docker
 ```
 
-Specify the target run name and optionally the frame step size in `docker-compose.yaml` under `services.visualize_run.command`. Below is an example of a visualized run.
 
-![Example Visualization](readme_images/visualize.png "Example Visualization")
+### 5. Export Dataset
 
-The visualization downsamples the lidar scans from the target run to accumulate the map. The colored FOV depicts a 2D slice of the radar scans. To move along the timestamps, use `↑` and `↓`.
+Exports the dataset according to the configuration in `examples/export-config.yaml`. Use to [example 6](#6-get-export-config-template) to create a new configuration.
 
-
-### 2.5. Export Dataset
 ```bash
-docker compose run export_dataset
+docker compose run -- build export_dataset
 ```
-Exports the dataset according to the configuration in `export-config.yaml`. This service mounts both your local data directory and the current directory for access to the configuration file.
 
-### 2.6. Jupyter Notebook Server
+### 6. Get Export Config Template
+
+Create a copy of the export configuration template `export-config.yaml` in the examples directory.
+
 ```bash
-docker compose up jupyter
+docker compose run --build get_export_config_template
 ```
-Starts a Jupyter notebook server accessible at http://localhost:8888. The server is configured to:
-- Run without authentication (no token or password required)
-- Allow access from any origin
-- Mount your local data directory and the current directory
 
 
-## 3. Using the Demo Notebook
-
-### 3.1. Run the Jupyter Server
-
-The `demo.ipynb` notebook is designed to help you select the appropriate radar configuration for your dataset. To use it:
-
-1. Start the Jupyter server:
-   ```bash
-   docker compose up jupyter
-   ```
-
-2. Open http://localhost:8888 in your browser or IDE
-
-3. Navigate to `demo.ipynb` and run the cells to:
-   - Visualize the radar's field of view
-   - Test different FOV configurations
-   - Generate the appropriate FOV parameters for your `export-config.yaml`
-
-
-### 3.2. Example Functions
-TBD
-
-## 4. Notes and Troubleshooting
+## Notes and Troubleshooting
 
 - The Jupyter server is configured to run without authentication for development purposes. Remote access may be hindered.
 
-- The container paths (`/data/coloradar`, `/app`, `/export`) should not be changed randomly as they are hardcoded in the scripts. The current directory is mounted to `/app` inside the container which allows access to local scripts and configurations.
+- The container paths (`/data/coloradar`, `/app`, `/export`) should not be changed as they are hardcoded in the scripts. When running a container, he current directory is mounted to `/app` inside the container which allows access to local scripts and configurations.
 
 - If the first import cell in a notebook fails with this:
 ```bash
 ModuleNotFoundError: No module named 'coloradar_cuda_lib'
 ```
-set a CUDA-compatible base image (see **1.3**) OR remove everything that uses the `cu.RadarProcessor` object. Currently, only the datacube-to-heatmap transformation requires that object.
+set a CUDA-compatible base image OR remove everything that uses the `cu.RadarProcessor` object. Currently, only the datacube-to-heatmap transformation requires that object.

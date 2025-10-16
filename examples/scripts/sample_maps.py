@@ -11,6 +11,7 @@ if __name__ == "__main__":
     # vertical_fov = radar_config.elevation_idx_to_fov_degrees(elevation_max_bin)
     horizontal_fov, vertical_fov, max_range = 156.6, 32.2, 7
     print(f'Sampling lidar map in cascade FOV: {horizontal_fov} degrees azimuth, {vertical_fov} degrees elevation, {max_range} meters range.')
+    
     for run in dataset.get_runs():
         print(f'Processing {run.name()}...')
         run.create_map_samples(
